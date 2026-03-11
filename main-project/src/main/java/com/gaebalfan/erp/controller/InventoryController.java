@@ -1,10 +1,34 @@
 package com.gaebalfan.erp.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.gaebalfan.erp.domain.Inventory;
+import com.gaebalfan.erp.service.InventoryService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/inventory")
 public class InventoryController {
-    // TODO: API 엔드포인트 추가 예정
+
+    private final InventoryService service;
+
+    public InventoryController(InventoryService service) {
+        this.service = service;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Inventory>> findAll() {
+        return ResponseEntity.ok(service.findAll());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Inventory> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findById(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<Void> insert(@RequestBody Inventory obj) {
+        service.insert(obj);
+        return ResponseEntity.ok().build();
+    }
 }
