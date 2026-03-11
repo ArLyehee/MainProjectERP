@@ -11,6 +11,7 @@
         <result property="quantity"    column="quantity"/>
         <result property="receiptDate" column="receipt_date"/>
         <result property="createdAt"   column="created_at"/>
+        <result property="productName" column="product_name"/>
     </resultMap>
 
     <select id="findAll" resultMap="ReceiptResultMap">
