@@ -9,7 +9,7 @@ import java.security.Principal;
 
 @Controller
 public class WebPageController {
-
+	
     // ── 로그인 페이지 ──────────────────────────────
     @GetMapping("/login")
     public String loginPage(
@@ -34,4 +34,6 @@ public class WebPageController {
     public String root() {
         return "redirect:/dashboard";
     }
+    
+    
 }
