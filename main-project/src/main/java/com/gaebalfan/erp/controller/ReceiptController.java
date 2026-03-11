@@ -21,10 +21,7 @@ public class ReceiptController {
         return ResponseEntity.ok(service.findAll());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Receipt> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(service.findById(id));
-    }
+
 
     @PostMapping
     public ResponseEntity<Void> insert(@RequestBody Receipt obj) {

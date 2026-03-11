@@ -18,9 +18,7 @@ public class ProductionReceiptService {
         return mapper.findAll();
     }
 
-    public ProductionReceipt findById(Long id) {
-        return mapper.findById(id);
-    }
+    
 
     public void insert(ProductionReceipt obj) {
         mapper.insert(obj);
