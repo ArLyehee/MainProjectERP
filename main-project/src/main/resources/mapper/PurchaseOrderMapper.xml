@@ -14,10 +14,10 @@
     </resultMap>
 
     <select id="findAll" resultMap="PurchaseOrderResultMap">
-        SELECT po.*, s.supplier_name
-        FROM purchase_orders po
-        LEFT JOIN suppliers s ON po.supplier_id = s.supplier_id
-        ORDER BY po.created_at DESC
+      SELECT po.*, s.supplier_name
+FROM purchase_orders po
+LEFT JOIN suppliers s ON po.supplier_id = s.supplier_id
+ORDER BY po.created_at DESC
     </select>
 
     <select id="findById" resultMap="PurchaseOrderResultMap">
