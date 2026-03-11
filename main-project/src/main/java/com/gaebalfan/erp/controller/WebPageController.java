@@ -1,5 +1,6 @@
 package com.gaebalfan.erp.controller;
 
+import com.gaebalfan.erp.service.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,7 +10,22 @@ import java.security.Principal;
 
 @Controller
 public class WebPageController {
-	
+
+    private final InventoryService inventoryService;
+    private final PurchaseOrderService purchaseOrderService;
+    private final ReceiptService receiptService;
+    private final ShipmentService shipmentService;
+
+    public WebPageController(InventoryService inventoryService,
+                             PurchaseOrderService purchaseOrderService,
+                             ReceiptService receiptService,
+                             ShipmentService shipmentService) {
+        this.inventoryService = inventoryService;
+        this.purchaseOrderService = purchaseOrderService;
+        this.receiptService = receiptService;
+        this.shipmentService = shipmentService;
+    }
+
     // ── 로그인 페이지 ──────────────────────────────
     @GetMapping("/login")
     public String loginPage(
@@ -34,6 +50,29 @@ public class WebPageController {
     public String root() {
         return "redirect:/dashboard";
     }
-    
-    
+
+    // ── 재고/물류 페이지 ───────────────────────────
+    @GetMapping("/inventory")
+    public String inventory(Model model) {
+        model.addAttribute("inventoryList", inventoryService.findAll());
+        return "inventory";
+    }
+
+    @GetMapping("/purchase-orders")
+    public String purchaseOrders(Model model) {
+        model.addAttribute("purchaseOrderList", purchaseOrderService.findAll());
+        return "purchase-orders";
+    }
+
+    @GetMapping("/receipts")
+    public String receipts(Model model) {
+        model.addAttribute("receiptList", receiptService.findAll());
+        return "receipts";
+    }
+
+    @GetMapping("/shipments")
+    public String shipments(Model model) {
+        model.addAttribute("shipmentList", shipmentService.findAll());
+        return "shipments";
+    }
 }
