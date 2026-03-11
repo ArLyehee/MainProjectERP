@@ -85,10 +85,13 @@
     <div class="nav-section">메인</div>
     <a href="/dashboard" class="nav-item active"><span class="icon">📊</span> 대시보드</a>
     <div class="nav-section">업무</div>
-    <a href="#" class="nav-item"><span class="icon">📦</span> 제품 관리</a>
-    <a href="#" class="nav-item"><span class="icon">🛒</span> 주문 관리</a>
-    <a href="#" class="nav-item"><span class="icon">🏭</span> 생산 관리</a>
-    <a href="#" class="nav-item"><span class="icon">🗄️</span> 재고 관리</a>
+<a href="/products" class="nav-item"><span class="icon">📦</span> 제품 관리</a>
+<a href="/purchase-orders" class="nav-item"><span class="icon">🛒</span> 발주 관리</a>
+<a href="/work-orders" class="nav-item"><span class="icon">🏭</span> 생산 관리</a>
+<a href="/inventory" class="nav-item"><span class="icon">🗄️</span> 재고 관리</a>
+<a href="/receipts" class="nav-item"><span class="icon">📥</span> 입고 관리</a>
+<a href="/shipments" class="nav-item"><span class="icon">📤</span> 출고 관리</a>
+<a href="/employees" class="nav-item"><span class="icon">👤</span> 직원 관리</a>
     <div class="nav-section" sec:authorize="hasRole('ADMIN')">관리자</div>
     <a href="#" class="nav-item" sec:authorize="hasRole('ADMIN')"><span class="icon">👥</span> 사용자 관리</a>
     <a href="#" class="nav-item" sec:authorize="hasRole('ADMIN')"><span class="icon">⚙️</span> 시스템 설정</a>
@@ -141,6 +144,9 @@
                 <a href="#" class="quick-btn"><span class="q-icon">➕</span><span class="q-label">새 발주 등록</span><span class="q-arrow">→</span></a>
                 <a href="#" class="quick-btn"><span class="q-icon">📋</span><span class="q-label">생산 지시 등록</span><span class="q-arrow">→</span></a>
                 <a href="#" class="quick-btn"><span class="q-icon">🔍</span><span class="q-label">재고 현황 조회</span><span class="q-arrow">→</span></a>
+                <a href="/purchase-orders/new" class="quick-btn">...</a>
+				<a href="/work-orders/new" class="quick-btn">...</a>
+				<a href="/inventory" class="quick-btn">...</a>
                 <a href="#" class="quick-btn" sec:authorize="hasRole('ADMIN')"><span class="q-icon">👤</span><span class="q-label">직원 계정 생성</span><span class="q-arrow">→</span></a>
             </div>
             <div class="panel">
