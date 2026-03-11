@@ -15,10 +15,9 @@
     </resultMap>
 
     <select id="findAll" resultMap="ReceiptResultMap">
-        SELECT r.*, p.product_name, po.status as po_status
+        SELECT r.*, p.product_name
         FROM receipts r
         LEFT JOIN products p ON r.product_id = p.product_id
-        LEFT JOIN purchase_orders po ON r.po_id = po.po_id
         ORDER BY r.created_at DESC
     </select>
 
