@@ -39,6 +39,12 @@
         WHERE inventory_id = #{inventoryId}
     </update>
 
+    <update id="updateQuantity">
+        UPDATE inventory
+        SET quantity = quantity + #{quantity}, last_update = NOW()
+        WHERE product_id = #{productId} AND warehouse_id = #{warehouseId}
+    </update>
+
     <delete id="delete">
         DELETE FROM inventory WHERE inventory_id = #{inventoryId}
     </delete>

@@ -25,4 +25,12 @@ public class ProductService {
     public void insert(Product obj) {
         mapper.insert(obj);
     }
+
+    public void update(Product obj) {
+        mapper.update(obj);
+    }
+
+    public void delete(Long id) {
+        mapper.delete(id);
+    }
 }

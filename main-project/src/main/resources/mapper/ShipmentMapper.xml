@@ -11,7 +11,8 @@
         <result property="quantity"     column="quantity"/>
         <result property="shipmentDate" column="shipment_date"/>
         <result property="destination"  column="destination"/>
-        <result property="createdAt"    column="created_at"/>
+        <result property="productName"  column="product_name"/>
+        <result property="warehouseName" column="warehouse_name"/>
     </resultMap>
 
     <select id="findAll" resultMap="ShipmentResultMap">
@@ -19,7 +20,7 @@
         FROM shipments s
         LEFT JOIN products p ON s.product_id = p.product_id
         LEFT JOIN warehouses w ON s.warehouse_id = w.warehouse_id
-        ORDER BY s.created_at DESC
+        ORDER BY s.shipment_id DESC
     </select>
 
     <select id="findById" resultMap="ShipmentResultMap">
@@ -28,8 +29,8 @@
 
     <insert id="insert" parameterType="com.gaebalfan.erp.domain.Shipment"
             useGeneratedKeys="true" keyProperty="shipmentId">
-        INSERT INTO shipments (product_id, warehouse_id, quantity, shipment_date, destination, created_at)
-        VALUES (#{productId}, #{warehouseId}, #{quantity}, #{shipmentDate}, #{destination}, NOW())
+        INSERT INTO shipments (product_id, warehouse_id, quantity, shipment_date, destination)
+        VALUES (#{productId}, #{warehouseId}, #{quantity}, #{shipmentDate}, #{destination})
     </insert>
 
     <delete id="delete">

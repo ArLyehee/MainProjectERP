@@ -10,7 +10,6 @@
         <result property="productId"   column="product_id"/>
         <result property="quantity"    column="quantity"/>
         <result property="receiptDate" column="receipt_date"/>
-        <result property="createdAt"   column="created_at"/>
         <result property="productName" column="product_name"/>
     </resultMap>
 
@@ -18,13 +17,13 @@
         SELECT r.*, p.product_name
         FROM receipts r
         LEFT JOIN products p ON r.product_id = p.product_id
-        ORDER BY r.created_at DESC
+        ORDER BY r.receipt_id DESC
     </select>
 
     <insert id="insert" parameterType="com.gaebalfan.erp.domain.Receipt"
             useGeneratedKeys="true" keyProperty="receiptId">
-        INSERT INTO receipts (po_id, product_id, quantity, receipt_date, created_at)
-        VALUES (#{poId}, #{productId}, #{quantity}, #{receiptDate}, NOW())
+        INSERT INTO receipts (po_id, product_id, quantity, receipt_date)
+        VALUES (#{poId}, #{productId}, #{quantity}, #{receiptDate})
     </insert>
 
     <delete id="delete">

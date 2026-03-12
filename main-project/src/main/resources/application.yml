@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mariadb://localhost:3306/gaebalfan_erp
+    url: jdbc:mariadb://192.168.0.224:3306/gaebalfan_erp
     username: root
-    password: root
+    password: 9927
     driver-class-name: org.mariadb.jdbc.Driver
 
   thymeleaf:

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gaebalfan.erp.mapper.WorkOrderMapper">
+
+    <resultMap id="WorkOrderResultMap" type="com.gaebalfan.erp.domain.WorkOrder">
+        <id     property="workOrderId"  column="work_order_id"/>
+        <result property="productId"    column="product_id"/>
+        <result property="quantity"     column="quantity"/>
+        <result property="startDate"    column="start_date"/>
+        <result property="status"       column="status"/>
+        <result property="productName"  column="product_name"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="WorkOrderResultMap">
+        SELECT w.*, p.product_name
+        FROM work_orders w
+        LEFT JOIN products p ON w.product_id = p.product_id
+        ORDER BY w.work_order_id DESC
+    </select>
+
+    <select id="findById" resultMap="WorkOrderResultMap">
+        SELECT w.*, p.product_name
+        FROM work_orders w
+        LEFT JOIN products p ON w.product_id = p.product_id
+        WHERE w.work_order_id = #{workOrderId}
+    </select>
+
+    <insert id="insert" parameterType="com.gaebalfan.erp.domain.WorkOrder"
+            useGeneratedKeys="true" keyProperty="workOrderId">
+        INSERT INTO work_orders (product_id, quantity, start_date, status)
+        VALUES (#{productId}, #{quantity}, #{startDate}, #{status})
+    </insert>
+
+    <update id="updateStatus">
+        UPDATE work_orders SET status = #{status} WHERE work_order_id = #{workOrderId}
+    </update>
+
+</mapper>

@@ -5,6 +5,7 @@ import com.gaebalfan.erp.service.WorkOrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/work-orders")
@@ -29,6 +30,12 @@ public class WorkOrderController {
     @PostMapping
     public ResponseEntity<Void> insert(@RequestBody WorkOrder obj) {
         service.insert(obj);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Void> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        service.updateStatus(id, body.get("status"));
         return ResponseEntity.ok().build();
     }
 }
