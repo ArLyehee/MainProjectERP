@@ -4,8 +4,8 @@
 <body>
 <aside th:fragment="nav(current)" class="sidebar">
     <div class="sidebar-logo">
-        <div class="s-icon">🌀</div>
-        <div class="brand">개발팬 ERP<small>GAEBALFAN</small></div>
+        <div class="s-icon">🌬️</div>
+        <div class="brand">개발환기좀해 ERP<small>GAEBALFAN</small></div>
     </div>
 
     <div class="nav-section">메인</div>
@@ -24,12 +24,14 @@
 
     <div class="nav-section">인사</div>
     <a href="/employees"       th:class="${current == 'employees'}       ? 'nav-item active' : 'nav-item'"><span class="ni">👤</span> 직원 관리</a>
+    <a href="/attendance"      th:class="${current == 'attendance'}      ? 'nav-item active' : 'nav-item'"><span class="ni">📅</span> 근태 관리</a>
 
-    <div class="nav-section">생산</div>
+    <div class="nav-section">생산관리</div>
     <a href="/work-orders"     th:class="${current == 'work-orders'}     ? 'nav-item active' : 'nav-item'"><span class="ni">⚙️</span> 작업지시</a>
+    <a href="/bom"             th:class="${current == 'bom'}             ? 'nav-item active' : 'nav-item'"><span class="ni">📋</span> BOM 관리</a>
 
     <div class="nav-section" sec:authorize="hasRole('ADMIN')">관리자</div>
-    <a href="#" class="nav-item" sec:authorize="hasRole('ADMIN')"><span class="ni">👥</span> 사용자 관리</a>
+    <a href="/admin/users" class="nav-item" sec:authorize="hasRole('ADMIN')"><span class="ni">👥</span> 사용자 관리</a>
     <a href="#" class="nav-item" sec:authorize="hasRole('ADMIN')"><span class="ni">⚙️</span> 시스템 설정</a>
 
     <div class="sidebar-bottom">

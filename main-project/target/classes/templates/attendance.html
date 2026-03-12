@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
-    <title>제품 관리 | 개발팬 ERP</title>
+    <title>근태 관리 | 개발팬 ERP</title>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -44,71 +44,75 @@
         td { padding:13px 16px; border-bottom:1px solid rgba(42,45,58,.5); color:var(--text); }
         tr:last-child td { border-bottom:none; }
         tr:hover td { background:rgba(79,142,247,.04); }
-        .price { font-weight:600; color:var(--accent); }
-        .model { font-size:12px; color:var(--text-muted); }
-        .desc { font-size:12px; color:var(--text-muted); max-width:260px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .empty-state { text-align:center; padding:60px; color:var(--text-muted); }
-        .btn-action { padding:4px 10px; border-radius:5px; border:none; cursor:pointer; font-size:12px; font-family:inherit; }
-        .btn-edit { background:rgba(79,142,247,.15); color:#4f8ef7; }
-        .btn-edit:hover { background:rgba(79,142,247,.3); }
-        .btn-del  { background:rgba(239,68,68,.15);  color:#ef4444; margin-left:4px; }
-        .btn-del:hover  { background:rgba(239,68,68,.3); }
+        .search-bar { display:flex; gap:12px; margin-bottom:20px; }
+        .search-input { flex:1; padding:9px 14px; background:#1a1d27; border:1px solid #2a2d3a; border-radius:8px; color:#e8eaf0; font-size:13px; font-family:inherit; outline:none; }
+        .search-input:focus { border-color:#4f8ef7; }
+        .badge { padding:3px 10px; border-radius:20px; font-size:11px; font-weight:500; }
+        .badge-present { background:rgba(34,197,94,.15); color:#4ade80; }
+        .badge-absent { background:rgba(239,68,68,.15); color:#f87171; }
+        .btn-action { padding:4px 10px; border-radius:5px; border:none; cursor:pointer; font-size:11px; font-family:inherit; font-weight:500; }
+        .btn-checkout { background:rgba(245,158,11,.15); color:#fbbf24; }
+        .btn-checkout:hover { background:rgba(245,158,11,.3); }
         .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:500; align-items:center; justify-content:center; }
         .modal-overlay.open { display:flex; }
         .modal { background:#1a1d27; border:1px solid #2a2d3a; border-radius:12px; padding:28px; width:420px; max-width:95vw; }
         .modal h3 { font-size:16px; font-weight:600; margin-bottom:20px; }
         .form-group { margin-bottom:14px; }
         .form-group label { display:block; font-size:12px; color:#6b7280; margin-bottom:6px; }
-        .form-group input, .form-group textarea, .form-group select { width:100%; padding:9px 12px; background:#0f1117; border:1px solid #2a2d3a; border-radius:7px; color:#e8eaf0; font-size:13px; font-family:inherit; outline:none; }
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:#4f8ef7; }
-        .form-group textarea { resize:vertical; min-height:70px; }
+        .form-group input, .form-group select { width:100%; padding:9px 12px; background:#0f1117; border:1px solid #2a2d3a; border-radius:7px; color:#e8eaf0; font-size:13px; font-family:inherit; outline:none; }
+        .form-group input:focus, .form-group select:focus { border-color:#4f8ef7; }
         .modal-footer { display:flex; justify-content:flex-end; gap:8px; margin-top:20px; }
-        .btn-cancel { padding:8px 16px; border-radius:7px; border:1px solid #2a2d3a; background:transparent; color:#6b7280; cursor:pointer; font-size:13px; font-family:inherit; }
-        .btn-cancel:hover { color:#e8eaf0; }
+        .btn-cancel-modal { padding:8px 16px; border-radius:7px; border:1px solid #2a2d3a; background:transparent; color:#6b7280; cursor:pointer; font-size:13px; font-family:inherit; }
         .btn-save { padding:8px 16px; border-radius:7px; border:none; background:#4f8ef7; color:#fff; cursor:pointer; font-size:13px; font-family:inherit; font-weight:500; }
         .btn-save:hover { background:#3b7de8; }
     </style>
 </head>
 <body>
 <div class="layout">
-    <aside th:replace="~{fragments/sidebar :: nav('products')}"></aside>
+    <aside th:replace="~{fragments/sidebar :: nav('attendance')}"></aside>
     <main class="main">
         <div class="page-header">
             <div class="page-title">
-                <h2>🔧 제품 관리</h2>
-                <p>환풍기 제품 목록을 관리합니다.</p>
+                <h2>📅 근태 관리</h2>
+                <p>직원 출퇴근 현황을 조회하고 관리합니다.</p>
             </div>
-            <button onclick="openCreate()" class="btn btn-primary">+ 제품 등록</button>
+            <button onclick="openCreate()" class="btn btn-primary">+ 출근 등록</button>
         </div>
-        <div style="margin-bottom:16px;">
-            <input type="text" id="searchInput" placeholder="검색..." oninput="filterTable()"
-                style="padding:9px 14px;background:#1a1d27;border:1px solid #2a2d3a;border-radius:8px;color:#e8eaf0;font-size:13px;font-family:inherit;outline:none;width:300px;">
+        <div class="search-bar">
+            <input type="text" class="search-input" id="searchInput" placeholder="직원명 검색..." oninput="filterTable()">
         </div>
         <div class="card">
             <table>
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>제품명</th>
-                        <th>모델명</th>
-                        <th>단가 (원)</th>
-                        <th>설명</th>
+                        <th>직원명</th>
+                        <th>날짜</th>
+                        <th>출근</th>
+                        <th>퇴근</th>
+                        <th>상태</th>
                         <th>액션</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:if="${#lists.isEmpty(productList)}">
-                        <td colspan="6" class="empty-state">등록된 제품이 없습니다.</td>
+                    <tr th:if="${#lists.isEmpty(attendanceList)}">
+                        <td colspan="7" class="empty-state">등록된 근태 기록이 없습니다.</td>
                     </tr>
-                    <tr th:each="p : ${productList}">
-                        <td th:text="${p.productId}"></td>
-                        <td th:text="${p.productName}"></td>
-                        <td class="model" th:text="${p.model}"></td>
-                        <td class="price" th:text="${#numbers.formatInteger(p.price, 0, 'COMMA')}"></td>
-                        <td class="desc" th:text="${p.description}"></td>
+                    <tr th:each="a : ${attendanceList}">
+                        <td th:text="${a.attendanceId}"></td>
+                        <td th:text="${a.employeeName}"></td>
+                        <td th:text="${a.workDate}"></td>
+                        <td th:text="${a.checkIn}"></td>
+                        <td th:text="${a.checkOut}"></td>
                         <td>
-                            <button class="btn-action btn-edit" th:onclick="|openEdit(${p.productId})|">수정</button>
-                            <button class="btn-action btn-del"  th:onclick="|confirmDelete(${p.productId})|">삭제</button>
+                            <span th:if="${a.checkOut != null}" class="badge badge-present">퇴근완료</span>
+                            <span th:if="${a.checkOut == null}" class="badge badge-absent">근무중</span>
+                        </td>
+                        <td>
+                            <button th:if="${a.checkOut == null}"
+                                    class="btn-action btn-checkout"
+                                    th:onclick="|checkOut(${a.attendanceId})|">퇴근</button>
                         </td>
                     </tr>
                 </tbody>
@@ -117,73 +121,47 @@
     </main>
 </div>
 
-<div class="modal-overlay" id="modalOverlay">
+<!-- 출근 등록 모달 -->
+<div class="modal-overlay" id="attModal">
     <div class="modal">
-        <h3 id="modalTitle">제품 등록</h3>
-        <input type="hidden" id="productId">
-        <div class="form-group"><label>제품명 *</label><input type="text" id="productName" placeholder="제품명 입력"></div>
-        <div class="form-group"><label>모델명</label><input type="text" id="model" placeholder="모델명 입력"></div>
-        <div class="form-group"><label>단가 (원)</label><input type="number" id="price" placeholder="0"></div>
-        <div class="form-group"><label>설명</label><textarea id="description" placeholder="제품 설명 입력"></textarea></div>
+        <h3>출근 등록</h3>
+        <div class="form-group">
+            <label>직원 *</label>
+            <select id="aEmployeeId">
+                <option value="">직원 선택</option>
+                <option th:each="e : ${employeeList}" th:value="${e.employeeId}" th:text="${e.name}"></option>
+            </select>
+        </div>
         <div class="modal-footer">
-            <button class="btn-cancel" onclick="closeModal()">취소</button>
-            <button class="btn-save" onclick="saveProduct()">저장</button>
+            <button class="btn-cancel-modal" onclick="closeModal()">취소</button>
+            <button class="btn-save" onclick="saveCheckIn()">출근 등록</button>
         </div>
     </div>
 </div>
 
 <script>
-function openCreate() {
-    document.getElementById('modalTitle').textContent = '제품 등록';
-    document.getElementById('productId').value = '';
-    document.getElementById('productName').value = '';
-    document.getElementById('model').value = '';
-    document.getElementById('price').value = '';
-    document.getElementById('description').value = '';
-    document.getElementById('modalOverlay').classList.add('open');
-}
-function openEdit(id) {
-    fetch('/api/products/' + id)
-        .then(r => r.json())
-        .then(p => {
-            document.getElementById('modalTitle').textContent = '제품 수정';
-            document.getElementById('productId').value = p.productId;
-            document.getElementById('productName').value = p.productName || '';
-            document.getElementById('model').value = p.model || '';
-            document.getElementById('price').value = p.price || '';
-            document.getElementById('description').value = p.description || '';
-            document.getElementById('modalOverlay').classList.add('open');
-        });
-}
-function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
-function saveProduct() {
-    const id = document.getElementById('productId').value;
-    const data = {
-        productName: document.getElementById('productName').value,
-        model: document.getElementById('model').value,
-        price: document.getElementById('price').value || null,
-        description: document.getElementById('description').value
-    };
-    const url = id ? '/api/products/' + id : '/api/products';
-    const method = id ? 'PUT' : 'POST';
-    const csrf = document.querySelector('meta[name="_csrf"]').content;
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-    fetch(url, { method, headers: {'Content-Type':'application/json', [csrfHeader]: csrf}, body: JSON.stringify(data) })
-        .then(() => location.reload());
-}
+const csrf = document.querySelector('meta[name="_csrf"]').content;
+const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
 function filterTable() {
     const q = document.getElementById('searchInput').value.toLowerCase();
     document.querySelectorAll('tbody tr').forEach(tr => {
         tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
     });
 }
-function confirmDelete(id) {
-    if (confirm('정말 삭제하시겠습니까?')) {
-        const csrf = document.querySelector('meta[name="_csrf"]').content;
-        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-        fetch('/api/products/' + id, { method: 'DELETE', headers: {[csrfHeader]: csrf} })
-            .then(() => location.reload());
-    }
+
+function openCreate() { document.getElementById('attModal').classList.add('open'); }
+function closeModal() { document.getElementById('attModal').classList.remove('open'); }
+
+function saveCheckIn() {
+    const data = { employeeId: document.getElementById('aEmployeeId').value };
+    fetch('/api/attendance/check-in', { method:'POST', headers:{'Content-Type':'application/json',[csrfHeader]:csrf}, body:JSON.stringify(data) })
+        .then(() => location.reload());
+}
+
+function checkOut(id) {
+    fetch('/api/attendance/' + id + '/check-out', { method:'PATCH', headers:{[csrfHeader]:csrf} })
+        .then(() => location.reload());
 }
 </script>
 </body>

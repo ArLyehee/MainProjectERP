@@ -20,6 +20,8 @@ public class WebPageController {
     private final WarehouseService warehouseService;
     private final EmployeeService employeeService;
     private final WorkOrderService workOrderService;
+    private final AttendanceService attendanceService;
+    private final BomService bomService;
 
     public WebPageController(InventoryService inventoryService,
                              PurchaseOrderService purchaseOrderService,
@@ -29,7 +31,9 @@ public class WebPageController {
                              SupplierService supplierService,
                              WarehouseService warehouseService,
                              EmployeeService employeeService,
-                             WorkOrderService workOrderService) {
+                             WorkOrderService workOrderService,
+                             AttendanceService attendanceService,
+                             BomService bomService) {
         this.inventoryService = inventoryService;
         this.purchaseOrderService = purchaseOrderService;
         this.receiptService = receiptService;
@@ -39,6 +43,8 @@ public class WebPageController {
         this.warehouseService = warehouseService;
         this.employeeService = employeeService;
         this.workOrderService = workOrderService;
+        this.attendanceService = attendanceService;
+        this.bomService = bomService;
     }
 
     // ── 로그인 페이지 ──────────────────────────────
@@ -125,6 +131,13 @@ public class WebPageController {
         return "employees";
     }
 
+    @GetMapping("/attendance")
+    public String attendance(Model model) {
+        model.addAttribute("attendanceList", attendanceService.findAll());
+        model.addAttribute("employeeList", employeeService.findAll());
+        return "attendance";
+    }
+
     // ── 생산 페이지 ───────────────────────────────
     @GetMapping("/work-orders")
     public String workOrders(Model model) {
@@ -132,5 +145,18 @@ public class WebPageController {
         model.addAttribute("productList", productService.findAll());
         model.addAttribute("warehouseList", warehouseService.findAll());
         return "work-orders";
+    }
+
+    @GetMapping("/bom")
+    public String bom(Model model) {
+        model.addAttribute("bomList", bomService.findAll());
+        model.addAttribute("productList", productService.findAll());
+        return "bom";
+    }
+
+    // ── 관리자 페이지 ─────────────────────────────
+    @GetMapping("/admin/users")
+    public String adminUsers(Model model) {
+        return "admin/users";
     }
 }

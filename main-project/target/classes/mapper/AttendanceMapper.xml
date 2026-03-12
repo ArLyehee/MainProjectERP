@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gaebalfan.erp.mapper.AttendanceMapper">
+
+    <resultMap id="AttendanceResultMap" type="com.gaebalfan.erp.domain.Attendance">
+        <id     property="attendanceId" column="attendance_id"/>
+        <result property="employeeId"   column="employee_id"/>
+        <result property="workDate"     column="work_date"/>
+        <result property="checkIn"      column="check_in"/>
+        <result property="checkOut"     column="check_out"/>
+        <result property="employeeName" column="name"/>
+    </resultMap>
+
+    <select id="findByEmployeeId" resultMap="AttendanceResultMap">
+        SELECT a.*, e.name
+        FROM attendance a
+        LEFT JOIN employees e ON a.employee_id = e.employee_id
+        WHERE a.employee_id = #{employeeId}
+        ORDER BY a.work_date DESC
+    </select>
+
+    <select id="findAll" resultMap="AttendanceResultMap">
+        SELECT a.*, e.name
+        FROM attendance a
+        LEFT JOIN employees e ON a.employee_id = e.employee_id
+        ORDER BY a.work_date DESC, a.attendance_id DESC
+    </select>
+
+    <insert id="insert" parameterType="com.gaebalfan.erp.domain.Attendance"
+            useGeneratedKeys="true" keyProperty="attendanceId">
+        INSERT INTO attendance (employee_id, work_date, check_in)
+        VALUES (#{employeeId}, #{workDate}, #{checkIn})
+    </insert>
+
+    <update id="updateCheckOut">
+        UPDATE attendance SET check_out = NOW()
+        WHERE attendance_id = #{attendanceId}
+    </update>
+
+</mapper>
