@@ -16,8 +16,7 @@
         }
         body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans KR', sans-serif; display: flex; min-height: 100vh; }
 
-        /* 사이드바 */
-        :root { --sidebar-w:220px; }
+        /* sidebar */
         .sidebar { width:var(--sidebar-w); background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; position:fixed; top:0; left:0; bottom:0; z-index:100; overflow-y:auto; }
         .sidebar-logo { padding:20px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; flex-shrink:0; }
         .sidebar-logo .s-icon { width:34px; height:34px; background:linear-gradient(135deg,var(--accent),#7c3aed); border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
@@ -37,44 +36,64 @@
         .btn-logout { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:15px; padding:3px; border-radius:4px; transition:color .15s; }
         .btn-logout:hover { color:#ef4444; }
 
-        /* 메인 */
+        /* main */
         .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
         .topbar { padding: 18px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
         .topbar h1 { font-size: 18px; font-weight: 600; }
         .topbar .date { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text-muted); }
         .content { padding: 28px; }
 
-        /* 통계 카드 */
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
-        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; transition: border-color 0.2s; }
+        /* stat cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; transition: border-color 0.2s; cursor: default; }
         .stat-card:hover { border-color: rgba(79,142,247,0.4); }
         .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
         .stat-card.blue::before   { background: var(--accent); }
         .stat-card.green::before  { background: var(--success); }
         .stat-card.yellow::before { background: var(--warning); }
         .stat-card.red::before    { background: var(--danger); }
-        .stat-label { font-size: 11px; font-family: 'IBM Plex Mono', monospace; color: var(--text-muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 12px; }
-        .stat-value { font-size: 28px; font-weight: 600; letter-spacing: -1px; margin-bottom: 6px; }
+        .stat-card.purple::before { background: #7c3aed; }
+        .stat-card.teal::before   { background: #06b6d4; }
+        .stat-label { font-size: 10px; font-family: 'IBM Plex Mono', monospace; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+        .stat-value { font-size: 32px; font-weight: 600; letter-spacing: -1px; margin-bottom: 4px; }
         .stat-sub { font-size: 12px; color: var(--text-muted); }
 
-        /* 하단 그리드 */
-        .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        /* bottom grid */
+        .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
         .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-        .panel-title { font-size: 13px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .panel-title { font-size: 13px; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
         .panel-title .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-        .quick-btn { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; cursor: pointer; margin-bottom: 8px; text-decoration: none; transition: border-color 0.15s, background 0.15s; }
+
+        /* quick buttons */
+        .quick-btn { display: flex; align-items: center; gap: 12px; padding: 11px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; cursor: pointer; margin-bottom: 8px; text-decoration: none; transition: border-color 0.15s, background 0.15s; }
         .quick-btn:last-child { margin-bottom: 0; }
         .quick-btn:hover { border-color: var(--accent); background: rgba(79,142,247,0.05); }
-        .quick-btn .q-icon { font-size: 18px; }
+        .quick-btn .q-icon { font-size: 16px; }
         .quick-btn .q-label { flex: 1; }
         .quick-btn .q-arrow { color: var(--text-muted); font-size: 12px; }
-        .notice-item { padding: 10px 0; border-bottom: 1px solid var(--border); display: flex; gap: 10px; }
-        .notice-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .notice-badge { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-family: 'IBM Plex Mono', monospace; font-weight: 500; flex-shrink: 0; align-self: flex-start; margin-top: 2px; }
-        .badge-warn { background: rgba(245,158,11,0.15); color: var(--warning); }
-        .badge-info { background: rgba(79,142,247,0.15); color: var(--accent); }
-        .notice-text { font-size: 13px; }
-        .notice-date { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+        /* lists */
+        .list-item { padding: 10px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .list-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .list-name { font-size: 13px; }
+        .list-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+        .list-badge { padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 500; font-family: 'IBM Plex Mono', monospace; flex-shrink: 0; }
+        .badge-pending  { background:rgba(245,158,11,.15); color:#fbbf24; }
+        .badge-approved { background:rgba(79,142,247,.15); color:#93c5fd; }
+        .badge-received { background:rgba(34,197,94,.15); color:#4ade80; }
+        .badge-cancelled{ background:rgba(107,114,128,.15); color:#9ca3af; }
+        .qty-low { color: var(--danger); font-weight: 600; font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
+        .empty-notice { text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px; }
+
+        /* work order status bar */
+        .wo-grid { display: flex; gap: 12px; }
+        .wo-item { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+        .wo-label { font-size: 10px; color: var(--text-muted); margin-bottom: 6px; }
+        .wo-value { font-size: 20px; font-weight: 600; }
+        .wo-pending   { color: #fbbf24; }
+        .wo-progress  { color: var(--accent); }
+        .wo-completed { color: var(--success); }
+        .wo-cancelled { color: #9ca3af; }
     </style>
 </head>
 <body>
@@ -86,68 +105,157 @@
         <span class="date" id="currentDate"></span>
     </div>
     <div class="content">
+
+        <!-- 통계 카드 6개 -->
         <div class="stats-grid">
             <div class="stat-card blue">
                 <div class="stat-label">총 제품 수</div>
-                <div class="stat-value">—</div>
-                <div class="stat-sub">등록된 제품 총계</div>
+                <div class="stat-value" id="statProducts">—</div>
+                <div class="stat-sub">등록된 제품</div>
+            </div>
+            <div class="stat-card teal">
+                <div class="stat-label">재직 직원</div>
+                <div class="stat-value" id="statEmployees">—</div>
+                <div class="stat-sub">활성 상태</div>
             </div>
             <div class="stat-card yellow">
-                <div class="stat-label">처리중 주문</div>
-                <div class="stat-value">—</div>
+                <div class="stat-label">처리중 발주</div>
+                <div class="stat-value" id="statOrders">—</div>
                 <div class="stat-sub">승인 대기 포함</div>
             </div>
             <div class="stat-card red">
                 <div class="stat-label">재고 부족</div>
-                <div class="stat-value">—</div>
-                <div class="stat-sub">안전재고 미달 항목</div>
+                <div class="stat-value" id="statLowInv">—</div>
+                <div class="stat-sub">수량 10 이하</div>
             </div>
             <div class="stat-card green">
-                <div class="stat-label">이번달 생산</div>
-                <div class="stat-value">—</div>
-                <div class="stat-sub">완료 생산 건수</div>
+                <div class="stat-label">이번달 매출</div>
+                <div class="stat-value" id="statRevenue">—</div>
+                <div class="stat-sub" id="statRevSub">—</div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-label">이번달 생산완료</div>
+                <div class="stat-value" id="statWO">—</div>
+                <div class="stat-sub">완료된 작업지시</div>
             </div>
         </div>
-        <div class="bottom-grid">
-            <div class="panel">
-                <div class="panel-title"><div class="dot"></div>빠른 메뉴</div>
-                <a href="#" class="quick-btn"><span class="q-icon">➕</span><span class="q-label">새 발주 등록</span><span class="q-arrow">→</span></a>
-                <a href="#" class="quick-btn"><span class="q-icon">📋</span><span class="q-label">생산 지시 등록</span><span class="q-arrow">→</span></a>
-                <a href="#" class="quick-btn"><span class="q-icon">🔍</span><span class="q-label">재고 현황 조회</span><span class="q-arrow">→</span></a>
-                <a href="/purchase-orders/new" class="quick-btn">...</a>
-				<a href="/work-orders/new" class="quick-btn">...</a>
-				<a href="/inventory" class="quick-btn">재고현황</a>
-                <a href="#" class="quick-btn" sec:authorize="hasRole('ADMIN')"><span class="q-icon">👤</span><span class="q-label">직원 계정 생성</span><span class="q-arrow">→</span></a>
+
+        <!-- 작업지시 현황 -->
+        <div class="panel" style="margin-bottom:24px;">
+            <div class="panel-title"><div class="dot"></div>작업지시 현황</div>
+            <div class="wo-grid" id="woStatusGrid">
+                <div class="wo-item"><div class="wo-label">대기</div><div class="wo-value wo-pending" id="woPending">—</div></div>
+                <div class="wo-item"><div class="wo-label">진행중</div><div class="wo-value wo-progress" id="woProgress">—</div></div>
+                <div class="wo-item"><div class="wo-label">완료</div><div class="wo-value wo-completed" id="woCompleted">—</div></div>
+                <div class="wo-item"><div class="wo-label">취소</div><div class="wo-value wo-cancelled" id="woCancelled">—</div></div>
             </div>
+        </div>
+
+        <div class="bottom-grid">
+            <!-- 최근 발주 -->
             <div class="panel">
-                <div class="panel-title"><div class="dot"></div>시스템 알림</div>
-                <div class="notice-item">
-                    <span class="notice-badge badge-info">안내</span>
-                    <div>
-                        <div class="notice-text">ERP 시스템이 정상 가동 중입니다.</div>
-                        <div class="notice-date" th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"></div>
-                    </div>
-                </div>
-                <div class="notice-item">
-                    <span class="notice-badge badge-warn">설정</span>
-                    <div>
-                        <div class="notice-text">DB 연결 및 Mapper 구현 후 통계가 표시됩니다.</div>
-                        <div class="notice-date">초기 설정 안내</div>
-                    </div>
-                </div>
+                <div class="panel-title"><div class="dot"></div>최근 발주 현황</div>
+                <div id="recentOrders"><div class="empty-notice">로딩 중...</div></div>
+            </div>
+
+            <!-- 재고 부족 알림 -->
+            <div class="panel">
+                <div class="panel-title"><div class="dot" style="background:var(--danger)"></div>재고 부족 알림</div>
+                <div id="lowInventory"><div class="empty-notice">로딩 중...</div></div>
+            </div>
+        </div>
+
+        <!-- 빠른 메뉴 -->
+        <div class="panel">
+            <div class="panel-title"><div class="dot"></div>빠른 메뉴</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+                <a href="/purchase-orders" class="quick-btn"><span class="q-icon">📋</span><span class="q-label">발주 관리</span><span class="q-arrow">→</span></a>
+                <a href="/work-orders" class="quick-btn"><span class="q-icon">⚙️</span><span class="q-label">작업지시 관리</span><span class="q-arrow">→</span></a>
+                <a href="/inventory" class="quick-btn"><span class="q-icon">📦</span><span class="q-label">재고 현황</span><span class="q-arrow">→</span></a>
+                <a href="/sales" class="quick-btn"><span class="q-icon">💰</span><span class="q-label">매출 관리</span><span class="q-arrow">→</span></a>
+                <a href="/employees" class="quick-btn"><span class="q-icon">👤</span><span class="q-label">직원 관리</span><span class="q-arrow">→</span></a>
+                <a href="/finance" class="quick-btn"><span class="q-icon">📈</span><span class="q-label">재무제표</span><span class="q-arrow">→</span></a>
             </div>
         </div>
     </div>
 </main>
 
 <script>
-    function updateDate() {
-        const now = new Date();
-        const opts = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit' };
-        document.getElementById('currentDate').textContent = now.toLocaleDateString('ko-KR', opts);
-    }
-    updateDate();
-    setInterval(updateDate, 60000);
+function updateDate() {
+    const now = new Date();
+    const opts = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit' };
+    document.getElementById('currentDate').textContent = now.toLocaleDateString('ko-KR', opts);
+}
+updateDate();
+setInterval(updateDate, 60000);
+
+function fmtMoney(n) {
+    const num = parseFloat(n || 0);
+    if (num >= 100000000) return (num/100000000).toFixed(1) + '억원';
+    if (num >= 10000) return (num/10000).toFixed(0) + '만원';
+    return Math.round(num).toLocaleString('ko-KR') + '원';
+}
+
+function getStatusBadge(status) {
+    const map = { PENDING:'badge-pending', APPROVED:'badge-approved', RECEIVED:'badge-received', CANCELLED:'badge-cancelled' };
+    const labelMap = { PENDING:'대기', APPROVED:'승인', RECEIVED:'입고완료', CANCELLED:'취소' };
+    return `<span class="list-badge ${map[status] || ''}">${labelMap[status] || status}</span>`;
+}
+
+function loadStats() {
+    fetch('/api/dashboard/stats')
+        .then(r => r.json())
+        .then(d => {
+            document.getElementById('statProducts').textContent  = d.productCount  ?? '—';
+            document.getElementById('statEmployees').textContent = d.employeeCount ?? '—';
+            document.getElementById('statOrders').textContent    = d.pendingOrders ?? '—';
+            document.getElementById('statLowInv').textContent    = d.lowInventory  ?? '—';
+            document.getElementById('statWO').textContent        = d.monthlyWO     ?? '—';
+            document.getElementById('statRevenue').textContent   = fmtMoney(d.monthlyRevenue);
+            document.getElementById('statRevSub').textContent    = '이번달 ' + (d.monthlySaleCount || 0) + '건';
+
+            // 작업지시 상태
+            const wo = { PENDING:0, IN_PROGRESS:0, COMPLETED:0, CANCELLED:0 };
+            (d.workOrderStatus || []).forEach(w => {
+                const s = w.status || w.STATUS;
+                const c = parseInt(w.cnt || w.CNT || 0);
+                if (s in wo) wo[s] = c;
+            });
+            document.getElementById('woPending').textContent   = wo.PENDING;
+            document.getElementById('woProgress').textContent  = wo.IN_PROGRESS;
+            document.getElementById('woCompleted').textContent = wo.COMPLETED;
+            document.getElementById('woCancelled').textContent = wo.CANCELLED;
+
+            // 최근 발주
+            const orders = d.recentOrders || [];
+            document.getElementById('recentOrders').innerHTML = orders.length === 0
+                ? '<div class="empty-notice">발주 내역이 없습니다.</div>'
+                : orders.map(o => `<div class="list-item">
+                    <div>
+                        <div class="list-name">PO-${o.po_id || o.poId || '-'} · ${o.supplier_name || o.supplierName || '-'}</div>
+                        <div class="list-sub">${o.order_date || o.orderDate || ''}</div>
+                    </div>
+                    ${getStatusBadge(o.status || o.STATUS || '')}
+                </div>`).join('');
+
+            // 재고 부족
+            const low = d.lowInventoryItems || [];
+            document.getElementById('lowInventory').innerHTML = low.length === 0
+                ? '<div class="empty-notice" style="color:var(--success)">✓ 재고 부족 항목 없음</div>'
+                : low.map(i => `<div class="list-item">
+                    <div>
+                        <div class="list-name">${i.product_name || i.productName || '-'}</div>
+                        <div class="list-sub">${i.warehouse_name || i.warehouseName || '-'}</div>
+                    </div>
+                    <span class="qty-low">${i.quantity}</span>
+                </div>`).join('');
+        })
+        .catch(() => {
+            document.getElementById('statProducts').textContent = 'err';
+        });
+}
+
+document.addEventListener('DOMContentLoaded', loadStats);
 </script>
 </body>
 </html>

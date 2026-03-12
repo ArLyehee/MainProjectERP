@@ -91,20 +91,22 @@
                         <th>#</th>
                         <th>제품명</th>
                         <th>모델명</th>
-                        <th>단가 (원)</th>
+                        <th>판매가 (원)</th>
+                        <th>원가 (원)</th>
                         <th>설명</th>
                         <th>액션</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:if="${#lists.isEmpty(productList)}">
-                        <td colspan="6" class="empty-state">등록된 제품이 없습니다.</td>
+                        <td colspan="7" class="empty-state">등록된 제품이 없습니다.</td>
                     </tr>
                     <tr th:each="p : ${productList}">
                         <td th:text="${p.productId}"></td>
                         <td th:text="${p.productName}"></td>
                         <td class="model" th:text="${p.model}"></td>
-                        <td class="price" th:text="${#numbers.formatInteger(p.price, 0, 'COMMA')}"></td>
+                        <td class="price" th:text="${#numbers.formatInteger(p.salePrice, 0, 'COMMA')}"></td>
+                        <td class="price" th:text="${#numbers.formatInteger(p.costPrice, 0, 'COMMA')}"></td>
                         <td class="desc" th:text="${p.description}"></td>
                         <td>
                             <button class="btn-action btn-edit" th:onclick="|openEdit(${p.productId})|">수정</button>
@@ -123,7 +125,8 @@
         <input type="hidden" id="productId">
         <div class="form-group"><label>제품명 *</label><input type="text" id="productName" placeholder="제품명 입력"></div>
         <div class="form-group"><label>모델명</label><input type="text" id="model" placeholder="모델명 입력"></div>
-        <div class="form-group"><label>단가 (원)</label><input type="number" id="price" placeholder="0"></div>
+        <div class="form-group"><label>판매가 (원)</label><input type="number" id="salePrice" placeholder="0"></div>
+        <div class="form-group"><label>원가 (원)</label><input type="number" id="costPrice" placeholder="0"></div>
         <div class="form-group"><label>설명</label><textarea id="description" placeholder="제품 설명 입력"></textarea></div>
         <div class="modal-footer">
             <button class="btn-cancel" onclick="closeModal()">취소</button>
@@ -138,7 +141,8 @@ function openCreate() {
     document.getElementById('productId').value = '';
     document.getElementById('productName').value = '';
     document.getElementById('model').value = '';
-    document.getElementById('price').value = '';
+    document.getElementById('salePrice').value = '';
+    document.getElementById('costPrice').value = '';
     document.getElementById('description').value = '';
     document.getElementById('modalOverlay').classList.add('open');
 }
@@ -150,7 +154,8 @@ function openEdit(id) {
             document.getElementById('productId').value = p.productId;
             document.getElementById('productName').value = p.productName || '';
             document.getElementById('model').value = p.model || '';
-            document.getElementById('price').value = p.price || '';
+            document.getElementById('salePrice').value = p.salePrice || '';
+            document.getElementById('costPrice').value = p.costPrice || '';
             document.getElementById('description').value = p.description || '';
             document.getElementById('modalOverlay').classList.add('open');
         });
@@ -161,7 +166,8 @@ function saveProduct() {
     const data = {
         productName: document.getElementById('productName').value,
         model: document.getElementById('model').value,
-        price: document.getElementById('price').value || null,
+        salePrice: document.getElementById('salePrice').value || null,
+        costPrice: document.getElementById('costPrice').value || null,
         description: document.getElementById('description').value
     };
     const url = id ? '/api/products/' + id : '/api/products';

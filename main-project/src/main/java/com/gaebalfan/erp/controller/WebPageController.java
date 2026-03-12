@@ -22,6 +22,8 @@ public class WebPageController {
     private final WorkOrderService workOrderService;
     private final AttendanceService attendanceService;
     private final BomService bomService;
+    private final SaleService saleService;
+    private final OperatingExpenseService expenseService;
 
     public WebPageController(InventoryService inventoryService,
                              PurchaseOrderService purchaseOrderService,
@@ -33,7 +35,9 @@ public class WebPageController {
                              EmployeeService employeeService,
                              WorkOrderService workOrderService,
                              AttendanceService attendanceService,
-                             BomService bomService) {
+                             BomService bomService,
+                             SaleService saleService,
+                             OperatingExpenseService expenseService) {
         this.inventoryService = inventoryService;
         this.purchaseOrderService = purchaseOrderService;
         this.receiptService = receiptService;
@@ -45,6 +49,8 @@ public class WebPageController {
         this.workOrderService = workOrderService;
         this.attendanceService = attendanceService;
         this.bomService = bomService;
+        this.saleService = saleService;
+        this.expenseService = expenseService;
     }
 
     // ── 로그인 페이지 ──────────────────────────────
@@ -154,9 +160,36 @@ public class WebPageController {
         return "bom";
     }
 
+    // ── 매출/비용 페이지 ──────────────────────────
+    @GetMapping("/sales")
+    public String sales(Model model) {
+        model.addAttribute("saleList", saleService.findAll());
+        model.addAttribute("productList", productService.findAll());
+        model.addAttribute("warehouseList", warehouseService.findAll());
+        return "sales";
+    }
+
+    @GetMapping("/expenses")
+    public String expenses(Model model) {
+        model.addAttribute("expenseList", expenseService.findAll());
+        return "expenses";
+    }
+
+    // ── 재무제표 페이지 ───────────────────────────
+    @GetMapping("/finance")
+    public String finance(Model model) {
+        model.addAttribute("currentYear", java.time.LocalDate.now().getYear());
+        return "finance";
+    }   
+
     // ── 관리자 페이지 ─────────────────────────────
     @GetMapping("/admin/users")
     public String adminUsers(Model model) {
         return "admin/users";
+    }
+
+    @GetMapping("/admin/settings")
+    public String adminSettings(Model model) {
+        return "admin/settings";
     }
 }

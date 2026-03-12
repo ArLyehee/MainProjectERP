@@ -75,4 +75,20 @@
         UPDATE employees SET status = #{status} WHERE employee_id = #{employeeId}
     </update>
 
+    <insert id="insertDepartment">
+        INSERT INTO departments (department_name) VALUES (#{departmentName})
+    </insert>
+
+    <delete id="deleteDepartment">
+        DELETE FROM departments WHERE department_id = #{departmentId}
+    </delete>
+
+    <insert id="insertPosition">
+        INSERT INTO positions (position_name) VALUES (#{positionName})
+    </insert>
+
+    <delete id="deletePosition">
+        DELETE FROM positions WHERE position_id = #{positionId}
+    </delete>
+
 </mapper>

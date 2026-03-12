@@ -52,6 +52,8 @@
         .btn-action { padding:4px 10px; border-radius:5px; border:none; cursor:pointer; font-size:12px; font-family:inherit; }
         .btn-toggle { background:rgba(245,158,11,.15); color:#fbbf24; }
         .btn-toggle:hover { background:rgba(245,158,11,.3); }
+        .btn-edit { background:rgba(79,142,247,.15); color:#4f8ef7; }
+        .btn-edit:hover { background:rgba(79,142,247,.3); }
         .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:500; align-items:center; justify-content:center; }
         .modal-overlay.open { display:flex; }
         .modal { background:#1a1d27; border:1px solid #2a2d3a; border-radius:12px; padding:28px; width:460px; max-width:95vw; max-height:90vh; overflow-y:auto; }
@@ -135,6 +137,37 @@
     </div>
 </div>
 
+<!-- 사용자 수정 모달 -->
+<div class="modal-overlay" id="editModalOverlay">
+    <div class="modal">
+        <h3>사용자 수정</h3>
+        <input type="hidden" id="editUserId">
+        <div class="form-row">
+            <div class="form-group"><label>이름</label><input type="text" id="editName" placeholder="실명"></div>
+            <div class="form-group"><label>이메일</label><input type="email" id="editEmail" placeholder="이메일 주소"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>전화번호</label><input type="text" id="editPhone" placeholder="전화번호"></div>
+            <div class="form-group"><label>부서</label><input type="text" id="editDepartment" placeholder="부서명"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>역할</label>
+                <select id="editRole">
+                    <option value="EMPLOYEE">EMPLOYEE</option>
+                    <option value="MANAGER">MANAGER</option>
+                    <option value="ADMIN">ADMIN</option>
+                </select>
+            </div>
+            <div class="form-group"><label>새 비밀번호 (선택)</label><input type="password" id="editPassword" placeholder="변경 시에만 입력"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeEditModal()">취소</button>
+            <button class="btn-save" onclick="updateUser()">저장</button>
+        </div>
+    </div>
+</div>
+
 <script>
 const csrf = document.querySelector('meta[name="_csrf"]').content;
 const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
@@ -156,7 +189,8 @@ function loadUsers() {
                 <td>${u.department || '-'}</td>
                 <td><span class="badge ${u.status === 'ACTIVE' ? 'badge-active' : 'badge-inactive'}">${u.status || '-'}</span></td>
                 <td>
-                    <button class="btn-action btn-toggle" onclick="toggleStatus(${u.userId || u.id}, '${u.status}')">
+                    <button class="btn-action btn-edit" onclick="openEdit(${u.userId})">수정</button>
+                    <button class="btn-action btn-toggle" style="margin-left:4px" onclick="toggleStatus(${u.userId || u.id}, '${u.status}')">
                         ${u.status === 'ACTIVE' ? '비활성화' : '활성화'}
                     </button>
                 </td>
@@ -191,6 +225,35 @@ function toggleStatus(id, currentStatus) {
 }
 
 document.addEventListener('DOMContentLoaded', loadUsers);
+
+function openEdit(id) {
+    fetch('/api/admin/users/' + id)
+        .then(r => r.json())
+        .then(u => {
+            document.getElementById('editUserId').value = u.userId;
+            document.getElementById('editName').value = u.name || '';
+            document.getElementById('editEmail').value = u.email || '';
+            document.getElementById('editPhone').value = u.phone || '';
+            document.getElementById('editDepartment').value = u.department || '';
+            document.getElementById('editRole').value = u.role || 'EMPLOYEE';
+            document.getElementById('editPassword').value = '';
+            document.getElementById('editModalOverlay').classList.add('open');
+        });
+}
+function closeEditModal() { document.getElementById('editModalOverlay').classList.remove('open'); }
+function updateUser() {
+    const id = document.getElementById('editUserId').value;
+    const data = {
+        name: document.getElementById('editName').value,
+        email: document.getElementById('editEmail').value,
+        phone: document.getElementById('editPhone').value,
+        department: document.getElementById('editDepartment').value,
+        role: document.getElementById('editRole').value,
+        password: document.getElementById('editPassword').value
+    };
+    fetch('/api/admin/users/' + id, { method:'PUT', headers:{'Content-Type':'application/json',[csrfHeader]:csrf}, body:JSON.stringify(data) })
+        .then(() => { closeEditModal(); loadUsers(); });
+}
 </script>
 </body>
 </html>

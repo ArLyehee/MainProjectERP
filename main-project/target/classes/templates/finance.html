@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <title>재무제표 | 개발팬 ERP</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* sidebar CSS - same as other pages */
+        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+        :root { --bg:#0f1117; --surface:#1a1d27; --border:#2a2d3a; --accent:#4f8ef7; --text:#e8eaf0; --text-muted:#6b7280; --success:#22c55e; --danger:#ef4444; --warning:#f59e0b; --sidebar-w:220px; }
+        body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',sans-serif; min-height:100vh; }
+        .layout { display:flex; min-height:100vh; }
+        .sidebar { width:var(--sidebar-w); background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; position:fixed; top:0; left:0; bottom:0; z-index:100; overflow-y:auto; }
+        .sidebar-logo { padding:20px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; flex-shrink:0; }
+        .sidebar-logo .s-icon { width:34px; height:34px; background:linear-gradient(135deg,var(--accent),#7c3aed); border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
+        .sidebar-logo .brand { font-size:13px; font-weight:600; line-height:1.3; }
+        .sidebar-logo .brand small { display:block; font-size:10px; color:var(--accent); letter-spacing:1px; font-weight:400; }
+        .nav-section { padding:14px 12px 5px; font-size:10px; letter-spacing:1.5px; color:var(--text-muted); text-transform:uppercase; }
+        .nav-item { display:flex; align-items:center; gap:9px; padding:9px 12px; margin:2px 8px; border-radius:7px; font-size:13px; color:var(--text-muted); text-decoration:none; transition:background .15s,color .15s; }
+        .nav-item:hover { background:rgba(79,142,247,.08); color:var(--text); }
+        .nav-item.active { background:rgba(79,142,247,.15); color:var(--accent); font-weight:500; }
+        .ni { font-size:15px; width:20px; text-align:center; }
+        .sidebar-bottom { margin-top:auto; padding:14px; border-top:1px solid var(--border); }
+        .user-info { display:flex; align-items:center; gap:9px; padding:8px; border-radius:7px; }
+        .avatar { width:30px; height:30px; background:linear-gradient(135deg,var(--accent),#7c3aed); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; flex-shrink:0; color:#fff; }
+        .user-meta { flex:1; min-width:0; }
+        .uname { font-size:12px; font-weight:500; }
+        .urole { font-size:10px; color:var(--accent); letter-spacing:.5px; }
+        .btn-logout { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:15px; padding:3px; border-radius:4px; transition:color .15s; }
+        .btn-logout:hover { color:#ef4444; }
+        /* main */
+        .main { flex:1; padding:32px; margin-left:var(--sidebar-w); }
+        .page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
+        .page-title h2 { font-size:20px; font-weight:600; }
+        .page-title p { font-size:13px; color:var(--text-muted); margin-top:4px; }
+        .year-nav { display:flex; align-items:center; gap:12px; }
+        .year-nav button { background:var(--surface); border:1px solid var(--border); color:var(--text); padding:7px 14px; border-radius:8px; cursor:pointer; font-size:13px; font-family:inherit; transition:border-color .15s; }
+        .year-nav button:hover { border-color:var(--accent); }
+        .year-display { font-size:18px; font-weight:600; font-family:'IBM Plex Mono',monospace; color:var(--accent); min-width:60px; text-align:center; }
+        /* summary cards */
+        .summary-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:24px; }
+        .sum-card { background:var(--surface); border:1px solid var(--border); border-radius:11px; padding:18px 16px; position:relative; overflow:hidden; transition:border-color .2s; }
+        .sum-card:hover { border-color:rgba(79,142,247,.4); }
+        .sum-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+        .sum-card.blue::before   { background:var(--accent); }
+        .sum-card.orange::before { background:var(--warning); }
+        .sum-card.green::before  { background:var(--success); }
+        .sum-card.purple::before { background:#7c3aed; }
+        .sum-card.red::before    { background:var(--danger); }
+        .sum-card.profit::before { background:var(--success); }
+        .card-label { font-size:10px; font-family:'IBM Plex Mono',monospace; letter-spacing:1px; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px; }
+        .card-value { font-size:20px; font-weight:600; letter-spacing:-0.5px; }
+        .card-sub { font-size:11px; color:var(--text-muted); margin-top:5px; }
+        .card-value.positive { color:var(--success); }
+        .card-value.negative { color:var(--danger); }
+        /* chart section */
+        .chart-grid { display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:24px; }
+        .panel { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; }
+        .panel-title { font-size:13px; font-weight:600; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+        .panel-title .dot { width:6px; height:6px; border-radius:50%; background:var(--accent); }
+        .chart-wrap { position:relative; height:260px; }
+        /* table */
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+        table { width:100%; border-collapse:collapse; font-size:13px; }
+        th { padding:11px 16px; text-align:right; font-size:10px; font-weight:500; color:var(--text-muted); letter-spacing:.8px; text-transform:uppercase; border-bottom:1px solid var(--border); background:rgba(0,0,0,.2); }
+        th:first-child { text-align:left; }
+        td { padding:12px 16px; border-bottom:1px solid rgba(42,45,58,.5); text-align:right; font-family:'IBM Plex Mono',monospace; font-size:12px; }
+        td:first-child { text-align:left; font-family:'IBM Plex Sans KR',sans-serif; font-size:13px; }
+        tr:last-child td { border-bottom:none; }
+        tr:hover td { background:rgba(79,142,247,.04); }
+        .total-row td { font-weight:600; background:rgba(79,142,247,.05); border-top:1px solid var(--border); }
+        .positive { color:var(--success); }
+        .negative { color:var(--danger); }
+        .loading { text-align:center; padding:60px; color:var(--text-muted); }
+    </style>
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/sidebar :: nav('finance')}"></aside>
+    <main class="main">
+        <div class="page-header">
+            <div class="page-title">
+                <h2>📈 재무제표</h2>
+                <p>연간 손익계산서 및 월별 실적을 분석합니다.</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div class="year-nav">
+                    <button onclick="changeYear(-1)">◀</button>
+                    <span class="year-display" id="yearDisplay" th:text="${currentYear}">2025</span>
+                    <button onclick="changeYear(1)">▶</button>
+                </div>
+                <button onclick="saveStatements()" style="padding:8px 16px;border-radius:8px;border:none;background:rgba(34,197,94,.15);color:#4ade80;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500;transition:background .15s;" onmouseover="this.style.background='rgba(34,197,94,.25)'" onmouseout="this.style.background='rgba(34,197,94,.15)'">💾 저장</button>
+            </div>
+        </div>
+
+        <!-- 요약 카드 -->
+        <div class="summary-grid">
+            <div class="sum-card blue">
+                <div class="card-label">매출액</div>
+                <div class="card-value" id="sumRevenue">—</div>
+                <div class="card-sub" id="subSaleCount">—</div>
+            </div>
+            <div class="sum-card orange">
+                <div class="card-label">매출원가</div>
+                <div class="card-value" id="sumCogs">—</div>
+                <div class="card-sub" id="subCogsRate">—</div>
+            </div>
+            <div class="sum-card green">
+                <div class="card-label">매출총이익</div>
+                <div class="card-value" id="sumGross">—</div>
+                <div class="card-sub" id="subGrossRate">—</div>
+            </div>
+            <div class="sum-card purple">
+                <div class="card-label">판매비·관리비</div>
+                <div class="card-value" id="sumExpenses">—</div>
+                <div class="card-sub">영업비용 합계</div>
+            </div>
+            <div class="sum-card profit">
+                <div class="card-label">영업이익</div>
+                <div class="card-value" id="sumOpProfit">—</div>
+                <div class="card-sub" id="subOpMargin">—</div>
+            </div>
+        </div>
+
+        <!-- 차트 -->
+        <div class="chart-grid">
+            <div class="panel">
+                <div class="panel-title"><div class="dot"></div>월별 매출 / 영업이익</div>
+                <div class="chart-wrap"><canvas id="barChart"></canvas></div>
+            </div>
+            <div class="panel">
+                <div class="panel-title"><div class="dot"></div>비용 유형별 구성</div>
+                <div class="chart-wrap" style="height:200px;"><canvas id="donutChart"></canvas></div>
+                <div id="donutLegend" style="margin-top:12px;font-size:12px;"></div>
+            </div>
+        </div>
+
+        <!-- 월별 상세 테이블 -->
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>월</th>
+                        <th>매출액</th>
+                        <th>매출원가</th>
+                        <th>매출총이익</th>
+                        <th>판관비</th>
+                        <th>영업이익</th>
+                        <th>영업이익률</th>
+                    </tr>
+                </thead>
+                <tbody id="monthlyTable">
+                    <tr><td colspan="7" class="loading">데이터 로딩 중...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 저장된 재무제표 -->
+        <div style="margin-top:20px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <div style="font-size:14px;font-weight:600;">📋 저장된 재무제표</div>
+                <span style="font-size:12px;color:#6b7280">재무제표 저장 버튼으로 현재 데이터를 저장할 수 있습니다.</span>
+            </div>
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align:left">월</th>
+                            <th>매출액</th>
+                            <th>매출원가</th>
+                            <th>매출총이익</th>
+                            <th>판관비</th>
+                            <th>영업이익</th>
+                            <th>영업이익률</th>
+                        </tr>
+                    </thead>
+                    <tbody id="savedTable">
+                        <tr><td colspan="7" class="loading">저장된 데이터 없음</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+let currentYear = parseInt(document.getElementById('yearDisplay').textContent) || new Date().getFullYear();
+let barChartInst = null;
+let donutChartInst = null;
+
+function changeYear(delta) {
+    currentYear += delta;
+    document.getElementById('yearDisplay').textContent = currentYear;
+    loadData();
+    loadSaved();
+}
+
+function fmt(n) {
+    if (n == null || n === '') return '0';
+    const num = parseFloat(n);
+    if (Math.abs(num) >= 1000000) return (num/1000000).toFixed(1) + 'M원';
+    if (Math.abs(num) >= 1000) return Math.round(num).toLocaleString('ko-KR') + '원';
+    return Math.round(num).toLocaleString('ko-KR') + '원';
+}
+
+function fmtShort(n) {
+    if (n == null) return '0';
+    return Math.round(parseFloat(n)).toLocaleString('ko-KR');
+}
+
+function pct(part, total) {
+    const p = parseFloat(total);
+    if (!p) return '0.0%';
+    return (parseFloat(part) / p * 100).toFixed(1) + '%';
+}
+
+function loadData() {
+    fetch('/api/finance/summary?year=' + currentYear)
+        .then(r => r.json())
+        .then(data => {
+            renderSummary(data);
+            renderBarChart(data.monthly);
+            renderDonut(data.expByType);
+            renderTable(data.monthly, data.revenue);
+            loadSaved();
+        })
+        .catch(() => {
+            document.getElementById('monthlyTable').innerHTML =
+                '<tr><td colspan="7" class="loading">데이터를 불러올 수 없습니다.</td></tr>';
+        });
+}
+
+function saveStatements() {
+    const csrf = document.querySelector('meta[name="_csrf"]').content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+    fetch('/api/finance/statements/save?year=' + currentYear, {
+        method: 'POST',
+        headers: { [csrfHeader]: csrf }
+    })
+    .then(r => {
+        if (r.ok) { loadSaved(); alert(currentYear + '년 재무제표가 저장되었습니다.'); }
+    });
+}
+
+function loadSaved() {
+    fetch('/api/finance/statements?year=' + currentYear)
+        .then(r => r.json())
+        .then(list => {
+            if (!list || list.length === 0) {
+                document.getElementById('savedTable').innerHTML = '<tr><td colspan="7" class="loading">저장된 데이터 없음</td></tr>';
+                return;
+            }
+            document.getElementById('savedTable').innerHTML = list.map(s => {
+                const rev = parseFloat(s.revenue || 0);
+                const op  = parseFloat(s.operatingProfit || 0);
+                const margin = rev ? (op/rev*100).toFixed(1) : '0.0';
+                const opSign = op >= 0 ? 'positive' : 'negative';
+                return `<tr>
+                    <td>${s.month}</td>
+                    <td>${fmtShort(s.revenue)}</td>
+                    <td>${fmtShort(s.cogs)}</td>
+                    <td>${fmtShort(s.grossProfit)}</td>
+                    <td>${fmtShort(s.expenses)}</td>
+                    <td class="${opSign}">${fmtShort(s.operatingProfit)}</td>
+                    <td class="${opSign}">${margin}%</td>
+                </tr>`;
+            }).join('');
+        });
+}
+
+function renderSummary(d) {
+    const rev = parseFloat(d.revenue || 0);
+    const gp  = parseFloat(d.grossProfit || 0);
+    const op  = parseFloat(d.opProfit || 0);
+
+    document.getElementById('sumRevenue').textContent  = fmt(d.revenue);
+    document.getElementById('subSaleCount').textContent = '판매 ' + (d.saleCount || 0) + '건';
+    document.getElementById('sumCogs').textContent     = fmt(d.cogs);
+    document.getElementById('subCogsRate').textContent = '원가율 ' + pct(d.cogs, rev);
+    document.getElementById('sumGross').textContent    = fmt(d.grossProfit);
+    document.getElementById('subGrossRate').textContent = '총이익률 ' + pct(gp, rev);
+    document.getElementById('sumExpenses').textContent = fmt(d.expenses);
+
+    const opEl = document.getElementById('sumOpProfit');
+    opEl.textContent = fmt(d.opProfit);
+    opEl.className   = 'card-value ' + (op >= 0 ? 'positive' : 'negative');
+    document.getElementById('subOpMargin').textContent = '영업이익률 ' + (d.opMargin || '0.00') + '%';
+}
+
+function renderBarChart(monthly) {
+    const labels  = monthly.map(m => m.month + '월');
+    const revData = monthly.map(m => parseFloat(m.revenue || 0));
+    const opData  = monthly.map(m => parseFloat(m.opProfit || 0));
+
+    if (barChartInst) barChartInst.destroy();
+    const ctx = document.getElementById('barChart').getContext('2d');
+    barChartInst = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [
+                { label: '매출액', data: revData, backgroundColor: 'rgba(79,142,247,0.6)', borderRadius: 4 },
+                { label: '영업이익', data: opData,  backgroundColor: opData.map(v => v >= 0 ? 'rgba(34,197,94,0.6)' : 'rgba(239,68,68,0.5)'), borderRadius: 4 }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#e8eaf0', font: { size: 11 } } } },
+            scales: {
+                x: { ticks: { color: '#6b7280', font: { size: 11 } }, grid: { color: 'rgba(42,45,58,0.5)' } },
+                y: { ticks: { color: '#6b7280', font: { size: 11 }, callback: v => Math.round(v).toLocaleString() }, grid: { color: 'rgba(42,45,58,0.5)' } }
+            }
+        }
+    });
+}
+
+function renderDonut(expByType) {
+    if (donutChartInst) donutChartInst.destroy();
+    if (!expByType || expByType.length === 0) {
+        document.getElementById('donutLegend').innerHTML = '<span style="color:#6b7280">비용 데이터 없음</span>';
+        return;
+    }
+    const colors = ['#4f8ef7','#22c55e','#f59e0b','#ef4444','#7c3aed','#06b6d4','#f97316','#84cc16'];
+    const labels = expByType.map(e => e.expenseType || e.expense_type || '-');
+    const values = expByType.map(e => parseFloat(e.totalAmount || e.total_amount || 0));
+    const ctx = document.getElementById('donutChart').getContext('2d');
+    donutChartInst = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels,
+            datasets: [{ data: values, backgroundColor: colors.slice(0, labels.length), borderWidth: 0, hoverOffset: 6 }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ': ' + Math.round(ctx.parsed).toLocaleString() + '원' } } },
+            cutout: '65%'
+        }
+    });
+    const total = values.reduce((a, b) => a + b, 0);
+    document.getElementById('donutLegend').innerHTML = labels.map((l, i) =>
+        `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #2a2d3a">
+            <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${colors[i]};margin-right:6px;vertical-align:middle"></span>${l}</span>
+            <span style="font-family:monospace;color:#9ca3af">${(values[i]/total*100).toFixed(1)}%</span>
+        </div>`
+    ).join('');
+}
+
+function renderTable(monthly, totalRevenue) {
+    let totalRev = 0, totalCogs = 0, totalGp = 0, totalExp = 0, totalOp = 0;
+    const rows = monthly.map(m => {
+        const rev = parseFloat(m.revenue || 0);
+        const cg  = parseFloat(m.cogs || 0);
+        const gp  = parseFloat(m.grossProfit || 0);
+        const exp = parseFloat(m.expenses || 0);
+        const op  = parseFloat(m.opProfit || 0);
+        totalRev += rev; totalCogs += cg; totalGp += gp; totalExp += exp; totalOp += op;
+        const opSign = op >= 0 ? 'positive' : 'negative';
+        const margin = rev ? (op/rev*100).toFixed(1) : '0.0';
+        return `<tr>
+            <td>${m.month}월</td>
+            <td>${fmtShort(rev)}</td>
+            <td>${fmtShort(cg)}</td>
+            <td>${fmtShort(gp)}</td>
+            <td>${fmtShort(exp)}</td>
+            <td class="${opSign}">${fmtShort(op)}</td>
+            <td class="${opSign}">${margin}%</td>
+        </tr>`;
+    }).join('');
+
+    const opTotalSign = totalOp >= 0 ? 'positive' : 'negative';
+    const totalMargin = totalRev ? (totalOp/totalRev*100).toFixed(1) : '0.0';
+    const totalRow = `<tr class="total-row">
+        <td>합계</td>
+        <td>${fmtShort(totalRev)}</td>
+        <td>${fmtShort(totalCogs)}</td>
+        <td>${fmtShort(totalGp)}</td>
+        <td>${fmtShort(totalExp)}</td>
+        <td class="${opTotalSign}">${fmtShort(totalOp)}</td>
+        <td class="${opTotalSign}">${totalMargin}%</td>
+    </tr>`;
+
+    document.getElementById('monthlyTable').innerHTML = rows + totalRow;
+}
+
+document.addEventListener('DOMContentLoaded', loadData);
+</script>
+</body>
+</html>

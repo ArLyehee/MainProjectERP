@@ -8,7 +8,8 @@
         <id     property="productId"   column="product_id"/>
         <result property="productName" column="product_name"/>
         <result property="model"       column="model"/>
-        <result property="price"       column="price"/>
+        <result property="salePrice"   column="sale_price"/>
+        <result property="costPrice"   column="cost_price"/>
         <result property="description" column="description"/>
     </resultMap>
 
@@ -22,15 +23,16 @@
 
     <insert id="insert" parameterType="com.gaebalfan.erp.domain.Product"
             useGeneratedKeys="true" keyProperty="productId">
-        INSERT INTO products (product_name, model, price, description)
-        VALUES (#{productName}, #{model}, #{price}, #{description})
+        INSERT INTO products (product_name, model, sale_price, cost_price, description)
+        VALUES (#{productName}, #{model}, #{salePrice}, #{costPrice}, #{description})
     </insert>
 
     <update id="update" parameterType="com.gaebalfan.erp.domain.Product">
         UPDATE products
         SET product_name = #{productName},
             model        = #{model},
-            price        = #{price},
+            sale_price   = #{salePrice},
+            cost_price   = #{costPrice},
             description  = #{description}
         WHERE product_id = #{productId}
     </update>

@@ -16,6 +16,11 @@
     <a href="/purchase-orders" th:class="${current == 'purchase-orders'} ? 'nav-item active' : 'nav-item'"><span class="ni">📋</span> 발주 관리</a>
     <a href="/receipts"        th:class="${current == 'receipts'}        ? 'nav-item active' : 'nav-item'"><span class="ni">📥</span> 입고 관리</a>
     <a href="/shipments"       th:class="${current == 'shipments'}       ? 'nav-item active' : 'nav-item'"><span class="ni">📤</span> 출고 관리</a>
+    <a href="/sales"           th:class="${current == 'sales'}           ? 'nav-item active' : 'nav-item'"><span class="ni">💰</span> 매출 관리</a>
+    <a href="/expenses"        th:class="${current == 'expenses'}        ? 'nav-item active' : 'nav-item'"><span class="ni">💸</span> 비용 관리</a>
+
+    <div class="nav-section">경영</div>
+    <a href="/finance" th:class="${current == 'finance'} ? 'nav-item active' : 'nav-item'"><span class="ni">📈</span> 재무제표</a>
 
     <div class="nav-section">기준정보</div>
     <a href="/products"        th:class="${current == 'products'}        ? 'nav-item active' : 'nav-item'"><span class="ni">🔧</span> 제품 관리</a>
@@ -32,7 +37,7 @@
 
     <div class="nav-section" sec:authorize="hasRole('ADMIN')">관리자</div>
     <a href="/admin/users" class="nav-item" sec:authorize="hasRole('ADMIN')"><span class="ni">👥</span> 사용자 관리</a>
-    <a href="#" class="nav-item" sec:authorize="hasRole('ADMIN')"><span class="ni">⚙️</span> 시스템 설정</a>
+    <a href="/admin/settings" th:class="${current == 'admin-settings'} ? 'nav-item active' : 'nav-item'" sec:authorize="hasRole('ADMIN')"><span class="ni">⚙️</span> 시스템 설정</a>
 
     <div class="sidebar-bottom">
         <div class="user-info">

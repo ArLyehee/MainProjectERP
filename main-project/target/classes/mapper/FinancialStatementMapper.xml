@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gaebalfan.erp.mapper.FinancialStatementMapper">
+
+    <!-- NOTE: upsert uses ON DUPLICATE KEY UPDATE, which requires month to be a PRIMARY KEY or UNIQUE KEY.
+         Run one of the following if not already set:
+           ALTER TABLE financial_statements ADD PRIMARY KEY (month);
+         or
+           ALTER TABLE financial_statements ADD UNIQUE KEY uk_month (month);
+    -->
+
+    <resultMap id="FSResultMap" type="com.gaebalfan.erp.domain.FinancialStatement">
+        <result property="month"           column="month"/>
+        <result property="revenue"         column="revenue"/>
+        <result property="cogs"            column="cogs"/>
+        <result property="grossProfit"     column="gross_profit"/>
+        <result property="expenses"        column="expenses"/>
+        <result property="operatingProfit" column="operating_profit"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="FSResultMap">
+        SELECT * FROM financial_statements ORDER BY month
+    </select>
+
+    <select id="findByYear" resultMap="FSResultMap">
+        SELECT * FROM financial_statements
+        WHERE month LIKE CONCAT(#{year}, '-%')
+        ORDER BY month
+    </select>
+
+    <insert id="upsert" parameterType="com.gaebalfan.erp.domain.FinancialStatement">
+        INSERT INTO financial_statements (month, revenue, cogs, gross_profit, expenses, operating_profit)
+        VALUES (#{month}, #{revenue}, #{cogs}, #{grossProfit}, #{expenses}, #{operatingProfit})
+        ON DUPLICATE KEY UPDATE
+            revenue          = VALUES(revenue),
+            cogs             = VALUES(cogs),
+            gross_profit     = VALUES(gross_profit),
+            expenses         = VALUES(expenses),
+            operating_profit = VALUES(operating_profit)
+    </insert>
+
+    <delete id="deleteByMonth">
+        DELETE FROM financial_statements WHERE month = #{month}
+    </delete>
+
+</mapper>

@@ -14,4 +14,8 @@ public interface EmployeeMapper {
     void updateStatus(@Param("employeeId") Long employeeId, @Param("status") String status);
     List<Department> findAllDepartments();
     List<Position> findAllPositions();
+    void insertDepartment(@Param("departmentName") String departmentName);
+    void deleteDepartment(@Param("departmentId") Long departmentId);
+    void insertPosition(@Param("positionName") String positionName);
+    void deletePosition(@Param("positionId") Long positionId);
 }

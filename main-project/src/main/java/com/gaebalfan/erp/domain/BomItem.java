@@ -1,18 +1,23 @@
 package com.gaebalfan.erp.domain;
 
+import java.math.BigDecimal;
+
 public class BomItem {
-    private Long   bomItemId;
-    private Long   bomId;
-    private String componentName;
-    private int    quantity;
+    private Long       bomItemId;
+    private Long       bomId;
+    private Long       componentProductId;
+    private BigDecimal quantity;
+    private String     componentProductName;
 
-    public Long   getBomItemId()      { return bomItemId; }
-    public Long   getBomId()          { return bomId; }
-    public String getComponentName()  { return componentName; }
-    public int    getQuantity()       { return quantity; }
+    public Long       getBomItemId()           { return bomItemId; }
+    public Long       getBomId()               { return bomId; }
+    public Long       getComponentProductId()  { return componentProductId; }
+    public BigDecimal getQuantity()            { return quantity; }
+    public String     getComponentProductName() { return componentProductName; }
 
-    public void setBomItemId(Long bomItemId)              { this.bomItemId = bomItemId; }
-    public void setBomId(Long bomId)                      { this.bomId = bomId; }
-    public void setComponentName(String componentName)    { this.componentName = componentName; }
-    public void setQuantity(int quantity)                 { this.quantity = quantity; }
+    public void setBomItemId(Long bomItemId)                          { this.bomItemId = bomItemId; }
+    public void setBomId(Long bomId)                                  { this.bomId = bomId; }
+    public void setComponentProductId(Long componentProductId)        { this.componentProductId = componentProductId; }
+    public void setQuantity(BigDecimal quantity)                       { this.quantity = quantity; }
+    public void setComponentProductName(String componentProductName)  { this.componentProductName = componentProductName; }
 }
