@@ -8,4 +8,5 @@ public interface ShipmentMapper {
     List<Shipment> findAll();
     Shipment findById(@Param("shipmentId") Long shipmentId);
     void insert(Shipment shipment);
+
 }

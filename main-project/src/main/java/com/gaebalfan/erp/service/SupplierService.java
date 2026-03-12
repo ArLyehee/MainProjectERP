@@ -25,4 +25,12 @@ public class SupplierService {
     public void insert(Supplier obj) {
         mapper.insert(obj);
     }
+
+    public void update(Supplier obj) {
+        mapper.update(obj);
+    }
+
+    public void delete(Long id) {
+        mapper.delete(id);
+    }
 }

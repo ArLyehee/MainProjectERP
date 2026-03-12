@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gaebalfan.erp.mapper.WarehouseMapper">
+
+    <resultMap id="WarehouseResultMap" type="com.gaebalfan.erp.domain.Warehouse">
+        <id     property="warehouseId"   column="warehouse_id"/>
+        <result property="warehouseName" column="warehouse_name"/>
+        <result property="location"      column="location"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="WarehouseResultMap">
+        SELECT * FROM warehouses ORDER BY warehouse_id
+    </select>
+
+    <select id="findById" resultMap="WarehouseResultMap">
+        SELECT * FROM warehouses WHERE warehouse_id = #{warehouseId}
+    </select>
+
+    <insert id="insert" parameterType="com.gaebalfan.erp.domain.Warehouse"
+            useGeneratedKeys="true" keyProperty="warehouseId">
+        INSERT INTO warehouses (warehouse_name, location)
+        VALUES (#{warehouseName}, #{location})
+    </insert>
+
+    <update id="update" parameterType="com.gaebalfan.erp.domain.Warehouse">
+        UPDATE warehouses
+        SET warehouse_name = #{warehouseName},
+            location       = #{location}
+        WHERE warehouse_id = #{warehouseId}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM warehouses WHERE warehouse_id = #{warehouseId}
+    </delete>
+
+</mapper>

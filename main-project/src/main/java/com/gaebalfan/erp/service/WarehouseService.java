@@ -25,4 +25,12 @@ public class WarehouseService {
     public void insert(Warehouse obj) {
         mapper.insert(obj);
     }
+
+    public void update(Warehouse obj) {
+        mapper.update(obj);
+    }
+
+    public void delete(Long id) {
+        mapper.delete(id);
+    }
 }

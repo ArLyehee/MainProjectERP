@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gaebalfan.erp.mapper.ProductMapper">
+
+    <resultMap id="ProductResultMap" type="com.gaebalfan.erp.domain.Product">
+        <id     property="productId"   column="product_id"/>
+        <result property="productName" column="product_name"/>
+        <result property="model"       column="model"/>
+        <result property="price"       column="price"/>
+        <result property="description" column="description"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="ProductResultMap">
+        SELECT * FROM products ORDER BY product_id
+    </select>
+
+    <select id="findById" resultMap="ProductResultMap">
+        SELECT * FROM products WHERE product_id = #{productId}
+    </select>
+
+    <insert id="insert" parameterType="com.gaebalfan.erp.domain.Product"
+            useGeneratedKeys="true" keyProperty="productId">
+        INSERT INTO products (product_name, model, price, description)
+        VALUES (#{productName}, #{model}, #{price}, #{description})
+    </insert>
+
+    <update id="update" parameterType="com.gaebalfan.erp.domain.Product">
+        UPDATE products
+        SET product_name = #{productName},
+            model        = #{model},
+            price        = #{price},
+            description  = #{description}
+        WHERE product_id = #{productId}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM products WHERE product_id = #{productId}
+    </delete>
+
+</mapper>

@@ -14,7 +14,7 @@
     <groupId>com.gaebalfan</groupId>
     <artifactId>erp</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <description>개발팬 환풍기 ERP 시스템</description>
+    <description>개발환기좀해 ERP 시스템</description>
 
     <properties>
         <java.version>17</java.version>

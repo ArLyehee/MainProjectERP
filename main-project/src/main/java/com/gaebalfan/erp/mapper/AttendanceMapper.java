@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 @Mapper
 public interface AttendanceMapper {
+    List<Attendance> findAll();
     List<Attendance> findByEmployeeId(@Param("employeeId") Long employeeId);
     void insert(Attendance attendance);
     void updateCheckOut(@Param("attendanceId") Long attendanceId);

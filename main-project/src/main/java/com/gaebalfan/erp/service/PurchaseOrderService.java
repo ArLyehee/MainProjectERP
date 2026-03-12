@@ -25,4 +25,8 @@ public class PurchaseOrderService {
     public void insert(PurchaseOrder obj) {
         mapper.insert(obj);
     }
+
+    public void updateStatus(Long id, String status) {
+        mapper.updateStatus(id, status);
+    }
 }

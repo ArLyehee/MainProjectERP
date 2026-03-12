@@ -25,4 +25,8 @@ public class WorkOrderService {
     public void insert(WorkOrder obj) {
         mapper.insert(obj);
     }
+
+    public void updateStatus(Long id, String status) {
+        mapper.updateStatus(id, status);
+    }
 }
