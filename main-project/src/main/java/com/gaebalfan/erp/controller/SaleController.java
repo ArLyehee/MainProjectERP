@@ -64,6 +64,7 @@ public class SaleController {
         } else {
             service.insert(sale);
         }
+        service.refreshFinancial(sale.getSaleDate().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM")));
 
         return ResponseEntity.ok().build();
     }

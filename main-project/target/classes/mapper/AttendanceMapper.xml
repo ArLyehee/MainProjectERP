@@ -52,8 +52,16 @@
     </insert>
 
     <update id="updateCheckOut">
-        UPDATE attendance SET check_out = NOW()
-        WHERE attendance_id = #{attendanceId}
+        UPDATE attendance a
+        JOIN employees e ON a.employee_id = e.employee_id
+        SET
+            a.check_out         = NOW(),
+            a.work_hours        = ROUND(TIMESTAMPDIFF(MINUTE, a.check_in, NOW()) / 60.0, 2),
+            a.overtime_hours    = GREATEST(0, ROUND(TIMESTAMPDIFF(MINUTE, a.check_in, NOW()) / 60.0 - 8, 2)),
+            a.late_minutes      = GREATEST(0, TIMESTAMPDIFF(MINUTE, CONCAT(a.work_date, ' 09:00:00'), a.check_in)),
+            a.early_leave_minutes = GREATEST(0, TIMESTAMPDIFF(MINUTE, NOW(), CONCAT(a.work_date, ' 18:00:00'))),
+            a.daily_pay         = ROUND(COALESCE(e.salary, 0) / 22)
+        WHERE a.attendance_id = #{attendanceId}
     </update>
 
 </mapper>

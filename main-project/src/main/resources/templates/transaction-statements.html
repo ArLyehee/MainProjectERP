@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <title>거래명세서 | 개발팬 ERP</title>
+    <link rel="stylesheet" th:href="@{/css/erp.css(v=4)}">
+    <style>
+        .items-table { width:100%; border-collapse:collapse; margin:12px 0; }
+        .items-table th, .items-table td { border:1px solid #d1d5db; padding:6px 8px; font-size:13px; }
+        .items-table th { background:#f3f4f6; text-align:center; }
+        .items-table td input { width:100%; border:none; background:transparent; font-size:13px; padding:2px; }
+        .items-table td input:focus { outline:1px solid var(--accent); border-radius:3px; }
+        .btn-add-row { font-size:12px; padding:4px 10px; background:#e5e7eb; border:none; border-radius:4px; cursor:pointer; margin-bottom:8px; }
+        .btn-add-row:hover { background:#d1d5db; }
+        .btn-del-row { background:#fee2e2; border:none; border-radius:4px; padding:3px 7px; cursor:pointer; color:#dc2626; font-size:12px; }
+        .total-row { font-weight:600; background:#f9fafb; }
+        .action-btns { display:flex; gap:6px; }
+        .btn-print { background:#2563eb; color:#fff; border:none; border-radius:6px; padding:5px 12px; cursor:pointer; font-size:13px; }
+        .btn-print:hover { background:#1d4ed8; }
+        .badge-no { font-family:monospace; font-size:12px; background:#eff6ff; color:#1e40af; padding:2px 8px; border-radius:10px; }
+    </style>
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/sidebar :: nav('transaction-statements')}"></aside>
+    <main class="main">
+        <div class="page-header">
+            <div class="page-title">
+                <h2>🧾 거래명세서</h2>
+                <p>거래명세서를 등록하고 인쇄합니다.</p>
+            </div>
+            <button onclick="openModal()" class="btn btn-primary">+ 거래명세서 등록</button>
+        </div>
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>명세서번호</th>
+                        <th>발행일</th>
+                        <th>거래처명</th>
+                        <th>사업자번호</th>
+                        <th>연락처</th>
+                        <th class="text-right">공급가액</th>
+                        <th class="text-right">세액(10%)</th>
+                        <th class="text-right">합계금액</th>
+                        <th>액션</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(statementList)}">
+                        <td colspan="9" class="empty-state">등록된 거래명세서가 없습니다.</td>
+                    </tr>
+                    <tr th:each="s : ${statementList}">
+                        <td><span class="badge-no" th:text="${s.statementNo}"></span></td>
+                        <td th:text="${s.issueDate}"></td>
+                        <td th:text="${s.customerName}"></td>
+                        <td th:text="${s.customerBizNo != null ? s.customerBizNo : '-'}"></td>
+                        <td th:text="${s.customerTel != null ? s.customerTel : '-'}"></td>
+                        <td class="text-right" th:text="${#numbers.formatInteger(s.totalAmount, 1, 'COMMA') + '원'}"></td>
+                        <td class="text-right" th:text="${#numbers.formatInteger(s.taxAmount, 1, 'COMMA') + '원'}"></td>
+                        <td class="text-right" style="font-weight:600;" th:text="${#numbers.formatInteger(s.grandTotal, 1, 'COMMA') + '원'}"></td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn-print" th:onclick="'printStatement(' + ${s.statementId} + ')'">🖨️ 인쇄</button>
+                                <button class="btn-del-sm" th:onclick="'deleteStatement(' + ${s.statementId} + ')'">삭제</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<!-- 등록 모달 -->
+<div class="modal-overlay" id="stmtModal">
+    <div class="modal" style="max-width:700px;width:95%;">
+        <h3>🧾 거래명세서 등록</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
+            <div class="form-group"><label>발행일 *</label><input type="date" id="issueDate"></div>
+            <div class="form-group"><label>거래처명 *</label><input type="text" id="customerName" placeholder="(주)홍길동물산"></div>
+            <div class="form-group"><label>사업자번호</label><input type="text" id="customerBizNo" placeholder="000-00-00000"></div>
+            <div class="form-group"><label>연락처</label><input type="text" id="customerTel" placeholder="02-0000-0000"></div>
+            <div class="form-group" style="grid-column:1/-1;"><label>주소</label><input type="text" id="customerAddr" placeholder="서울시 강남구 ..."></div>
+            <div class="form-group" style="grid-column:1/-1;"><label>비고</label><input type="text" id="notes" placeholder="특이사항 입력"></div>
+        </div>
+        <div style="font-weight:600;margin:8px 0 4px;">품목</div>
+        <button class="btn-add-row" onclick="addRow()">+ 품목 추가</button>
+        <table class="items-table">
+            <thead><tr><th style="width:40%">품목명</th><th style="width:15%">수량</th><th style="width:20%">단가</th><th style="width:20%">금액</th><th style="width:5%"></th></tr></thead>
+            <tbody id="itemsBody"></tbody>
+        </table>
+        <div style="text-align:right;font-size:13px;padding:8px;background:#f9fafb;border-radius:6px;margin-bottom:12px;">
+            공급가액: <b id="sumTotal">0</b>원 &nbsp;|&nbsp; 세액(10%): <b id="sumTax">0</b>원 &nbsp;|&nbsp; 합계: <b id="sumGrand">0</b>원
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel-modal" onclick="closeModal()">취소</button>
+            <button class="btn-save" onclick="saveStatement()">저장</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const csrf = document.querySelector('meta[name="_csrf"]').content;
+const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+function openModal() {
+    document.getElementById('stmtModal').classList.add('open');
+    document.getElementById('issueDate').value = new Date().toISOString().slice(0,10);
+    document.getElementById('itemsBody').innerHTML = '';
+    addRow();
+    calcTotal();
+}
+function closeModal() { document.getElementById('stmtModal').classList.remove('open'); }
+
+function addRow() {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td><input type="text" placeholder="품목명" oninput="calcTotal()"></td>
+        <td><input type="number" value="1" min="1" oninput="calcTotal()"></td>
+        <td><input type="number" value="0" min="0" oninput="calcTotal()"></td>
+        <td><input type="number" readonly style="color:#6b7280;"></td>
+        <td><button class="btn-del-row" onclick="this.closest('tr').remove();calcTotal()">✕</button></td>`;
+    document.getElementById('itemsBody').appendChild(tr);
+}
+
+function calcTotal() {
+    let total = 0;
+    document.querySelectorAll('#itemsBody tr').forEach(tr => {
+        const inputs = tr.querySelectorAll('input');
+        const qty = parseInt(inputs[1].value) || 0;
+        const price = parseInt(inputs[2].value) || 0;
+        const amt = qty * price;
+        inputs[3].value = amt.toLocaleString();
+        total += amt;
+    });
+    const tax = Math.round(total * 0.1);
+    document.getElementById('sumTotal').textContent = total.toLocaleString();
+    document.getElementById('sumTax').textContent = tax.toLocaleString();
+    document.getElementById('sumGrand').textContent = (total + tax).toLocaleString();
+}
+
+function saveStatement() {
+    const customerName = document.getElementById('customerName').value.trim();
+    if (!customerName) { alert('거래처명을 입력하세요.'); return; }
+    const rows = document.querySelectorAll('#itemsBody tr');
+    if (rows.length === 0) { alert('품목을 1개 이상 추가하세요.'); return; }
+    const items = [];
+    for (const tr of rows) {
+        const inputs = tr.querySelectorAll('input');
+        const itemName = inputs[0].value.trim();
+        if (!itemName) { alert('품목명을 입력하세요.'); return; }
+        items.push({
+            itemName: itemName,
+            quantity: parseInt(inputs[1].value) || 1,
+            unitPrice: parseInt(inputs[2].value) || 0
+        });
+    }
+    const data = {
+        issueDate: document.getElementById('issueDate').value,
+        customerName: customerName,
+        customerBizNo: document.getElementById('customerBizNo').value,
+        customerTel: document.getElementById('customerTel').value,
+        customerAddr: document.getElementById('customerAddr').value,
+        notes: document.getElementById('notes').value,
+        items: items
+    };
+    fetch('/api/transaction-statements', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', [csrfHeader]: csrf},
+        body: JSON.stringify(data)
+    }).then(res => {
+        if (!res.ok) {
+            res.headers.get('X-Error-Message') && alert(res.headers.get('X-Error-Message'));
+        } else {
+            closeModal();
+            location.reload();
+        }
+    });
+}
+
+function printStatement(id) {
+    window.open('/transaction-statements/' + id + '/print', '_blank');
+}
+
+function deleteStatement(id) {
+    if (!confirm('삭제하시겠습니까?')) return;
+    fetch('/api/transaction-statements/' + id, {
+        method: 'DELETE',
+        headers: {[csrfHeader]: csrf}
+    }).then(() => location.reload());
+}
+</script>
+</body>
+</html>

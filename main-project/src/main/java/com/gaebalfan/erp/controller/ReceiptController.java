@@ -46,9 +46,9 @@ public class ReceiptController {
         receipt.setProductId(Long.parseLong(body.get("productId").toString()));
         receipt.setQuantity(qty);
         if (body.get("receiptDate") != null && !body.get("receiptDate").toString().isEmpty()) {
-            receipt.setReceiptDate(java.time.LocalDate.parse(body.get("receiptDate").toString()));
+            receipt.setReceiptDate(java.time.LocalDate.parse(body.get("receiptDate").toString()).atStartOfDay());
         } else {
-            receipt.setReceiptDate(java.time.LocalDate.now());
+            receipt.setReceiptDate(java.time.LocalDateTime.now());
         }
         service.insert(receipt);
 

@@ -9,4 +9,5 @@ public class SaleService {
     public SaleService(SaleMapper mapper) { this.mapper = mapper; }
     public List<Sale> findAll() { return mapper.findAll(); }
     public void insert(Sale obj) { mapper.insert(obj); }
+    public void refreshFinancial(String month) { mapper.refreshFinancial(month); }
 }

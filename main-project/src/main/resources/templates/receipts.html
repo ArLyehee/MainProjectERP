@@ -6,7 +6,7 @@
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>입고 관리 | 개발팬 ERP</title>
-    <link rel="stylesheet" th:href="@{/css/erp.css(v=3)}">
+    <link rel="stylesheet" th:href="@{/css/erp.css(v=4)}">
 </head>
 <body>
 <div class="layout">
@@ -28,12 +28,11 @@
                         <th>제품명</th>
                         <th>수량</th>
                         <th>입고일</th>
-                        <th>등록일</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:if="${#lists.isEmpty(receiptList)}">
-                        <td colspan="6" class="empty-state">등록된 입고 내역이 없습니다.</td>
+                        <td colspan="5" class="empty-state">등록된 입고 내역이 없습니다.</td>
                     </tr>
                     <tr th:each="r : ${receiptList}">
                         <td th:text="'REC-' + ${r.receiptId}"></td>
@@ -41,7 +40,6 @@
                         <td th:text="${r.productName != null ? r.productName : r.productId}"></td>
                         <td class="qty" th:text="${r.quantity}"></td>
                         <td th:text="${r.receiptDate}"></td>
-                        <td th:text="${r.createdAt}"></td>
                     </tr>
                 </tbody>
             </table>

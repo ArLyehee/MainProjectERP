@@ -1,9 +1,11 @@
 package com.gaebalfan.erp.controller;
 
 import com.gaebalfan.erp.service.*;
+import com.gaebalfan.erp.service.TransactionStatementService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
@@ -24,6 +26,7 @@ public class WebPageController {
     private final BomService bomService;
     private final SaleService saleService;
     private final OperatingExpenseService expenseService;
+    private final TransactionStatementService transactionStatementService;
 
     public WebPageController(InventoryService inventoryService,
                              PurchaseOrderService purchaseOrderService,
@@ -37,7 +40,8 @@ public class WebPageController {
                              AttendanceService attendanceService,
                              BomService bomService,
                              SaleService saleService,
-                             OperatingExpenseService expenseService) {
+                             OperatingExpenseService expenseService,
+                             TransactionStatementService transactionStatementService) {
         this.inventoryService = inventoryService;
         this.purchaseOrderService = purchaseOrderService;
         this.receiptService = receiptService;
@@ -51,6 +55,7 @@ public class WebPageController {
         this.bomService = bomService;
         this.saleService = saleService;
         this.expenseService = expenseService;
+        this.transactionStatementService = transactionStatementService;
     }
 
     // ── 로그인 페이지 ──────────────────────────────
@@ -198,6 +203,19 @@ public class WebPageController {
         model.addAttribute("currentYear", java.time.LocalDate.now().getYear());
         return "finance";
     }   
+
+    // ── 거래명세서 페이지 ─────────────────────────
+    @GetMapping("/transaction-statements")
+    public String transactionStatements(Model model) {
+        model.addAttribute("statementList", transactionStatementService.findAll());
+        return "transaction-statements";
+    }
+
+    @GetMapping("/transaction-statements/{id}/print")
+    public String printStatement(@PathVariable Long id, Model model) {
+        model.addAttribute("statement", transactionStatementService.findById(id));
+        return "transaction-statement-print";
+    }
 
     // ── 관리자 페이지 ─────────────────────────────
     @GetMapping("/admin/users")

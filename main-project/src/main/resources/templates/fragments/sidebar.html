@@ -18,6 +18,7 @@
     <a href="/shipments"       th:class="${current == 'shipments'}       ? 'nav-item active' : 'nav-item'"><span class="ni">📤</span> 출고 관리</a>
     <a href="/sales"           th:class="${current == 'sales'}           ? 'nav-item active' : 'nav-item'"><span class="ni">💰</span> 매출 관리</a>
     <a href="/expenses"        th:class="${current == 'expenses'}        ? 'nav-item active' : 'nav-item'"><span class="ni">💸</span> 비용 관리</a>
+    <a href="/transaction-statements" th:class="${current == 'transaction-statements'} ? 'nav-item active' : 'nav-item'"><span class="ni">🧾</span> 거래명세서</a>
 
     <div class="nav-section">경영</div>
     <a href="/finance" th:class="${current == 'finance'} ? 'nav-item active' : 'nav-item'"><span class="ni">📈</span> 재무제표</a>
