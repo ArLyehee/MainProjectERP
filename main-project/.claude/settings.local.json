@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mysql -h 192.168.0.224 -u root -p9927 gaebalfan_erp -e \"SHOW TABLES LIKE ''bom%'';\")",
+      "Bash(mariadb -h 192.168.0.224 -u root -p9927 gaebalfan_erp -e \"SHOW TABLES LIKE ''bom%'';\")"
+    ]
+  }
+}

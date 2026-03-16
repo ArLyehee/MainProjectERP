@@ -26,7 +26,7 @@
 
     <select id="findByYear" resultMap="FSResultMap">
         SELECT * FROM financial_statements
-        WHERE month LIKE CONCAT(#{year}, '-%')
+        WHERE YEAR(month) = #{year}
         ORDER BY month
     </select>
 

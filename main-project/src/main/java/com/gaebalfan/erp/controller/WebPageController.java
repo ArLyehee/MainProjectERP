@@ -82,6 +82,8 @@ public class WebPageController {
     @GetMapping("/inventory")
     public String inventory(Model model) {
         model.addAttribute("inventoryList", inventoryService.findAll());
+        model.addAttribute("productList", productService.findAll());
+        model.addAttribute("warehouseList", warehouseService.findAll());
         return "inventory";
     }
 

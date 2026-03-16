@@ -5,12 +5,17 @@
 <mapper namespace="com.gaebalfan.erp.mapper.AttendanceMapper">
 
     <resultMap id="AttendanceResultMap" type="com.gaebalfan.erp.domain.Attendance">
-        <id     property="attendanceId" column="attendance_id"/>
-        <result property="employeeId"   column="employee_id"/>
-        <result property="workDate"     column="work_date"/>
-        <result property="checkIn"      column="check_in"/>
-        <result property="checkOut"     column="check_out"/>
-        <result property="employeeName" column="name"/>
+        <id     property="attendanceId"      column="attendance_id"/>
+        <result property="employeeId"        column="employee_id"/>
+        <result property="workDate"          column="work_date"/>
+        <result property="checkIn"           column="check_in"/>
+        <result property="checkOut"          column="check_out"/>
+        <result property="workHours"         column="work_hours"/>
+        <result property="overtimeHours"     column="overtime_hours"/>
+        <result property="lateMinutes"       column="late_minutes"/>
+        <result property="earlyLeaveMinutes" column="early_leave_minutes"/>
+        <result property="dailyPay"          column="daily_pay"/>
+        <result property="employeeName"      column="name"/>
     </resultMap>
 
     <select id="findByEmployeeId" resultMap="AttendanceResultMap">

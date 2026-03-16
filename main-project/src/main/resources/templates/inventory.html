@@ -3,52 +3,11 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>재고 현황 | 개발팬 ERP</title>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        :root { --bg:#0f1117; --surface:#1a1d27; --border:#2a2d3a; --accent:#4f8ef7; --text:#e8eaf0; --text-muted:#6b7280; --success:#22c55e; --danger:#ef4444; --warning:#f59e0b; }
-        body { background:var(--bg); color:var(--text); font-family:'IBM Plex Sans KR',sans-serif; min-height:100vh; }
-        .layout { display:flex; min-height:100vh; }
-        :root { --sidebar-w:220px; }
-        .sidebar { width:var(--sidebar-w); background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; position:fixed; top:0; left:0; bottom:0; z-index:100; overflow-y:auto; }
-        .sidebar-logo { padding:20px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; flex-shrink:0; }
-        .sidebar-logo .s-icon { width:34px; height:34px; background:linear-gradient(135deg,var(--accent),#7c3aed); border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
-        .sidebar-logo .brand { font-size:13px; font-weight:600; line-height:1.3; }
-        .sidebar-logo .brand small { display:block; font-size:10px; color:var(--accent); letter-spacing:1px; font-weight:400; }
-        .nav-section { padding:14px 12px 5px; font-size:10px; letter-spacing:1.5px; color:var(--text-muted); text-transform:uppercase; }
-        .nav-item { display:flex; align-items:center; gap:9px; padding:9px 12px; margin:2px 8px; border-radius:7px; font-size:13px; color:var(--text-muted); text-decoration:none; transition:background .15s,color .15s; }
-        .nav-item:hover { background:rgba(79,142,247,.08); color:var(--text); }
-        .nav-item.active { background:rgba(79,142,247,.15); color:var(--accent); font-weight:500; }
-        .ni { font-size:15px; width:20px; text-align:center; }
-        .sidebar-bottom { margin-top:auto; padding:14px; border-top:1px solid var(--border); }
-        .user-info { display:flex; align-items:center; gap:9px; padding:8px; border-radius:7px; }
-        .avatar { width:30px; height:30px; background:linear-gradient(135deg,var(--accent),#7c3aed); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; flex-shrink:0; color:#fff; }
-        .user-meta { flex:1; min-width:0; }
-        .uname { font-size:12px; font-weight:500; }
-        .urole { font-size:10px; color:var(--accent); letter-spacing:.5px; }
-        .btn-logout { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:15px; padding:3px; border-radius:4px; transition:color .15s; }
-        .btn-logout:hover { color:#ef4444; }
-        .main { flex:1; padding:32px; overflow-x:auto; margin-left:var(--sidebar-w); }
-        .page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; }
-        .page-title h2 { font-size:20px; font-weight:600; }
-        .page-title p { font-size:13px; color:var(--text-muted); margin-top:4px; }
-        .btn { padding:9px 18px; border-radius:8px; font-size:13px; font-weight:500; cursor:pointer; border:none; font-family:inherit; transition:all .2s; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
-        .btn-primary { background:var(--accent); color:#fff; }
-        .btn-primary:hover { background:#3b7de8; }
-        .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
-        table { width:100%; border-collapse:collapse; font-size:13px; }
-        th { padding:12px 16px; text-align:left; font-size:11px; font-weight:500; color:var(--text-muted); letter-spacing:.8px; text-transform:uppercase; border-bottom:1px solid var(--border); background:rgba(0,0,0,.2); }
-        td { padding:13px 16px; border-bottom:1px solid rgba(42,45,58,.5); color:var(--text); }
-        tr:last-child td { border-bottom:none; }
-        tr:hover td { background:rgba(79,142,247,.04); }
-        .badge { padding:3px 10px; border-radius:20px; font-size:11px; font-weight:500; }
-        .badge-ok { background:rgba(34,197,94,.15); color:#4ade80; }
-        .badge-low { background:rgba(245,158,11,.15); color:#fbbf24; }
-        .badge-empty { background:rgba(239,68,68,.15); color:#f87171; }
-        .qty { font-weight:600; font-size:14px; }
-        .empty-state { text-align:center; padding:60px; color:var(--text-muted); }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/erp.css(v=3)}">
 </head>
 <body>
 <div class="layout">
@@ -59,7 +18,10 @@
                 <h2>📦 재고 현황</h2>
                 <p>창고별 제품 재고를 확인합니다.</p>
             </div>
-            <a href="/inventory/new" class="btn btn-primary">+ 재고 등록</a>
+            <button onclick="openCreate()" class="btn btn-primary">+ 재고 등록</button>
+        </div>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="제품명 또는 창고 검색..." oninput="filterTable()" class="search-input">
         </div>
         <div class="card">
             <table>
@@ -71,11 +33,12 @@
                         <th>수량</th>
                         <th>상태</th>
                         <th>최종 수정</th>
+                        <th>액션</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="inventoryTableBody">
                     <tr th:if="${#lists.isEmpty(inventoryList)}">
-                        <td colspan="6" class="empty-state">등록된 재고가 없습니다.</td>
+                        <td colspan="7" class="empty-state">등록된 재고가 없습니다.</td>
                     </tr>
                     <tr th:each="inv : ${inventoryList}">
                         <td th:text="${inv.inventoryId}"></td>
@@ -88,11 +51,107 @@
                             <span th:if="${inv.quantity >= 10}" class="badge badge-ok">정상</span>
                         </td>
                         <td th:text="${inv.lastUpdate}"></td>
+                        <td>
+                            <button class="btn-action btn-edit" th:onclick="|openEdit(${inv.inventoryId})|">수정</button>
+                            <button class="btn-action btn-del"  th:onclick="|confirmDelete(${inv.inventoryId})|">삭제</button>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </main>
 </div>
+
+<!-- 재고 등록 모달 -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <h3 id="modalTitle">재고 등록</h3>
+        <input type="hidden" id="inventoryId">
+        <div class="form-group">
+            <label>제품 *</label>
+            <select id="invProductId">
+                <option value="">제품 선택</option>
+                <option th:each="p : ${productList}" th:value="${p.productId}" th:text="${p.productName}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>창고 *</label>
+            <select id="invWarehouseId">
+                <option value="">창고 선택</option>
+                <option th:each="w : ${warehouseList}" th:value="${w.warehouseId}" th:text="${w.warehouseName}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>수량 *</label>
+            <input type="number" id="invQuantity" placeholder="수량 입력" min="0">
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal()">취소</button>
+            <button class="btn-save" onclick="saveInventory()">저장</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const CSRF_TOKEN  = document.querySelector('meta[name="_csrf"]')?.content;
+const CSRF_HEADER = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+function filterTable() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#inventoryTableBody tr').forEach(tr => {
+        tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+
+function openCreate() {
+    document.getElementById('modalTitle').textContent = '재고 등록';
+    document.getElementById('inventoryId').value = '';
+    document.getElementById('invProductId').value = '';
+    document.getElementById('invWarehouseId').value = '';
+    document.getElementById('invQuantity').value = '';
+    document.getElementById('modalOverlay').classList.add('open');
+}
+
+function openEdit(id) {
+    fetch('/api/inventory/' + id)
+        .then(r => r.json())
+        .then(d => {
+            document.getElementById('modalTitle').textContent = '재고 수정';
+            document.getElementById('inventoryId').value = d.inventoryId;
+            document.getElementById('invProductId').value = d.productId;
+            document.getElementById('invWarehouseId').value = d.warehouseId;
+            document.getElementById('invQuantity').value = d.quantity;
+            document.getElementById('modalOverlay').classList.add('open');
+        });
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function saveInventory() {
+    const id = document.getElementById('inventoryId').value;
+    const body = {
+        productId:   document.getElementById('invProductId').value,
+        warehouseId: document.getElementById('invWarehouseId').value,
+        quantity:    document.getElementById('invQuantity').value
+    };
+    const url    = id ? '/api/inventory/' + id : '/api/inventory';
+    const method = id ? 'PUT' : 'POST';
+    fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', [CSRF_HEADER]: CSRF_TOKEN },
+        body: JSON.stringify(body)
+    }).then(r => { if (r.ok) location.reload(); });
+}
+
+function confirmDelete(id) {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    fetch('/api/inventory/' + id, {
+        method: 'DELETE',
+        headers: { [CSRF_HEADER]: CSRF_TOKEN }
+    }).then(r => { if (r.ok) location.reload(); });
+}
+</script>
 </body>
 </html>
