@@ -20,6 +20,18 @@
         ORDER BY r.receipt_id DESC
     </select>
 
+    <select id="findAllPaged" resultMap="ReceiptResultMap">
+        SELECT r.*, p.product_name
+        FROM receipts r
+        LEFT JOIN products p ON r.product_id = p.product_id
+        ORDER BY r.receipt_id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM receipts
+    </select>
+
     <insert id="insert" parameterType="com.gaebalfan.erp.domain.Receipt"
             useGeneratedKeys="true" keyProperty="receiptId">
         INSERT INTO receipts (po_id, product_id, quantity, receipt_date)

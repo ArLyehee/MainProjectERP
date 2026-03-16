@@ -1,5 +1,6 @@
 package com.gaebalfan.erp.controller;
 
+import com.gaebalfan.erp.domain.Inventory;
 import com.gaebalfan.erp.domain.Shipment;
 import com.gaebalfan.erp.mapper.InventoryMapper;
 import com.gaebalfan.erp.service.ShipmentService;
@@ -43,6 +44,15 @@ public class ShipmentController {
         } else {
             obj.setShipmentDate(LocalDate.now());
         }
+        // 재고 부족 검증
+        Inventory stock = inventoryMapper.findByProductAndWarehouse(obj.getProductId(), obj.getWarehouseId());
+        int currentQty = (stock != null) ? stock.getQuantity() : 0;
+        if (currentQty < obj.getQuantity()) {
+            return ResponseEntity.badRequest()
+                    .header("X-Error-Message", "재고 부족: 현재 재고 " + currentQty + "개, 출고 요청 " + obj.getQuantity() + "개")
+                    .build();
+        }
+
         service.insert(obj);
 
         // 재고 차감

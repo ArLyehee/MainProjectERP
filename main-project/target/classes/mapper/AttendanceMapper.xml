@@ -33,6 +33,18 @@
         ORDER BY a.work_date DESC, a.attendance_id DESC
     </select>
 
+    <select id="findAllPaged" resultMap="AttendanceResultMap">
+        SELECT a.*, e.name
+        FROM attendance a
+        LEFT JOIN employees e ON a.employee_id = e.employee_id
+        ORDER BY a.work_date DESC, a.attendance_id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM attendance
+    </select>
+
     <insert id="insert" parameterType="com.gaebalfan.erp.domain.Attendance"
             useGeneratedKeys="true" keyProperty="attendanceId">
         INSERT INTO attendance (employee_id, work_date, check_in)

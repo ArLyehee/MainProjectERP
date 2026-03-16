@@ -95,19 +95,29 @@ public class WebPageController {
     }
 
     @GetMapping("/receipts")
-    public String receipts(Model model) {
-        model.addAttribute("receiptList", receiptService.findAll());
+    public String receipts(@RequestParam(defaultValue = "1") int page, Model model) {
+        int size = 20;
+        int total = receiptService.count();
+        int totalPages = (int) Math.ceil((double) total / size);
+        model.addAttribute("receiptList", receiptService.findAllPaged(page, size));
         model.addAttribute("purchaseOrderList", purchaseOrderService.findAll());
         model.addAttribute("productList", productService.findAll());
         model.addAttribute("warehouseList", warehouseService.findAll());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         return "receipts";
     }
 
     @GetMapping("/shipments")
-    public String shipments(Model model) {
-        model.addAttribute("shipmentList", shipmentService.findAll());
+    public String shipments(@RequestParam(defaultValue = "1") int page, Model model) {
+        int size = 20;
+        int total = shipmentService.count();
+        int totalPages = (int) Math.ceil((double) total / size);
+        model.addAttribute("shipmentList", shipmentService.findAllPaged(page, size));
         model.addAttribute("productList", productService.findAll());
         model.addAttribute("warehouseList", warehouseService.findAll());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         return "shipments";
     }
 
@@ -140,9 +150,14 @@ public class WebPageController {
     }
 
     @GetMapping("/attendance")
-    public String attendance(Model model) {
-        model.addAttribute("attendanceList", attendanceService.findAll());
+    public String attendance(@RequestParam(defaultValue = "1") int page, Model model) {
+        int size = 20;
+        int total = attendanceService.count();
+        int totalPages = (int) Math.ceil((double) total / size);
+        model.addAttribute("attendanceList", attendanceService.findAllPaged(page, size));
         model.addAttribute("employeeList", employeeService.findAll());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         return "attendance";
     }
 

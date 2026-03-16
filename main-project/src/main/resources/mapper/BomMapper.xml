@@ -28,6 +28,15 @@
         ORDER BY b.bom_id DESC
     </select>
 
+    <select id="findByProductId" resultMap="BomResultMap">
+        SELECT b.*, p.product_name
+        FROM bom b
+        LEFT JOIN products p ON b.product_id = p.product_id
+        WHERE b.product_id = #{productId}
+        ORDER BY b.bom_id DESC
+        LIMIT 1
+    </select>
+
     <select id="findById" resultMap="BomResultMap">
         SELECT b.*, p.product_name
         FROM bom b

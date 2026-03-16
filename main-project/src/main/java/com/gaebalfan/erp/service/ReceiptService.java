@@ -18,7 +18,13 @@ public class ReceiptService {
         return mapper.findAll();
     }
 
-    
+    public List<Receipt> findAllPaged(int page, int size) {
+        return mapper.findAllPaged((page - 1) * size, size);
+    }
+
+    public int count() {
+        return mapper.count();
+    }
 
     public void insert(Receipt obj) {
         mapper.insert(obj);

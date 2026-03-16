@@ -6,6 +6,8 @@ import java.util.List;
 @Mapper
 public interface AttendanceMapper {
     List<Attendance> findAll();
+    List<Attendance> findAllPaged(@Param("offset") int offset, @Param("size") int size);
+    int count();
     List<Attendance> findByEmployeeId(@Param("employeeId") Long employeeId);
     void insert(Attendance attendance);
     void updateCheckOut(@Param("attendanceId") Long attendanceId);

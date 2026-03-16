@@ -24,6 +24,11 @@
         SELECT * FROM inventory WHERE inventory_id = #{inventoryId}
     </select>
 
+    <select id="findByProductAndWarehouse" resultMap="InventoryResultMap">
+        SELECT * FROM inventory
+        WHERE product_id = #{productId} AND warehouse_id = #{warehouseId}
+    </select>
+
     <insert id="insert" parameterType="com.gaebalfan.erp.domain.Inventory"
             useGeneratedKeys="true" keyProperty="inventoryId">
         INSERT INTO inventory (product_id, warehouse_id, quantity, last_update)

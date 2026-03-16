@@ -46,6 +46,19 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- 페이지네이션 -->
+        <div class="pagination" th:if="${totalPages != null and totalPages > 1}">
+            <a th:href="@{/shipments(page=${currentPage - 1})}"
+               th:classappend="${currentPage == 1} ? 'disabled'">&laquo;</a>
+            <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                <a th:href="@{/shipments(page=${i})}"
+                   th:text="${i}"
+                   th:classappend="${i == currentPage} ? 'active'"></a>
+            </th:block>
+            <a th:href="@{/shipments(page=${currentPage + 1})}"
+               th:classappend="${currentPage == totalPages} ? 'disabled'">&raquo;</a>
+        </div>
     </main>
 </div>
 
@@ -91,7 +104,14 @@ function saveShipment() {
         shipmentDate: document.getElementById('sShipmentDate').value
     };
     fetch('/api/shipments', { method:'POST', headers:{'Content-Type':'application/json',[csrfHeader]:csrf}, body:JSON.stringify(data) })
-        .then(() => location.reload());
+        .then(res => {
+            if (!res.ok) {
+                const msg = res.headers.get('X-Error-Message') || '출고 등록에 실패했습니다.';
+                alert(msg);
+            } else {
+                location.reload();
+            }
+        });
 }
 </script>
 </body>

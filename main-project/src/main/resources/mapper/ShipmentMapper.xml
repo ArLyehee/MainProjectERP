@@ -23,6 +23,19 @@
         ORDER BY s.shipment_id DESC
     </select>
 
+    <select id="findAllPaged" resultMap="ShipmentResultMap">
+        SELECT s.*, p.product_name, w.warehouse_name
+        FROM shipments s
+        LEFT JOIN products p ON s.product_id = p.product_id
+        LEFT JOIN warehouses w ON s.warehouse_id = w.warehouse_id
+        ORDER BY s.shipment_id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM shipments
+    </select>
+
     <select id="findById" resultMap="ShipmentResultMap">
         SELECT * FROM shipments WHERE shipment_id = #{shipmentId}
     </select>

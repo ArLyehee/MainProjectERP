@@ -31,10 +31,20 @@ public class ReceiptController {
 
     @PostMapping
     public ResponseEntity<Void> receive(@RequestBody Map<String, Object> body) {
+        if (body.get("poId") == null || body.get("poId").toString().isBlank())
+            return ResponseEntity.badRequest().header("X-Error-Message", "발주 번호를 선택하세요.").build();
+        if (body.get("productId") == null || body.get("productId").toString().isBlank())
+            return ResponseEntity.badRequest().header("X-Error-Message", "제품을 선택하세요.").build();
+        if (body.get("warehouseId") == null || body.get("warehouseId").toString().isBlank())
+            return ResponseEntity.badRequest().header("X-Error-Message", "입고 창고를 선택하세요.").build();
+        int qty = body.get("quantity") != null ? Integer.parseInt(body.get("quantity").toString()) : 0;
+        if (qty <= 0)
+            return ResponseEntity.badRequest().header("X-Error-Message", "수량은 1 이상이어야 합니다.").build();
+
         Receipt receipt = new Receipt();
         receipt.setPoId(Long.parseLong(body.get("poId").toString()));
         receipt.setProductId(Long.parseLong(body.get("productId").toString()));
-        receipt.setQuantity(Integer.parseInt(body.get("quantity").toString()));
+        receipt.setQuantity(qty);
         if (body.get("receiptDate") != null && !body.get("receiptDate").toString().isEmpty()) {
             receipt.setReceiptDate(java.time.LocalDate.parse(body.get("receiptDate").toString()));
         } else {
