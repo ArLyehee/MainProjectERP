@@ -1,11 +1,12 @@
 package com.gaebalfan.erp.controller;
 
+import com.gaebalfan.erp.domain.Inventory;
 import com.gaebalfan.erp.domain.Shipment;
 import com.gaebalfan.erp.mapper.InventoryMapper;
 import com.gaebalfan.erp.service.ShipmentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -39,10 +40,19 @@ public class ShipmentController {
         obj.setQuantity(Integer.parseInt(body.get("quantity").toString()));
         obj.setDestination(body.get("destination") != null ? body.get("destination").toString() : "");
         if (body.get("shipmentDate") != null && !body.get("shipmentDate").toString().isEmpty()) {
-            obj.setShipmentDate(LocalDate.parse(body.get("shipmentDate").toString()));
+            obj.setShipmentDate(java.time.LocalDate.parse(body.get("shipmentDate").toString()).atStartOfDay());
         } else {
-            obj.setShipmentDate(LocalDate.now());
+            obj.setShipmentDate(LocalDateTime.now());
         }
+        // 재고 부족 검증
+        Inventory stock = inventoryMapper.findByProductAndWarehouse(obj.getProductId(), obj.getWarehouseId());
+        int currentQty = (stock != null) ? stock.getQuantity() : 0;
+        if (currentQty < obj.getQuantity()) {
+            return ResponseEntity.badRequest()
+                    .header("X-Error-Message", "재고 부족: 현재 재고 " + currentQty + "개, 출고 요청 " + obj.getQuantity() + "개")
+                    .build();
+        }
+
         service.insert(obj);
 
         // 재고 차감

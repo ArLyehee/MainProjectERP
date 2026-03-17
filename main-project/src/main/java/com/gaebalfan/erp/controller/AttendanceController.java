@@ -5,7 +5,7 @@ import com.gaebalfan.erp.service.AttendanceService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
@@ -26,10 +26,13 @@ public class AttendanceController {
 
     @PostMapping("/check-in")
     public ResponseEntity<Void> checkIn(@RequestBody Map<String, Object> body) {
+        if (body.get("employeeId") == null || body.get("employeeId").toString().isBlank())
+            return ResponseEntity.badRequest().header("X-Error-Message", "직원을 선택하세요.").build();
+
         Attendance att = new Attendance();
         att.setEmployeeId(Long.parseLong(body.get("employeeId").toString()));
         att.setWorkDate(LocalDate.now());
-        att.setCheckIn(LocalDateTime.now());
+        att.setCheckIn(LocalTime.now());
         service.insert(att);
         return ResponseEntity.ok().build();
     }

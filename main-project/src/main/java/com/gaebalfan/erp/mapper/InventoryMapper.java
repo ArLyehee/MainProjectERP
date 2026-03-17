@@ -7,6 +7,7 @@ import java.util.List;
 public interface InventoryMapper {
     List<Inventory> findAll();
     Inventory findById(@Param("inventoryId") Long inventoryId);
+    Inventory findByProductAndWarehouse(@Param("productId") Long productId, @Param("warehouseId") Long warehouseId);
     void insert(Inventory inventory);
     void updateQuantity(@Param("productId") Long productId, @Param("warehouseId") Long warehouseId, @Param("quantity") int quantity);
 }

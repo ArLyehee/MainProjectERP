@@ -42,6 +42,38 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<User> findById(@PathVariable Long id) {
+        return userMapper.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> update(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        User user = new User();
+        user.setUserId(id);
+        user.setName(body.get("name"));
+        user.setEmail(body.get("email"));
+        user.setPhone(body.get("phone"));
+        user.setRole(body.getOrDefault("role", "EMPLOYEE"));
+        user.setDepartment(body.get("department"));
+        userMapper.updateUser(user);
+        // 비밀번호 변경 요청이 있을 경우
+        if (body.get("password") != null && !body.get("password").isEmpty()) {
+            userMapper.updatePassword(id, passwordEncoder.encode(body.get("password")));
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}/reset-password")
+    public ResponseEntity<Void> resetPassword(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        if (body.get("password") != null && !body.get("password").isEmpty()) {
+            userMapper.updatePassword(id, passwordEncoder.encode(body.get("password")));
+        }
+        return ResponseEntity.ok().build();
+    }
+
     @PatchMapping("/{id}/status")
     public ResponseEntity<Void> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
         userMapper.updateStatus(id, body.get("status"));

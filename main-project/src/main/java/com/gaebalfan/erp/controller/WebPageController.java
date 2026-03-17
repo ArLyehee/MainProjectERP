@@ -1,9 +1,11 @@
 package com.gaebalfan.erp.controller;
 
 import com.gaebalfan.erp.service.*;
+import com.gaebalfan.erp.service.TransactionStatementService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
@@ -22,6 +24,9 @@ public class WebPageController {
     private final WorkOrderService workOrderService;
     private final AttendanceService attendanceService;
     private final BomService bomService;
+    private final SaleService saleService;
+    private final OperatingExpenseService expenseService;
+    private final TransactionStatementService transactionStatementService;
 
     public WebPageController(InventoryService inventoryService,
                              PurchaseOrderService purchaseOrderService,
@@ -33,7 +38,10 @@ public class WebPageController {
                              EmployeeService employeeService,
                              WorkOrderService workOrderService,
                              AttendanceService attendanceService,
-                             BomService bomService) {
+                             BomService bomService,
+                             SaleService saleService,
+                             OperatingExpenseService expenseService,
+                             TransactionStatementService transactionStatementService) {
         this.inventoryService = inventoryService;
         this.purchaseOrderService = purchaseOrderService;
         this.receiptService = receiptService;
@@ -45,6 +53,9 @@ public class WebPageController {
         this.workOrderService = workOrderService;
         this.attendanceService = attendanceService;
         this.bomService = bomService;
+        this.saleService = saleService;
+        this.expenseService = expenseService;
+        this.transactionStatementService = transactionStatementService;
     }
 
     // ── 로그인 페이지 ──────────────────────────────
@@ -76,6 +87,8 @@ public class WebPageController {
     @GetMapping("/inventory")
     public String inventory(Model model) {
         model.addAttribute("inventoryList", inventoryService.findAll());
+        model.addAttribute("productList", productService.findAll());
+        model.addAttribute("warehouseList", warehouseService.findAll());
         return "inventory";
     }
 
@@ -87,19 +100,29 @@ public class WebPageController {
     }
 
     @GetMapping("/receipts")
-    public String receipts(Model model) {
-        model.addAttribute("receiptList", receiptService.findAll());
+    public String receipts(@RequestParam(defaultValue = "1") int page, Model model) {
+        int size = 20;
+        int total = receiptService.count();
+        int totalPages = (int) Math.ceil((double) total / size);
+        model.addAttribute("receiptList", receiptService.findAllPaged(page, size));
         model.addAttribute("purchaseOrderList", purchaseOrderService.findAll());
         model.addAttribute("productList", productService.findAll());
         model.addAttribute("warehouseList", warehouseService.findAll());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         return "receipts";
     }
 
     @GetMapping("/shipments")
-    public String shipments(Model model) {
-        model.addAttribute("shipmentList", shipmentService.findAll());
+    public String shipments(@RequestParam(defaultValue = "1") int page, Model model) {
+        int size = 20;
+        int total = shipmentService.count();
+        int totalPages = (int) Math.ceil((double) total / size);
+        model.addAttribute("shipmentList", shipmentService.findAllPaged(page, size));
         model.addAttribute("productList", productService.findAll());
         model.addAttribute("warehouseList", warehouseService.findAll());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         return "shipments";
     }
 
@@ -132,9 +155,14 @@ public class WebPageController {
     }
 
     @GetMapping("/attendance")
-    public String attendance(Model model) {
-        model.addAttribute("attendanceList", attendanceService.findAll());
+    public String attendance(@RequestParam(defaultValue = "1") int page, Model model) {
+        int size = 20;
+        int total = attendanceService.count();
+        int totalPages = (int) Math.ceil((double) total / size);
+        model.addAttribute("attendanceList", attendanceService.findAllPaged(page, size));
         model.addAttribute("employeeList", employeeService.findAll());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         return "attendance";
     }
 
@@ -154,9 +182,49 @@ public class WebPageController {
         return "bom";
     }
 
+    // ── 매출/비용 페이지 ──────────────────────────
+    @GetMapping("/sales")
+    public String sales(Model model) {
+        model.addAttribute("saleList", saleService.findAll());
+        model.addAttribute("productList", productService.findAll());
+        model.addAttribute("warehouseList", warehouseService.findAll());
+        return "sales";
+    }
+
+    @GetMapping("/expenses")
+    public String expenses(Model model) {
+        model.addAttribute("expenseList", expenseService.findAll());
+        return "expenses";
+    }
+
+    // ── 재무제표 페이지 ───────────────────────────
+    @GetMapping("/finance")
+    public String finance(Model model) {
+        model.addAttribute("currentYear", java.time.LocalDate.now().getYear());
+        return "finance";
+    }   
+
+    // ── 거래명세서 페이지 ─────────────────────────
+    @GetMapping("/transaction-statements")
+    public String transactionStatements(Model model) {
+        model.addAttribute("statementList", transactionStatementService.findAll());
+        return "transaction-statements";
+    }
+
+    @GetMapping("/transaction-statements/{id}/print")
+    public String printStatement(@PathVariable Long id, Model model) {
+        model.addAttribute("statement", transactionStatementService.findById(id));
+        return "transaction-statement-print";
+    }
+
     // ── 관리자 페이지 ─────────────────────────────
     @GetMapping("/admin/users")
     public String adminUsers(Model model) {
         return "admin/users";
+    }
+
+    @GetMapping("/admin/settings")
+    public String adminSettings(Model model) {
+        return "admin/settings";
     }
 }

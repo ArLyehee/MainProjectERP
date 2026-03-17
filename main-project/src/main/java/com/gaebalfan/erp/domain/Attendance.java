@@ -1,29 +1,45 @@
 package com.gaebalfan.erp.domain;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public class Attendance {
-    private Long          attendanceId;
-    private Long          employeeId;
-    private LocalDateTime checkIn;
-    private LocalDateTime checkOut;
-    private LocalDate     workDate;
+    private Long       attendanceId;
+    private Long       employeeId;
+    private LocalDate  workDate;
+    private LocalTime  checkIn;
+    private LocalTime  checkOut;
+    private BigDecimal workHours;
+    private BigDecimal overtimeHours;
+    private Integer    lateMinutes;
+    private Integer    earlyLeaveMinutes;
+    private Integer    dailyPay;
 
     // 조인용
-    private String        employeeName;
+    private String     employeeName;
 
-    public Long          getAttendanceId() { return attendanceId; }
-    public Long          getEmployeeId()   { return employeeId; }
-    public LocalDateTime getCheckIn()      { return checkIn; }
-    public LocalDateTime getCheckOut()     { return checkOut; }
-    public LocalDate     getWorkDate()     { return workDate; }
-    public String        getEmployeeName() { return employeeName; }
+    public Long       getAttendanceId()      { return attendanceId; }
+    public Long       getEmployeeId()        { return employeeId; }
+    public LocalDate  getWorkDate()          { return workDate; }
+    public LocalTime  getCheckIn()           { return checkIn; }
+    public LocalTime  getCheckOut()          { return checkOut; }
+    public BigDecimal getWorkHours()         { return workHours; }
+    public BigDecimal getOvertimeHours()     { return overtimeHours; }
+    public Integer    getLateMinutes()       { return lateMinutes; }
+    public Integer    getEarlyLeaveMinutes() { return earlyLeaveMinutes; }
+    public Integer    getDailyPay()          { return dailyPay; }
+    public String     getEmployeeName()      { return employeeName; }
 
-    public void setAttendanceId(Long attendanceId)        { this.attendanceId = attendanceId; }
-    public void setEmployeeId(Long employeeId)            { this.employeeId = employeeId; }
-    public void setCheckIn(LocalDateTime checkIn)         { this.checkIn = checkIn; }
-    public void setCheckOut(LocalDateTime checkOut)       { this.checkOut = checkOut; }
-    public void setWorkDate(LocalDate workDate)           { this.workDate = workDate; }
-    public void setEmployeeName(String employeeName)      { this.employeeName = employeeName; }
+    public void setAttendanceId(Long v)        { this.attendanceId = v; }
+    public void setEmployeeId(Long v)          { this.employeeId = v; }
+    public void setWorkDate(LocalDate v)       { this.workDate = v; }
+    public void setCheckIn(LocalTime v)        { this.checkIn = v; }
+    public void setCheckOut(LocalTime v)       { this.checkOut = v; }
+    public void setWorkHours(BigDecimal v)     { this.workHours = v; }
+    public void setOvertimeHours(BigDecimal v) { this.overtimeHours = v; }
+    public void setLateMinutes(Integer v)      { this.lateMinutes = v; }
+    public void setEarlyLeaveMinutes(Integer v){ this.earlyLeaveMinutes = v; }
+    public void setDailyPay(Integer v)         { this.dailyPay = v; }
+    public void setEmployeeName(String v)      { this.employeeName = v; }
 }

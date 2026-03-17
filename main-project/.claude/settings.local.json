@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mysql -h 192.168.0.224 -u root -p9927 gaebalfan_erp -e \"SHOW TABLES LIKE ''bom%'';\")",
+      "Bash(mariadb -h 192.168.0.224 -u root -p9927 gaebalfan_erp -e \"SHOW TABLES LIKE ''bom%'';\")",
+      "Bash(xargs sed:*)",
+      "Bash(ls \"c:\\\\Users\\\\3class_013\\\\Desktop\\\\main_project\\\\MainProjectERP\\\\main-project\\\\src\\\\main\\\\java\\\\com\\\\gaebalfan\\\\erp\\\\domain\\\\TransactionStatement\"*)",
+      "Bash(ls \"c:\\\\Users\\\\3class_013\\\\Desktop\\\\main_project\\\\MainProjectERP\\\\main-project\\\\src\\\\main\\\\resources\\\\templates\\\\transaction-statement\"*)"
+    ]
+  }
+}

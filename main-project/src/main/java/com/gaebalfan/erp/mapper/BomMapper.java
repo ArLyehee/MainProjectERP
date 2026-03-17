@@ -8,6 +8,7 @@ import java.util.List;
 public interface BomMapper {
     List<Bom> findAll();
     Bom findById(@Param("bomId") Long bomId);
+    Bom findByProductId(@Param("productId") Long productId);
     List<BomItem> findItemsByBomId(@Param("bomId") Long bomId);
     void insertBom(Bom bom);
     void insertBomItem(BomItem item);

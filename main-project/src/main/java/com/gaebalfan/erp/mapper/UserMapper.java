@@ -22,5 +22,7 @@ public interface UserMapper {
 
     void updateStatus(@Param("userId") Long userId, @Param("status") String status);
 
+    void updatePassword(@Param("userId") Long userId, @Param("password") String password);
+
     int countByUsername(@Param("username") String username);
 }
