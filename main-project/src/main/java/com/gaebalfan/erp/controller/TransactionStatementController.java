@@ -45,6 +45,7 @@ public class TransactionStatementController {
         stmt.setCustomerTel(body.get("customerTel") != null ? body.get("customerTel").toString() : "");
         stmt.setCustomerBizNo(body.get("customerBizNo") != null ? body.get("customerBizNo").toString() : "");
         stmt.setNotes(body.get("notes") != null ? body.get("notes").toString() : "");
+        stmt.setManagerName(body.get("managerName") != null ? body.get("managerName").toString() : "");
 
         if (body.get("issueDate") != null && !body.get("issueDate").toString().isEmpty()) {
             stmt.setIssueDate(LocalDate.parse(body.get("issueDate").toString()));
@@ -90,6 +91,7 @@ public class TransactionStatementController {
         stmt.setCustomerTel(body.get("customerTel") != null ? body.get("customerTel").toString() : "");
         stmt.setCustomerBizNo(body.get("customerBizNo") != null ? body.get("customerBizNo").toString() : "");
         stmt.setNotes(body.get("notes") != null ? body.get("notes").toString() : "");
+        stmt.setManagerName(body.get("managerName") != null ? body.get("managerName").toString() : "");
         if (body.get("issueDate") != null && !body.get("issueDate").toString().isEmpty()) {
             stmt.setIssueDate(LocalDate.parse(body.get("issueDate").toString()));
         } else {

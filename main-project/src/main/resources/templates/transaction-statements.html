@@ -6,7 +6,7 @@
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>거래명세서 | 개발팬 ERP</title>
-    <link rel="stylesheet" th:href="@{/css/erp.css(v=4)}">
+    <link rel="stylesheet" th:href="@{/css/erp.css(v=6)}">
     <style>
         .items-table { width:100%; border-collapse:collapse; margin:12px 0; }
         .items-table th, .items-table td { border:1px solid #d1d5db; padding:6px 8px; font-size:13px; }
@@ -88,7 +88,8 @@
             <div class="form-group"><label>사업자번호</label><input type="text" id="customerBizNo" placeholder="000-00-00000"></div>
             <div class="form-group"><label>연락처</label><input type="text" id="customerTel" placeholder="02-0000-0000"></div>
             <div class="form-group" style="grid-column:1/-1;"><label>주소</label><input type="text" id="customerAddr" placeholder="서울시 강남구 ..."></div>
-            <div class="form-group" style="grid-column:1/-1;"><label>비고</label><input type="text" id="notes" placeholder="특이사항 입력"></div>
+            <div class="form-group"><label>담당자</label><input type="text" id="managerName" placeholder="홍길동"></div>
+            <div class="form-group"><label>비고</label><input type="text" id="notes" placeholder="특이사항 입력"></div>
         </div>
         <div style="font-weight:600;margin:8px 0 4px;">품목</div>
         <button class="btn-add-row" onclick="addRow()">+ 품목 추가</button>
@@ -130,6 +131,7 @@ function openModal() {
     document.getElementById('customerBizNo').value = '';
     document.getElementById('customerTel').value = '';
     document.getElementById('customerAddr').value = '';
+    document.getElementById('managerName').value = '';
     document.getElementById('notes').value = '';
     document.getElementById('taxRate').value = '10';
     document.getElementById('taxAmountInput').value = '0';
@@ -150,6 +152,7 @@ function openEditModal(id) {
             document.getElementById('customerBizNo').value = s.customerBizNo || '';
             document.getElementById('customerTel').value = s.customerTel || '';
             document.getElementById('customerAddr').value = s.customerAddr || '';
+            document.getElementById('managerName').value = s.managerName || '';
             document.getElementById('notes').value = s.notes || '';
             document.getElementById('itemsBody').innerHTML = '';
             (s.items || []).forEach(item => {
@@ -158,7 +161,7 @@ function openEditModal(id) {
                     <td><input type="text" placeholder="품목명" oninput="calcTotal()" value="${escHtml(item.itemName)}"></td>
                     <td><input type="number" value="${item.quantity}" min="1" oninput="calcTotal()"></td>
                     <td><input type="number" value="${item.unitPrice}" min="0" oninput="calcTotal()"></td>
-                    <td><input type="number" readonly style="color:#6b7280;"></td>
+                    <td><input type="text" readonly style="color:#6b7280; text-align:right;"></td>
                     <td><button class="btn-del-row" onclick="this.closest('tr').remove();calcTotal()">✕</button></td>`;
                 document.getElementById('itemsBody').appendChild(tr);
             });
@@ -187,7 +190,7 @@ function addRow() {
         <td><input type="text" placeholder="품목명" oninput="calcTotal()"></td>
         <td><input type="number" value="1" min="1" oninput="calcTotal()"></td>
         <td><input type="number" value="0" min="0" oninput="calcTotal()"></td>
-        <td><input type="number" readonly style="color:#6b7280;"></td>
+        <td><input type="text" readonly style="color:#6b7280; text-align:right;"></td>
         <td><button class="btn-del-row" onclick="this.closest('tr').remove();calcTotal()">✕</button></td>`;
     document.getElementById('itemsBody').appendChild(tr);
 }
@@ -257,6 +260,7 @@ function saveStatement() {
         customerTel: document.getElementById('customerTel').value,
         customerAddr: document.getElementById('customerAddr').value,
         notes: document.getElementById('notes').value,
+        managerName: document.getElementById('managerName').value,
         taxAmount: parseInt(document.getElementById('taxAmountInput').value) || 0,
         items: items
     };

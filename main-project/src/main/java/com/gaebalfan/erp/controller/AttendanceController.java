@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public class AttendanceController {
         Attendance att = new Attendance();
         att.setEmployeeId(Long.parseLong(body.get("employeeId").toString()));
         att.setWorkDate(LocalDate.now());
-        att.setCheckIn(LocalTime.now());
+        att.setCheckIn(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
         service.insert(att);
         return ResponseEntity.ok().build();
     }

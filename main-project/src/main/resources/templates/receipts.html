@@ -6,7 +6,7 @@
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>입고 관리 | 개발팬 ERP</title>
-    <link rel="stylesheet" th:href="@{/css/erp.css(v=4)}">
+    <link rel="stylesheet" th:href="@{/css/erp.css(v=6)}">
 </head>
 <body>
 <div class="layout">
@@ -49,7 +49,7 @@
         <div class="pagination" th:if="${totalPages != null and totalPages > 1}">
             <a th:href="@{/receipts(page=${currentPage - 1})}"
                th:classappend="${currentPage == 1} ? 'disabled'">&laquo;</a>
-            <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+            <th:block th:each="i : ${#numbers.sequence(T(Math).max(1, currentPage - 5), T(Math).min(totalPages, currentPage + 5))}">
                 <a th:href="@{/receipts(page=${i})}"
                    th:text="${i}"
                    th:classappend="${i == currentPage} ? 'active'"></a>

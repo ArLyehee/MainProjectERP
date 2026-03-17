@@ -16,6 +16,7 @@
         <result property="taxAmount"     column="tax_amount"/>
         <result property="grandTotal"    column="grand_total"/>
         <result property="notes"         column="notes"/>
+        <result property="managerName"   column="manager_name"/>
         <result property="createdAt"     column="created_at"/>
     </resultMap>
 
@@ -44,10 +45,10 @@
             useGeneratedKeys="true" keyProperty="statementId">
         INSERT INTO transaction_statements
             (statement_no, issue_date, customer_name, customer_addr, customer_tel,
-             customer_biz_no, total_amount, tax_amount, grand_total, notes)
+             customer_biz_no, total_amount, tax_amount, grand_total, notes, manager_name)
         VALUES
             (#{statementNo}, #{issueDate}, #{customerName}, #{customerAddr}, #{customerTel},
-             #{customerBizNo}, #{totalAmount}, #{taxAmount}, #{grandTotal}, #{notes})
+             #{customerBizNo}, #{totalAmount}, #{taxAmount}, #{grandTotal}, #{notes}, #{managerName})
     </insert>
 
     <insert id="insertItem" parameterType="com.gaebalfan.erp.domain.TransactionStatementItem"
@@ -66,7 +67,8 @@
             total_amount    = #{totalAmount},
             tax_amount      = #{taxAmount},
             grand_total     = #{grandTotal},
-            notes           = #{notes}
+            notes           = #{notes},
+            manager_name    = #{managerName}
         WHERE statement_id = #{statementId}
     </update>
 

@@ -15,7 +15,7 @@
         <result property="warehouseName" column="warehouse_name"/>
     </resultMap>
 
-    <select id="findAll" resultMap="ShipmentResultMap">
+    <select id="findAll" resultType="Shipment">
         SELECT s.*, p.product_name, w.warehouse_name
         FROM shipments s
         LEFT JOIN products p ON s.product_id = p.product_id
@@ -23,7 +23,7 @@
         ORDER BY s.shipment_id DESC
     </select>
 
-    <select id="findAllPaged" resultMap="ShipmentResultMap">
+    <select id="findAllPaged" resultType="Shipment">
         SELECT s.*, p.product_name, w.warehouse_name
         FROM shipments s
         LEFT JOIN products p ON s.product_id = p.product_id

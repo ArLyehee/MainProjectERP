@@ -18,23 +18,35 @@
         <result property="employeeName"      column="name"/>
     </resultMap>
 
-    <select id="findByEmployeeId" resultMap="AttendanceResultMap">
-        SELECT a.*, e.name
+    <select id="findByEmployeeId" resultType="Attendance">
+        SELECT a.attendance_id, a.employee_id, a.work_date,
+               TIME_FORMAT(a.check_in,  '%H:%i') AS check_in,
+               TIME_FORMAT(a.check_out, '%H:%i') AS check_out,
+               a.work_hours, a.overtime_hours, a.late_minutes, a.early_leave_minutes, a.daily_pay,
+               e.name AS employee_name
         FROM attendance a
         LEFT JOIN employees e ON a.employee_id = e.employee_id
         WHERE a.employee_id = #{employeeId}
         ORDER BY a.work_date DESC
     </select>
 
-    <select id="findAll" resultMap="AttendanceResultMap">
-        SELECT a.*, e.name
+    <select id="findAll" resultType="Attendance">
+        SELECT a.attendance_id, a.employee_id, a.work_date,
+               TIME_FORMAT(a.check_in,  '%H:%i') AS check_in,
+               TIME_FORMAT(a.check_out, '%H:%i') AS check_out,
+               a.work_hours, a.overtime_hours, a.late_minutes, a.early_leave_minutes, a.daily_pay,
+               e.name AS employee_name
         FROM attendance a
         LEFT JOIN employees e ON a.employee_id = e.employee_id
         ORDER BY a.work_date DESC, a.attendance_id DESC
     </select>
 
-    <select id="findAllPaged" resultMap="AttendanceResultMap">
-        SELECT a.*, e.name
+    <select id="findAllPaged" resultType="Attendance">
+        SELECT a.attendance_id, a.employee_id, a.work_date,
+               TIME_FORMAT(a.check_in,  '%H:%i') AS check_in,
+               TIME_FORMAT(a.check_out, '%H:%i') AS check_out,
+               a.work_hours, a.overtime_hours, a.late_minutes, a.early_leave_minutes, a.daily_pay,
+               e.name AS employee_name
         FROM attendance a
         LEFT JOIN employees e ON a.employee_id = e.employee_id
         ORDER BY a.work_date DESC, a.attendance_id DESC
