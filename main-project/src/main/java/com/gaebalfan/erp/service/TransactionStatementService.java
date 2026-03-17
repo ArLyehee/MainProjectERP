@@ -47,6 +47,17 @@ public class TransactionStatementService {
         return statement;
     }
 
+    @Transactional
+    public void update(Long id, TransactionStatement statement, List<TransactionStatementItem> items) {
+        statement.setStatementId(id);
+        mapper.update(statement);
+        mapper.deleteItemsByStatementId(id);
+        for (TransactionStatementItem item : items) {
+            item.setStatementId(id);
+            mapper.insertItem(item);
+        }
+    }
+
     public void delete(Long id) {
         mapper.delete(id);
     }

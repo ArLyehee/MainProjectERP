@@ -56,6 +56,24 @@
         VALUES (#{statementId}, #{itemName}, #{quantity}, #{unitPrice}, #{amount})
     </insert>
 
+    <update id="update" parameterType="com.gaebalfan.erp.domain.TransactionStatement">
+        UPDATE transaction_statements SET
+            issue_date      = #{issueDate},
+            customer_name   = #{customerName},
+            customer_addr   = #{customerAddr},
+            customer_tel    = #{customerTel},
+            customer_biz_no = #{customerBizNo},
+            total_amount    = #{totalAmount},
+            tax_amount      = #{taxAmount},
+            grand_total     = #{grandTotal},
+            notes           = #{notes}
+        WHERE statement_id = #{statementId}
+    </update>
+
+    <delete id="deleteItemsByStatementId">
+        DELETE FROM transaction_statement_items WHERE statement_id = #{statementId}
+    </delete>
+
     <delete id="delete">
         DELETE FROM transaction_statements WHERE statement_id = #{statementId}
     </delete>

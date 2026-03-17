@@ -8,7 +8,6 @@ public class WorkOrder {
     private int           quantity;
     private LocalDateTime startDate;
     private String        status;  // PENDING, IN_PROGRESS, COMPLETED, CANCELLED
-    private LocalDateTime createdAt;
 
     // 조인용
     private String        productName;
@@ -18,7 +17,6 @@ public class WorkOrder {
     public int           getQuantity()    { return quantity; }
     public LocalDateTime getStartDate()   { return startDate; }
     public String        getStatus()      { return status; }
-    public LocalDateTime getCreatedAt()   { return createdAt; }
     public String        getProductName() { return productName; }
 
     public void setWorkOrderId(Long workOrderId)          { this.workOrderId = workOrderId; }
@@ -26,6 +24,5 @@ public class WorkOrder {
     public void setQuantity(int quantity)                 { this.quantity = quantity; }
     public void setStartDate(LocalDateTime startDate)     { this.startDate = startDate; }
     public void setStatus(String status)                  { this.status = status; }
-    public void setCreatedAt(LocalDateTime createdAt)     { this.createdAt = createdAt; }
     public void setProductName(String productName)        { this.productName = productName; }
 }

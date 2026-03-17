@@ -5,7 +5,14 @@
       "Bash(mariadb -h 192.168.0.224 -u root -p9927 gaebalfan_erp -e \"SHOW TABLES LIKE ''bom%'';\")",
       "Bash(xargs sed:*)",
       "Bash(ls \"c:\\\\Users\\\\3class_013\\\\Desktop\\\\main_project\\\\MainProjectERP\\\\main-project\\\\src\\\\main\\\\java\\\\com\\\\gaebalfan\\\\erp\\\\domain\\\\TransactionStatement\"*)",
-      "Bash(ls \"c:\\\\Users\\\\3class_013\\\\Desktop\\\\main_project\\\\MainProjectERP\\\\main-project\\\\src\\\\main\\\\resources\\\\templates\\\\transaction-statement\"*)"
+      "Bash(ls \"c:\\\\Users\\\\3class_013\\\\Desktop\\\\main_project\\\\MainProjectERP\\\\main-project\\\\src\\\\main\\\\resources\\\\templates\\\\transaction-statement\"*)",
+      "Bash(python3:*)",
+      "Bash(findstr /n \"EXPENSE_CONFIG\" \"C:\\\\Users\\\\3class_013\\\\.claude\\\\projects\\\\c--Users-3class-013-Desktop-main-project-MainProjectERP-main-project\\\\108184f5-b3f2-417e-8f50-5072cd8dfd8f.jsonl\")",
+      "Bash(findstr /n \"gen_opex\\\\|sync_all\\\\|relativedelta\\\\|판관비 자동\" \"C:\\\\Users\\\\3class_013\\\\.claude\\\\projects\\\\c--Users-3class-013-Desktop-main-project-MainProjectERP-main-project\\\\108184f5-b3f2-417e-8f50-5072cd8dfd8f.jsonl\")",
+      "Bash(sed -n '3662p' \"C:\\\\Users\\\\3class_013\\\\.claude\\\\projects\\\\c--Users-3class-013-Desktop-main-project-MainProjectERP-main-project\\\\108184f5-b3f2-417e-8f50-5072cd8dfd8f.jsonl\")",
+      "Read(//tmp/**)",
+      "Bash(for line_num in 3662 3668 3675 3677 3679 3696 3698 3701 3702 3703)",
+      "Bash(do echo:*)"
     ]
   }
 }

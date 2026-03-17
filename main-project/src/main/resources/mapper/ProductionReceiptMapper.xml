@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gaebalfan.erp.mapper.ProductionReceiptMapper">
+
+    <resultMap id="ProductionReceiptResultMap" type="com.gaebalfan.erp.domain.ProductionReceipt">
+        <id     property="productionId" column="production_id"/>
+        <result property="workOrderId"  column="work_order_id"/>
+        <result property="productId"    column="product_id"/>
+        <result property="quantity"     column="quantity"/>
+        <result property="receiptDate"  column="receipt_date"/>
+        <result property="productName"  column="product_name"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="ProductionReceiptResultMap">
+        SELECT pr.*, p.product_name
+        FROM production_receipts pr
+        LEFT JOIN products p ON pr.product_id = p.product_id
+        ORDER BY pr.production_id DESC
+    </select>
+
+    <select id="findByWorkOrderId" resultMap="ProductionReceiptResultMap">
+        SELECT pr.*, p.product_name
+        FROM production_receipts pr
+        LEFT JOIN products p ON pr.product_id = p.product_id
+        WHERE pr.work_order_id = #{workOrderId}
+    </select>
+
+    <insert id="insert" parameterType="com.gaebalfan.erp.domain.ProductionReceipt"
+            useGeneratedKeys="true" keyProperty="productionId">
+        INSERT INTO production_receipts (work_order_id, product_id, quantity, receipt_date)
+        VALUES (#{workOrderId}, #{productId}, #{quantity}, #{receiptDate})
+    </insert>
+
+</mapper>

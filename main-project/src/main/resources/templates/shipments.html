@@ -41,7 +41,7 @@
                         <td th:text="${s.warehouseName != null ? s.warehouseName : s.warehouseId}"></td>
                         <td class="qty" th:text="${s.quantity}"></td>
                         <td th:text="${s.destination}"></td>
-                        <td th:text="${s.shipmentDate}"></td>
+                        <td th:text="${s.shipmentDate != null ? #temporals.format(s.shipmentDate, 'yyyy-MM-dd') : '-'}"></td>
                     </tr>
                 </tbody>
             </table>
