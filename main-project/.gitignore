@@ -4,3 +4,8 @@
 .DS_Store
 .idea/
 .vscode/
+.classpath
+.factorypath
+.project
+.settings/
+.idea/
