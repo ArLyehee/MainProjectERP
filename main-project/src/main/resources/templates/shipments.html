@@ -6,7 +6,7 @@
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>출고 관리 | 개발팬 ERP</title>
-    <link rel="stylesheet" th:href="@{/css/erp.css(v=4)}">
+    <link rel="stylesheet" th:href="@{/css/erp.css(v=6)}">
 </head>
 <body>
 <div class="layout">
@@ -41,7 +41,7 @@
                         <td th:text="${s.warehouseName != null ? s.warehouseName : s.warehouseId}"></td>
                         <td class="qty" th:text="${s.quantity}"></td>
                         <td th:text="${s.destination}"></td>
-                        <td th:text="${s.shipmentDate}"></td>
+                        <td th:text="${s.shipmentDate != null ? s.shipmentDate.toString().substring(0,10) : '-'}"></td>
                     </tr>
                 </tbody>
             </table>
@@ -51,7 +51,7 @@
         <div class="pagination" th:if="${totalPages != null and totalPages > 1}">
             <a th:href="@{/shipments(page=${currentPage - 1})}"
                th:classappend="${currentPage == 1} ? 'disabled'">&laquo;</a>
-            <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+            <th:block th:each="i : ${#numbers.sequence(T(Math).max(1, currentPage - 5), T(Math).min(totalPages, currentPage + 5))}">
                 <a th:href="@{/shipments(page=${i})}"
                    th:text="${i}"
                    th:classappend="${i == currentPage} ? 'active'"></a>

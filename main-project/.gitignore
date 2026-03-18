@@ -1,4 +1,5 @@
 /target/
+<<<<<<< HEAD
 *.log
 *.class
 .DS_Store
@@ -10,3 +11,15 @@
 .settings/
 .idea/
 bin/
+=======
+bin/
+*.log
+*.class
+.DS_Store
+.idea/
+.vscode/
+.classpath
+.factorypath
+.project
+.settings/
+>>>>>>> refs/remotes/origin/test

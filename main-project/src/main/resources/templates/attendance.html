@@ -6,7 +6,7 @@
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>근태 관리 | 개발팬 ERP</title>
-    <link rel="stylesheet" th:href="@{/css/erp.css(v=4)}">
+    <link rel="stylesheet" th:href="@{/css/erp.css(v=6)}">
 </head>
 <body>
 <div class="layout">
@@ -43,8 +43,8 @@
                         <td th:text="${a.attendanceId}"></td>
                         <td th:text="${a.employeeName}"></td>
                         <td th:text="${a.workDate}"></td>
-                        <td th:text="${a.checkIn != null ? #temporals.format(a.checkIn, 'HH:mm') : '-'}"></td>
-                        <td th:text="${a.checkOut != null ? #temporals.format(a.checkOut, 'HH:mm') : '-'}"></td>
+                        <td th:text="${a.checkIn != null ? a.checkIn : '-'}"></td>
+                        <td th:text="${a.checkOut != null ? a.checkOut : '-'}"></td>
                         <td>
                             <span th:if="${a.checkOut != null}" class="badge badge-present">퇴근완료</span>
                             <span th:if="${a.checkOut == null}" class="badge badge-absent">근무중</span>
@@ -63,7 +63,7 @@
         <div class="pagination" th:if="${totalPages != null and totalPages > 1}">
             <a th:href="@{/attendance(page=${currentPage - 1})}"
                th:classappend="${currentPage == 1} ? 'disabled'">&laquo;</a>
-            <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+            <th:block th:each="i : ${#numbers.sequence(T(Math).max(1, currentPage - 5), T(Math).min(totalPages, currentPage + 5))}">
                 <a th:href="@{/attendance(page=${i})}"
                    th:text="${i}"
                    th:classappend="${i == currentPage} ? 'active'"></a>

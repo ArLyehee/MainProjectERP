@@ -17,6 +17,7 @@ public class TransactionStatement {
     private BigDecimal    taxAmount;
     private BigDecimal    grandTotal;
     private String        notes;
+    private String        managerName;
     private LocalDateTime createdAt;
     private List<TransactionStatementItem> items;
 
@@ -31,6 +32,7 @@ public class TransactionStatement {
     public BigDecimal getTaxAmount() { return taxAmount; }
     public BigDecimal getGrandTotal() { return grandTotal; }
     public String getNotes() { return notes; }
+    public String getManagerName() { return managerName; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public List<TransactionStatementItem> getItems() { return items; }
 
@@ -45,6 +47,7 @@ public class TransactionStatement {
     public void setTaxAmount(BigDecimal taxAmount) { this.taxAmount = taxAmount; }
     public void setGrandTotal(BigDecimal grandTotal) { this.grandTotal = grandTotal; }
     public void setNotes(String notes) { this.notes = notes; }
+    public void setManagerName(String managerName) { this.managerName = managerName; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public void setItems(List<TransactionStatementItem> items) { this.items = items; }
 }

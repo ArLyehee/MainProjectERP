@@ -6,7 +6,7 @@
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>비용 관리 | 개발팬 ERP</title>
-    <link rel="stylesheet" th:href="@{/css/erp.css(v=4)}">
+    <link rel="stylesheet" th:href="@{/css/erp.css(v=6)}">
 </head>
 <body>
 <div class="layout">
@@ -19,6 +19,9 @@
             </div>
             <button onclick="openCreate()" class="btn btn-primary">+ 비용 등록</button>
         </div>
+        <!-- 카테고리별 합계 -->
+        <div id="summaryGrid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:16px; margin-bottom:24px;"></div>
+
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="검색..." oninput="filterTable()" class="search-input">
         </div>
@@ -26,18 +29,16 @@
             <table>
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>비용유형</th>
-                        <th>금액 (원)</th>
-                        <th>날짜</th>
+                        <th onclick="sortTable(0,'str')" style="cursor:pointer; user-select:none;">비용유형 <span id="icon0"></span></th>
+                        <th onclick="sortTable(1,'num')" style="cursor:pointer; user-select:none;">금액 (원) <span id="icon1"></span></th>
+                        <th onclick="sortTable(2,'str')" style="cursor:pointer; user-select:none;">날짜 <span id="icon2">▼</span></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:if="${#lists.isEmpty(expenseList)}">
-                        <td colspan="4" class="empty-state">등록된 비용이 없습니다.</td>
+                        <td colspan="3" class="empty-state">등록된 비용이 없습니다.</td>
                     </tr>
                     <tr th:each="e : ${expenseList}">
-                        <td th:text="${e.expenseId}"></td>
                         <td th:text="${e.expenseType}"></td>
                         <td class="amount" th:text="${#numbers.formatInteger(e.amount, 0, 'COMMA')}"></td>
                         <td th:text="${e.expenseDate}"></td>
@@ -89,6 +90,64 @@ function filterTable() {
         tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
     });
 }
+
+// 컬럼 정렬
+const sortState = { col: 2, asc: false };
+function sortTable(col, type) {
+    if (sortState.col === col) sortState.asc = !sortState.asc;
+    else { sortState.col = col; sortState.asc = true; }
+
+    [0,1,2].forEach(i => {
+        const el = document.getElementById('icon' + i);
+        el.textContent = i === col ? (sortState.asc ? '▲' : '▼') : '';
+    });
+
+    const tbody = document.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr')).filter(tr => tr.querySelectorAll('td').length >= 3);
+    rows.sort((a, b) => {
+        const va = a.querySelectorAll('td')[col].textContent.trim();
+        const vb = b.querySelectorAll('td')[col].textContent.trim();
+        let cmp;
+        if (type === 'num') cmp = (parseInt(va.replace(/,/g,'')) || 0) - (parseInt(vb.replace(/,/g,'')) || 0);
+        else cmp = va.localeCompare(vb, 'ko');
+        return sortState.asc ? cmp : -cmp;
+    });
+    rows.forEach(tr => tbody.appendChild(tr));
+}
+
+// 카테고리별 합계 카드 생성
+(function buildSummary() {
+    const totals = {};
+    document.querySelectorAll('tbody tr').forEach(tr => {
+        const cells = tr.querySelectorAll('td');
+        if (cells.length < 3) return;
+        const type = cells[0].textContent.trim();
+        const amount = parseInt(cells[1].textContent.replace(/,/g, '')) || 0;
+        if (!type) return;
+        totals[type] = (totals[type] || 0) + amount;
+    });
+
+    const colors = ['#5b8dee','#27ae7a','#e6a817','#8b5cf6','#14b8a6','#e05c5c','#f97316','#a0aab8'];
+    const grid = document.getElementById('summaryGrid');
+    Object.entries(totals)
+        .sort((a, b) => b[1] - a[1])
+        .forEach(([type, total], i) => {
+            const color = colors[i % colors.length];
+            const card = document.createElement('div');
+            card.style.cssText = `background:var(--surface);border-radius:14px;padding:18px 16px;box-shadow:var(--neu-raised);position:relative;overflow:hidden;cursor:pointer;transition:box-shadow .2s;`;
+            card.innerHTML = `
+                <div style="position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;background:${color};"></div>
+                <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">${type}</div>
+                <div style="font-size:18px;font-weight:600;color:var(--text);">${total.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--text-muted);margin-left:3px;">원</span></div>`;
+            card.onmouseover = () => card.style.boxShadow = '8px 8px 18px var(--sh-dark),-8px -8px 18px var(--sh-light)';
+            card.onmouseout  = () => card.style.boxShadow = 'var(--neu-raised)';
+            card.onclick = () => {
+                document.getElementById('searchInput').value = type;
+                filterTable();
+            };
+            grid.appendChild(card);
+        });
+})();
 </script>
 </body>
 </html>

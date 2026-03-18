@@ -12,7 +12,9 @@ public interface TransactionStatementMapper {
     TransactionStatement findById(@Param("statementId") Long statementId);
     List<TransactionStatementItem> findItemsByStatementId(@Param("statementId") Long statementId);
     void insert(TransactionStatement statement);
+    void update(TransactionStatement statement);
     void insertItem(TransactionStatementItem item);
+    void deleteItemsByStatementId(@Param("statementId") Long statementId);
     void delete(@Param("statementId") Long statementId);
     String findMaxStatementNo(@Param("prefix") String prefix);
 }

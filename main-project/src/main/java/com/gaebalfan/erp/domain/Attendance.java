@@ -2,14 +2,13 @@ package com.gaebalfan.erp.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 public class Attendance {
     private Long       attendanceId;
     private Long       employeeId;
     private LocalDate  workDate;
-    private LocalTime  checkIn;
-    private LocalTime  checkOut;
+    private String     checkIn;
+    private String     checkOut;
     private BigDecimal workHours;
     private BigDecimal overtimeHours;
     private Integer    lateMinutes;
@@ -22,8 +21,8 @@ public class Attendance {
     public Long       getAttendanceId()      { return attendanceId; }
     public Long       getEmployeeId()        { return employeeId; }
     public LocalDate  getWorkDate()          { return workDate; }
-    public LocalTime  getCheckIn()           { return checkIn; }
-    public LocalTime  getCheckOut()          { return checkOut; }
+    public String     getCheckIn()           { return checkIn; }
+    public String     getCheckOut()          { return checkOut; }
     public BigDecimal getWorkHours()         { return workHours; }
     public BigDecimal getOvertimeHours()     { return overtimeHours; }
     public Integer    getLateMinutes()       { return lateMinutes; }
@@ -34,8 +33,8 @@ public class Attendance {
     public void setAttendanceId(Long v)        { this.attendanceId = v; }
     public void setEmployeeId(Long v)          { this.employeeId = v; }
     public void setWorkDate(LocalDate v)       { this.workDate = v; }
-    public void setCheckIn(LocalTime v)        { this.checkIn = v; }
-    public void setCheckOut(LocalTime v)       { this.checkOut = v; }
+    public void setCheckIn(String v)           { this.checkIn = v; }
+    public void setCheckOut(String v)          { this.checkOut = v; }
     public void setWorkHours(BigDecimal v)     { this.workHours = v; }
     public void setOvertimeHours(BigDecimal v) { this.overtimeHours = v; }
     public void setLateMinutes(Integer v)      { this.lateMinutes = v; }

@@ -298,8 +298,22 @@ body {
 .btn-cancel-po { color: var(--danger); margin-left: 6px; }
 .btn-cancel-po:hover { color: #c94040; }
 
-.btn-cancel-modal { color: var(--text-muted); }
+.btn-cancel-modal {
+    padding: 8px 16px;
+    border-radius: 9px;
+    border: none;
+    background: var(--bg);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    box-shadow: var(--neu-flat);
+    transition: all .15s;
+}
 .btn-cancel-modal:hover { color: var(--text); }
+.btn-cancel-modal:active { box-shadow: var(--neu-pressed); }
+
+.table-wrap { overflow-x: auto; }
 
 .btn-checkout  { color: var(--warning); }
 .btn-checkout:hover { color: #cc9010; }
@@ -1009,6 +1023,7 @@ body.login-page::after {
    ============================================================ */
 .pagination {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     gap: 6px;

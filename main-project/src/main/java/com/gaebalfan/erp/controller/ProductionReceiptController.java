@@ -36,14 +36,13 @@ public class ProductionReceiptController {
         pr.setProductId(Long.parseLong(body.get("productId").toString()));
         pr.setQuantity(Integer.parseInt(body.get("quantity").toString()));
         if (body.get("receiptDate") != null && !body.get("receiptDate").toString().isEmpty()) {
-            // receiptDate field is LocalDate; parse only the date portion if datetime-local value is sent
             String dateStr = body.get("receiptDate").toString();
             if (dateStr.contains("T")) {
                 dateStr = dateStr.substring(0, dateStr.indexOf("T"));
             }
-            pr.setReceiptDate(java.time.LocalDate.parse(dateStr));
+            pr.setReceiptDate(java.time.LocalDate.parse(dateStr).atStartOfDay());
         } else {
-            pr.setReceiptDate(java.time.LocalDate.now());
+            pr.setReceiptDate(java.time.LocalDateTime.now());
         }
         service.insert(pr);
 

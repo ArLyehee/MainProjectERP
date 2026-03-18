@@ -6,7 +6,7 @@
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>거래명세서 | 개발팬 ERP</title>
-    <link rel="stylesheet" th:href="@{/css/erp.css(v=4)}">
+    <link rel="stylesheet" th:href="@{/css/erp.css(v=6)}">
     <style>
         .items-table { width:100%; border-collapse:collapse; margin:12px 0; }
         .items-table th, .items-table td { border:1px solid #d1d5db; padding:6px 8px; font-size:13px; }
@@ -21,6 +21,8 @@
         .btn-print { background:#2563eb; color:#fff; border:none; border-radius:6px; padding:5px 12px; cursor:pointer; font-size:13px; }
         .btn-print:hover { background:#1d4ed8; }
         .badge-no { font-family:monospace; font-size:12px; background:#eff6ff; color:#1e40af; padding:2px 8px; border-radius:10px; }
+        .btn-edit { background:#059669; color:#fff; border:none; border-radius:6px; padding:5px 12px; cursor:pointer; font-size:13px; }
+        .btn-edit:hover { background:#047857; }
     </style>
 </head>
 <body>
@@ -64,6 +66,7 @@
                         <td class="text-right" style="font-weight:600;" th:text="${#numbers.formatInteger(s.grandTotal, 1, 'COMMA') + '원'}"></td>
                         <td>
                             <div class="action-btns">
+                                <button class="btn-edit" th:onclick="'openEditModal(' + ${s.statementId} + ')'">수정</button>
                                 <button class="btn-print" th:onclick="'printStatement(' + ${s.statementId} + ')'">🖨️ 인쇄</button>
                                 <button class="btn-del-sm" th:onclick="'deleteStatement(' + ${s.statementId} + ')'">삭제</button>
                             </div>
@@ -78,14 +81,15 @@
 <!-- 등록 모달 -->
 <div class="modal-overlay" id="stmtModal">
     <div class="modal" style="max-width:700px;width:95%;">
-        <h3>🧾 거래명세서 등록</h3>
+        <h3 id="modalTitle">🧾 거래명세서 등록</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
             <div class="form-group"><label>발행일 *</label><input type="date" id="issueDate"></div>
             <div class="form-group"><label>거래처명 *</label><input type="text" id="customerName" placeholder="(주)홍길동물산"></div>
             <div class="form-group"><label>사업자번호</label><input type="text" id="customerBizNo" placeholder="000-00-00000"></div>
             <div class="form-group"><label>연락처</label><input type="text" id="customerTel" placeholder="02-0000-0000"></div>
             <div class="form-group" style="grid-column:1/-1;"><label>주소</label><input type="text" id="customerAddr" placeholder="서울시 강남구 ..."></div>
-            <div class="form-group" style="grid-column:1/-1;"><label>비고</label><input type="text" id="notes" placeholder="특이사항 입력"></div>
+            <div class="form-group"><label>담당자</label><input type="text" id="managerName" placeholder="홍길동"></div>
+            <div class="form-group"><label>비고</label><input type="text" id="notes" placeholder="특이사항 입력"></div>
         </div>
         <div style="font-weight:600;margin:8px 0 4px;">품목</div>
         <button class="btn-add-row" onclick="addRow()">+ 품목 추가</button>
@@ -93,8 +97,19 @@
             <thead><tr><th style="width:40%">품목명</th><th style="width:15%">수량</th><th style="width:20%">단가</th><th style="width:20%">금액</th><th style="width:5%"></th></tr></thead>
             <tbody id="itemsBody"></tbody>
         </table>
-        <div style="text-align:right;font-size:13px;padding:8px;background:#f9fafb;border-radius:6px;margin-bottom:12px;">
-            공급가액: <b id="sumTotal">0</b>원 &nbsp;|&nbsp; 세액(10%): <b id="sumTax">0</b>원 &nbsp;|&nbsp; 합계: <b id="sumGrand">0</b>원
+        <div style="background:#f9fafb;border-radius:6px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:flex-end;gap:16px;font-size:13px;flex-wrap:wrap;">
+            <span>공급가액: <b id="sumTotal">0</b>원</span>
+            <span style="display:flex;align-items:center;gap:4px;">
+                세율: <input type="number" id="taxRate" value="10" min="0" max="100"
+                    style="width:48px;text-align:center;border:1px solid #d1d5db;border-radius:4px;padding:2px 4px;font-size:13px;"
+                    oninput="onTaxRateChange()">%
+            </span>
+            <span style="display:flex;align-items:center;gap:4px;">
+                세액: <input type="number" id="taxAmountInput" value="0" min="0"
+                    style="width:110px;text-align:right;border:1px solid #d1d5db;border-radius:4px;padding:2px 4px;font-size:13px;"
+                    oninput="onTaxAmountChange()">원
+            </span>
+            <span>합계: <b id="sumGrand">0</b>원</span>
         </div>
         <div class="modal-footer">
             <button class="btn-cancel-modal" onclick="closeModal()">취소</button>
@@ -106,14 +121,67 @@
 <script>
 const csrf = document.querySelector('meta[name="_csrf"]').content;
 const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+let editingId = null;
 
 function openModal() {
-    document.getElementById('stmtModal').classList.add('open');
+    editingId = null;
+    document.getElementById('modalTitle').textContent = '🧾 거래명세서 등록';
     document.getElementById('issueDate').value = new Date().toISOString().slice(0,10);
+    document.getElementById('customerName').value = '';
+    document.getElementById('customerBizNo').value = '';
+    document.getElementById('customerTel').value = '';
+    document.getElementById('customerAddr').value = '';
+    document.getElementById('managerName').value = '';
+    document.getElementById('notes').value = '';
+    document.getElementById('taxRate').value = '10';
+    document.getElementById('taxAmountInput').value = '0';
     document.getElementById('itemsBody').innerHTML = '';
     addRow();
     calcTotal();
+    document.getElementById('stmtModal').classList.add('open');
 }
+
+function openEditModal(id) {
+    fetch('/api/transaction-statements/' + id)
+        .then(r => r.json())
+        .then(s => {
+            editingId = id;
+            document.getElementById('modalTitle').textContent = '🧾 거래명세서 수정 (' + s.statementNo + ')';
+            document.getElementById('issueDate').value = s.issueDate;
+            document.getElementById('customerName').value = s.customerName || '';
+            document.getElementById('customerBizNo').value = s.customerBizNo || '';
+            document.getElementById('customerTel').value = s.customerTel || '';
+            document.getElementById('customerAddr').value = s.customerAddr || '';
+            document.getElementById('managerName').value = s.managerName || '';
+            document.getElementById('notes').value = s.notes || '';
+            document.getElementById('itemsBody').innerHTML = '';
+            (s.items || []).forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="text" placeholder="품목명" oninput="calcTotal()" value="${escHtml(item.itemName)}"></td>
+                    <td><input type="number" value="${item.quantity}" min="1" oninput="calcTotal()"></td>
+                    <td><input type="number" value="${item.unitPrice}" min="0" oninput="calcTotal()"></td>
+                    <td><input type="text" readonly style="color:#6b7280; text-align:right;"></td>
+                    <td><button class="btn-del-row" onclick="this.closest('tr').remove();calcTotal()">✕</button></td>`;
+                document.getElementById('itemsBody').appendChild(tr);
+            });
+            if (!s.items || s.items.length === 0) addRow();
+            // 세율 역산 (소수점 반올림), 세액 직접 세팅
+            const loadedTotal = s.totalAmount || 0;
+            const loadedTax = s.taxAmount || 0;
+            document.getElementById('taxAmountInput').value = loadedTax;
+            document.getElementById('taxRate').value = loadedTotal > 0 ? Math.round(loadedTax / loadedTotal * 100) : 10;
+            calcTotal();
+            document.getElementById('taxAmountInput').value = loadedTax; // calcTotal이 덮어쓰므로 재세팅
+            document.getElementById('sumGrand').textContent = (loadedTotal + loadedTax).toLocaleString();
+            document.getElementById('stmtModal').classList.add('open');
+        });
+}
+
+function escHtml(str) {
+    return (str || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 function closeModal() { document.getElementById('stmtModal').classList.remove('open'); }
 
 function addRow() {
@@ -122,9 +190,20 @@ function addRow() {
         <td><input type="text" placeholder="품목명" oninput="calcTotal()"></td>
         <td><input type="number" value="1" min="1" oninput="calcTotal()"></td>
         <td><input type="number" value="0" min="0" oninput="calcTotal()"></td>
-        <td><input type="number" readonly style="color:#6b7280;"></td>
+        <td><input type="text" readonly style="color:#6b7280; text-align:right;"></td>
         <td><button class="btn-del-row" onclick="this.closest('tr').remove();calcTotal()">✕</button></td>`;
     document.getElementById('itemsBody').appendChild(tr);
+}
+
+function parseItemsTotal() {
+    let total = 0;
+    document.querySelectorAll('#itemsBody tr').forEach(tr => {
+        const inputs = tr.querySelectorAll('input');
+        const qty = parseInt(inputs[1].value) || 0;
+        const price = parseInt(inputs[2].value) || 0;
+        total += qty * price;
+    });
+    return total;
 }
 
 function calcTotal() {
@@ -137,9 +216,24 @@ function calcTotal() {
         inputs[3].value = amt.toLocaleString();
         total += amt;
     });
-    const tax = Math.round(total * 0.1);
+    const rate = parseFloat(document.getElementById('taxRate').value) || 0;
+    const tax = Math.round(total * rate / 100);
     document.getElementById('sumTotal').textContent = total.toLocaleString();
-    document.getElementById('sumTax').textContent = tax.toLocaleString();
+    document.getElementById('taxAmountInput').value = tax;
+    document.getElementById('sumGrand').textContent = (total + tax).toLocaleString();
+}
+
+function onTaxRateChange() {
+    const total = parseItemsTotal();
+    const rate = parseFloat(document.getElementById('taxRate').value) || 0;
+    const tax = Math.round(total * rate / 100);
+    document.getElementById('taxAmountInput').value = tax;
+    document.getElementById('sumGrand').textContent = (total + tax).toLocaleString();
+}
+
+function onTaxAmountChange() {
+    const total = parseItemsTotal();
+    const tax = parseInt(document.getElementById('taxAmountInput').value) || 0;
     document.getElementById('sumGrand').textContent = (total + tax).toLocaleString();
 }
 
@@ -166,15 +260,20 @@ function saveStatement() {
         customerTel: document.getElementById('customerTel').value,
         customerAddr: document.getElementById('customerAddr').value,
         notes: document.getElementById('notes').value,
+        managerName: document.getElementById('managerName').value,
+        taxAmount: parseInt(document.getElementById('taxAmountInput').value) || 0,
         items: items
     };
-    fetch('/api/transaction-statements', {
-        method: 'POST',
+    const url = editingId ? '/api/transaction-statements/' + editingId : '/api/transaction-statements';
+    const method = editingId ? 'PUT' : 'POST';
+    fetch(url, {
+        method: method,
         headers: {'Content-Type': 'application/json', [csrfHeader]: csrf},
         body: JSON.stringify(data)
     }).then(res => {
         if (!res.ok) {
-            res.headers.get('X-Error-Message') && alert(res.headers.get('X-Error-Message'));
+            const msg = res.headers.get('X-Error-Message') || '저장에 실패했습니다.';
+            alert(msg);
         } else {
             closeModal();
             location.reload();
