@@ -19,11 +19,13 @@
             </div>
             <button onclick="openCreate()" class="btn btn-primary">+ 발주 등록</button>
         </div>
+        <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+            <button id="sortBtn" onclick="toggleSort()" class="btn" style="font-size:12px; padding:6px 14px;">🕒 최신순</button>
+        </div>
         <div class="card">
-            <table>
+            <table id="poTable">
                 <thead>
                     <tr>
-                        <th>발주 번호</th>
                         <th>공급업체</th>
                         <th>발주일</th>
                         <th>상태</th>
@@ -32,12 +34,14 @@
                 </thead>
                 <tbody>
                     <tr th:if="${#lists.isEmpty(purchaseOrderList)}">
-                        <td colspan="5" class="empty-state">등록된 발주가 없습니다.</td>
+                        <td colspan="4" class="empty-state">등록된 발주가 없습니다.</td>
                     </tr>
-                    <tr th:each="po : ${purchaseOrderList}">
-                        <td th:text="'PO-' + ${po.poId}"></td>
-                        <td th:text="${po.supplierName != null ? po.supplierName : po.supplierId}"></td>
-                        <td th:text="${po.orderDate}"></td>
+                    <tr th:each="po : ${purchaseOrderList}" th:attr="data-date=${po.orderDate}">
+                        <td>
+                            <div th:text="${po.supplierName != null ? po.supplierName : po.supplierId}"></div>
+                            <div class="sub-text" th:text="${po.poCode}" th:if="${po.poCode != null}"></div>
+                        </td>
+                        <td th:text="${po.orderDate != null ? po.orderDate.toString().substring(0,10) : '-'}"></td>
                         <td>
                             <span th:class="'badge badge-' + ${#strings.toLowerCase(po.status)}"
                                   th:text="${po.status == 'PENDING' ? '대기' :
@@ -83,6 +87,18 @@
 <script>
 const csrf = document.querySelector('meta[name="_csrf"]').content;
 const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+let sortAsc = false;
+function toggleSort() {
+    sortAsc = !sortAsc;
+    document.getElementById('sortBtn').textContent = sortAsc ? '🕒 과거순' : '🕒 최신순';
+    const tbody = document.querySelector('#poTable tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr[data-date]'));
+    rows.sort((a, b) => {
+        const da = a.dataset.date, db = b.dataset.date;
+        return sortAsc ? da.localeCompare(db) : db.localeCompare(da);
+    });
+    rows.forEach(r => tbody.appendChild(r));
+}
 function openCreate() { document.getElementById('poModal').classList.add('open'); }
 function closePoModal() { document.getElementById('poModal').classList.remove('open'); }
 function savePo() {

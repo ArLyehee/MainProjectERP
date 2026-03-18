@@ -23,30 +23,28 @@
             <input type="text" id="searchInput" placeholder="검색..." oninput="filterTable()" class="search-input">
         </div>
         <div class="card">
-            <table>
+            <table id="salesTable">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>제품명</th>
-                        <th>수량</th>
-                        <th>단가 (원)</th>
-                        <th>총액 (원)</th>
-                        <th>원가 (원)</th>
-                        <th>판매일</th>
+                        <th onclick="sortTable(0)" style="cursor:pointer;">판매일 ↕</th>
+                        <th onclick="sortTable(1)" style="cursor:pointer;">제품명 ↕</th>
+                        <th onclick="sortTable(2)" style="cursor:pointer;">수량 ↕</th>
+                        <th onclick="sortTable(3)" style="cursor:pointer;">단가 (원) ↕</th>
+                        <th onclick="sortTable(4)" style="cursor:pointer;">총액 (원) ↕</th>
+                        <th onclick="sortTable(5)" style="cursor:pointer;">원가 (원) ↕</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:if="${#lists.isEmpty(saleList)}">
-                        <td colspan="7" class="empty-state">등록된 매출이 없습니다.</td>
+                        <td colspan="6" class="empty-state">등록된 매출이 없습니다.</td>
                     </tr>
                     <tr th:each="s : ${saleList}">
-                        <td th:text="${s.saleId}"></td>
+                        <td th:text="${s.saleDate}"></td>
                         <td th:text="${s.productName != null ? s.productName : s.productId}"></td>
                         <td th:text="${s.quantity}"></td>
                         <td class="price" th:text="${#numbers.formatInteger(s.unitPrice, 0, 'COMMA')}"></td>
                         <td class="price" th:text="${#numbers.formatInteger(s.totalPrice, 0, 'COMMA')}"></td>
                         <td th:text="${#numbers.formatInteger(s.costPrice, 0, 'COMMA')}"></td>
-                        <td th:text="${s.saleDate}"></td>
                     </tr>
                 </tbody>
             </table>
@@ -122,6 +120,26 @@ function saveSale() {
                 location.reload();
             }
         });
+}
+
+let sortColIdx = -1, sortAsc = true;
+function sortTable(colIdx) {
+    sortAsc = (sortColIdx === colIdx) ? !sortAsc : true;
+    sortColIdx = colIdx;
+    const ths = document.querySelectorAll('#salesTable thead th');
+    ths.forEach((th, i) => {
+        th.textContent = th.textContent.replace(/ [▲▼↕]$/, '') + (i === colIdx ? (sortAsc ? ' ▲' : ' ▼') : ' ↕');
+    });
+    const tbody = document.querySelector('#salesTable tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => r.cells.length > 1);
+    rows.sort((a, b) => {
+        const va = a.cells[colIdx].textContent.replace(/,/g, '').trim();
+        const vb = b.cells[colIdx].textContent.replace(/,/g, '').trim();
+        const na = parseFloat(va), nb = parseFloat(vb);
+        const cmp = (!isNaN(na) && !isNaN(nb)) ? na - nb : va.localeCompare(vb);
+        return sortAsc ? cmp : -cmp;
+    });
+    rows.forEach(r => tbody.appendChild(r));
 }
 
 function filterTable() {

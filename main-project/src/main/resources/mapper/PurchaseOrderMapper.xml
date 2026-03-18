@@ -5,7 +5,8 @@
 <mapper namespace="com.gaebalfan.erp.mapper.PurchaseOrderMapper">
 
     <resultMap id="PurchaseOrderResultMap" type="com.gaebalfan.erp.domain.PurchaseOrder">
-        <id     property="poId"         column="po_id"/>
+        <id     property="poId"         column="id"/>
+        <result property="poCode"       column="po_id"/>
         <result property="supplierId"   column="supplier_id"/>
         <result property="orderDate"    column="order_date"/>
         <result property="status"       column="status"/>
@@ -13,14 +14,14 @@
     </resultMap>
 
     <select id="findAll" resultMap="PurchaseOrderResultMap">
-        SELECT po.*, s.supplier_name
+        SELECT po.id, po.po_id, po.supplier_id, po.order_date, po.status, s.supplier_name
         FROM purchase_orders po
         LEFT JOIN suppliers s ON po.supplier_id = s.supplier_id
-        ORDER BY po.po_id DESC
+        ORDER BY po.order_date DESC
     </select>
 
     <select id="findById" resultMap="PurchaseOrderResultMap">
-        SELECT * FROM purchase_orders WHERE po_id = #{poId}
+        SELECT id, po_id, supplier_id, order_date, status FROM purchase_orders WHERE id = #{poId}
     </select>
 
     <insert id="insert" parameterType="com.gaebalfan.erp.domain.PurchaseOrder"
@@ -31,11 +32,11 @@
 
     <update id="updateStatus">
         UPDATE purchase_orders SET status = #{status}
-        WHERE po_id = #{poId}
+        WHERE id = #{poId}
     </update>
 
     <delete id="delete">
-        DELETE FROM purchase_orders WHERE po_id = #{poId}
+        DELETE FROM purchase_orders WHERE id = #{poId}
     </delete>
 
 </mapper>

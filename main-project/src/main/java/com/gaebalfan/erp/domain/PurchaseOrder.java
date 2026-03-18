@@ -3,7 +3,8 @@ package com.gaebalfan.erp.domain;
 import java.time.LocalDateTime;
 
 public class PurchaseOrder {
-    private Long          poId;
+    private Integer       poId;        // purchase_orders.id (INT PK)
+    private String        poCode;      // purchase_orders.po_id (VARCHAR)
     private Long          supplierId;
     private LocalDateTime orderDate;
     private String        status;   // PENDING, APPROVED, COMPLETED, CANCELLED
@@ -11,13 +12,15 @@ public class PurchaseOrder {
     // 조인용
     private String        supplierName;
 
-    public Long          getPoId()         { return poId; }
+    public Integer       getPoId()         { return poId; }
+    public String        getPoCode()       { return poCode; }
     public Long          getSupplierId()   { return supplierId; }
     public LocalDateTime getOrderDate()    { return orderDate; }
     public String        getStatus()       { return status; }
     public String        getSupplierName() { return supplierName; }
 
-    public void setPoId(Long poId)                        { this.poId = poId; }
+    public void setPoId(Integer poId)                     { this.poId = poId; }
+    public void setPoCode(String poCode)                  { this.poCode = poCode; }
     public void setSupplierId(Long supplierId)            { this.supplierId = supplierId; }
     public void setOrderDate(LocalDateTime orderDate)     { this.orderDate = orderDate; }
     public void setStatus(String status)                  { this.status = status; }

@@ -19,12 +19,13 @@
             </div>
             <button onclick="openCreate()" class="btn btn-primary">+ 입고 등록</button>
         </div>
+        <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+            <button id="sortBtn" onclick="toggleSort()" class="btn" style="font-size:12px; padding:6px 14px;">🕒 최신순</button>
+        </div>
         <div class="card">
-            <table>
+            <table id="receiptTable">
                 <thead>
                     <tr>
-                        <th>입고 번호</th>
-                        <th>발주 번호</th>
                         <th>제품명</th>
                         <th>수량</th>
                         <th>입고일</th>
@@ -32,11 +33,9 @@
                 </thead>
                 <tbody>
                     <tr th:if="${#lists.isEmpty(receiptList)}">
-                        <td colspan="5" class="empty-state">등록된 입고 내역이 없습니다.</td>
+                        <td colspan="3" class="empty-state">등록된 입고 내역이 없습니다.</td>
                     </tr>
-                    <tr th:each="r : ${receiptList}">
-                        <td th:text="'REC-' + ${r.receiptId}"></td>
-                        <td th:text="'PO-' + ${r.poId}"></td>
+                    <tr th:each="r : ${receiptList}" th:attr="data-date=${r.receiptDate}">
                         <td th:text="${r.productName != null ? r.productName : r.productId}"></td>
                         <td class="qty" th:text="${r.quantity}"></td>
                         <td th:text="${r.receiptDate}"></td>
@@ -97,6 +96,18 @@
 <script>
 const csrf = document.querySelector('meta[name="_csrf"]').content;
 const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+let sortAsc = false;
+function toggleSort() {
+    sortAsc = !sortAsc;
+    document.getElementById('sortBtn').textContent = sortAsc ? '🕒 과거순' : '🕒 최신순';
+    const tbody = document.querySelector('#receiptTable tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr[data-date]'));
+    rows.sort((a, b) => {
+        const da = a.dataset.date, db = b.dataset.date;
+        return sortAsc ? da.localeCompare(db) : db.localeCompare(da);
+    });
+    rows.forEach(r => tbody.appendChild(r));
+}
 function openCreate() { document.getElementById('receiptModal').classList.add('open'); }
 function closeReceiptModal() { document.getElementById('receiptModal').classList.remove('open'); }
 function saveReceipt() {

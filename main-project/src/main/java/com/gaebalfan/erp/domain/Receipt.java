@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public class Receipt {
     private Long          receiptId;
-    private Long          poId;
+    private String        poId;   // receipts.po_id is VARCHAR
     private Long          productId;
     private int           quantity;
     private LocalDateTime receiptDate;
@@ -13,14 +13,14 @@ public class Receipt {
     private String        productName;
 
     public Long          getReceiptId()   { return receiptId; }
-    public Long          getPoId()        { return poId; }
+    public String        getPoId()        { return poId; }
     public Long          getProductId()   { return productId; }
     public int           getQuantity()    { return quantity; }
     public LocalDateTime getReceiptDate() { return receiptDate; }
     public String        getProductName() { return productName; }
 
     public void setReceiptId(Long receiptId)                  { this.receiptId = receiptId; }
-    public void setPoId(Long poId)                            { this.poId = poId; }
+    public void setPoId(String poId)                          { this.poId = poId; }
     public void setProductId(Long productId)                  { this.productId = productId; }
     public void setQuantity(int quantity)                     { this.quantity = quantity; }
     public void setReceiptDate(LocalDateTime receiptDate)     { this.receiptDate = receiptDate; }
