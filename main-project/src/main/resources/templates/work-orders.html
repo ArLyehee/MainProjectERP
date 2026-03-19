@@ -26,7 +26,6 @@
             <table>
                 <thead>
                     <tr>
-                        <th>#</th>
                         <th>제품명</th>
                         <th>생산 수량</th>
                         <th>시작일</th>
@@ -36,10 +35,9 @@
                 </thead>
                 <tbody>
                     <tr th:if="${#lists.isEmpty(workOrderList)}">
-                        <td colspan="6" class="empty-state">등록된 작업지시가 없습니다.</td>
+                        <td colspan="5" class="empty-state">등록된 작업지시가 없습니다.</td>
                     </tr>
                     <tr th:each="w : ${workOrderList}">
-                        <td th:text="${w.workOrderId}"></td>
                         <td th:text="${w.productName != null ? w.productName : w.productId}"></td>
                         <td class="qty" th:text="${w.quantity}"></td>
                         <td th:text="${w.startDate}"></td>
@@ -101,8 +99,16 @@
 <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
         <h3>작업지시 등록</h3>
-        <div class="form-group"><label>제품 *</label><select id="productId"></select></div>
-        <div class="form-group"><label>생산 수량 *</label><input type="number" id="quantity" placeholder="0" min="1"></div>
+        <div class="form-group"><label>제품 *</label><select id="productId" onchange="onProductOrQtyChange()"></select></div>
+        <div class="form-group"><label>생산 수량 *</label><input type="number" id="quantity" placeholder="0" min="1" oninput="onProductOrQtyChange()"></div>
+        <div id="stockCheckArea" style="margin:8px 0;display:none;">
+            <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--text-muted);">📦 자재 재고 현황</div>
+            <table style="width:100%;font-size:12px;border-collapse:collapse;" id="stockTable">
+                <thead><tr style="background:var(--surface);"><th style="padding:4px 8px;text-align:left;">자재명</th><th style="padding:4px 8px;text-align:right;">필요</th><th style="padding:4px 8px;text-align:right;">보유</th><th style="padding:4px 8px;text-align:right;">부족</th></tr></thead>
+                <tbody id="stockTableBody"></tbody>
+            </table>
+        </div>
+        <div id="stockWarning" style="font-size:12px;color:#e74c3c;margin:4px 0 8px;display:none;">⚠️ 재고가 부족한 자재가 있습니다. 등록 시 재고가 음수가 될 수 있습니다.</div>
         <div class="form-group"><label>시작일</label><input type="datetime-local" id="startDate"></div>
         <div class="form-group"><label>상태</label>
             <select id="status">
@@ -124,6 +130,36 @@ function filterTable() {
         tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
     });
 }
+let stockCheckTimer = null;
+function onProductOrQtyChange() {
+    clearTimeout(stockCheckTimer);
+    stockCheckTimer = setTimeout(doStockCheck, 400);
+}
+function doStockCheck() {
+    const productId = document.getElementById('productId').value;
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const area = document.getElementById('stockCheckArea');
+    const warning = document.getElementById('stockWarning');
+    if (!productId || !quantity || quantity < 1) { area.style.display='none'; warning.style.display='none'; return; }
+    fetch('/api/work-orders/check-stock?productId=' + productId + '&quantity=' + quantity)
+        .then(r => r.json())
+        .then(list => {
+            if (!list || list.length === 0) { area.style.display='none'; warning.style.display='none'; return; }
+            area.style.display='block';
+            let hasShortage = false;
+            document.getElementById('stockTableBody').innerHTML = list.map(item => {
+                const short = item.shortage > 0;
+                if (short) hasShortage = true;
+                return `<tr style="${short ? 'background:rgba(231,76,60,0.08);' : ''}">
+                    <td style="padding:4px 8px;">${item.componentName}</td>
+                    <td style="padding:4px 8px;text-align:right;">${item.needed}</td>
+                    <td style="padding:4px 8px;text-align:right;">${item.available}</td>
+                    <td style="padding:4px 8px;text-align:right;color:${short ? '#e74c3c' : '#27ae60'};font-weight:600;">${short ? '-' + item.shortage : '충족'}</td>
+                </tr>`;
+            }).join('');
+            warning.style.display = hasShortage ? 'block' : 'none';
+        });
+}
 function openCreate() {
     const src = document.getElementById('productSourceSelect');
     const dst = document.getElementById('productId');
@@ -131,6 +167,8 @@ function openCreate() {
     document.getElementById('quantity').value = '';
     document.getElementById('startDate').value = '';
     document.getElementById('status').value = 'PENDING';
+    document.getElementById('stockCheckArea').style.display = 'none';
+    document.getElementById('stockWarning').style.display = 'none';
     document.getElementById('modalOverlay').classList.add('open');
 }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }

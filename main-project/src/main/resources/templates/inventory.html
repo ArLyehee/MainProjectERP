@@ -20,6 +20,25 @@
             </div>
             <button onclick="openCreate()" class="btn btn-primary">+ 재고 등록</button>
         </div>
+        <!-- 재고 부족 알림 배너 -->
+        <div th:if="${!#lists.isEmpty(shortageList)}"
+             style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.3);border-radius:8px;padding:14px 18px;margin-bottom:16px;">
+            <div style="font-size:13px;font-weight:700;color:#c0392b;margin-bottom:8px;">
+                ⚠️ 재고 부족 항목 <span style="background:#e74c3c;color:#fff;border-radius:10px;padding:1px 8px;font-size:11px;" th:text="${#lists.size(shortageList)}"></span>
+                <span style="font-size:11px;font-weight:400;color:#888;margin-left:8px;">기준: <span th:text="${lowStockThreshold}"></span>개 미만</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                <span th:each="s : ${shortageList}"
+                      style="font-size:12px;padding:3px 10px;border-radius:12px;border:1px solid rgba(231,76,60,0.4);"
+                      th:style="${s.quantity <= 0} ? 'background:#e74c3c;color:#fff;font-size:12px;padding:3px 10px;border-radius:12px;' : 'background:rgba(231,76,60,0.12);color:#c0392b;font-size:12px;padding:3px 10px;border-radius:12px;'">
+                    <span th:text="${s.productName}"></span>
+                    (<span th:text="${s.warehouseName}"></span>)
+                    <b th:text="${s.quantity}"></b>개
+                    <span th:if="${s.quantity <= 0}" style="font-weight:700;"> ❗음수</span>
+                </span>
+            </div>
+        </div>
+
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="제품명 또는 창고 검색..." oninput="filterTable()" class="search-input">
         </div>
@@ -40,15 +59,17 @@
                     <tr th:if="${#lists.isEmpty(inventoryList)}">
                         <td colspan="7" class="empty-state">등록된 재고가 없습니다.</td>
                     </tr>
-                    <tr th:each="inv : ${inventoryList}">
+                    <tr th:each="inv : ${inventoryList}"
+                        th:style="${inv.quantity <= 0} ? 'background:rgba(231,76,60,0.07);' : (${inv.quantity < lowStockThreshold} ? 'background:rgba(255,183,77,0.08);' : '')">
                         <td th:text="${inv.inventoryId}"></td>
                         <td th:text="${inv.productName != null ? inv.productName : inv.productId}"></td>
                         <td th:text="${inv.warehouseName != null ? inv.warehouseName : inv.warehouseId}"></td>
-                        <td class="qty" th:text="${inv.quantity}"></td>
+                        <td class="qty" th:text="${inv.quantity}"
+                            th:style="${inv.quantity <= 0} ? 'color:#e74c3c;font-weight:700;' : ''"></td>
                         <td>
-                            <span th:if="${inv.quantity == 0}" class="badge badge-empty">재고없음</span>
-                            <span th:if="${inv.quantity > 0 and inv.quantity < 10}" class="badge badge-low">부족</span>
-                            <span th:if="${inv.quantity >= 10}" class="badge badge-ok">정상</span>
+                            <span th:if="${inv.quantity <= 0}" class="badge badge-empty">재고없음</span>
+                            <span th:if="${inv.quantity > 0 and inv.quantity < lowStockThreshold}" class="badge badge-low">부족</span>
+                            <span th:if="${inv.quantity >= lowStockThreshold}" class="badge badge-ok">정상</span>
                         </td>
                         <td th:text="${inv.lastUpdate}"></td>
                         <td>

@@ -26,7 +26,6 @@
             <table>
                 <thead>
                     <tr>
-                        <th>#</th>
                         <th>직원명</th>
                         <th>날짜</th>
                         <th>출근</th>
@@ -37,10 +36,9 @@
                 </thead>
                 <tbody>
                     <tr th:if="${#lists.isEmpty(attendanceList)}">
-                        <td colspan="7" class="empty-state">등록된 근태 기록이 없습니다.</td>
+                        <td colspan="6" class="empty-state">등록된 근태 기록이 없습니다.</td>
                     </tr>
                     <tr th:each="a : ${attendanceList}">
-                        <td th:text="${a.attendanceId}"></td>
                         <td th:text="${a.employeeName}"></td>
                         <td th:text="${a.workDate}"></td>
                         <td th:text="${a.checkIn != null ? a.checkIn : '-'}"></td>

@@ -1,5 +1,6 @@
 package com.gaebalfan.erp.controller;
 
+import com.gaebalfan.erp.config.SystemSettings;
 import com.gaebalfan.erp.service.*;
 import com.gaebalfan.erp.service.TransactionStatementService;
 import org.springframework.stereotype.Controller;
@@ -27,6 +28,7 @@ public class WebPageController {
     private final SaleService saleService;
     private final OperatingExpenseService expenseService;
     private final TransactionStatementService transactionStatementService;
+    private final SystemSettings systemSettings;
 
     public WebPageController(InventoryService inventoryService,
                              PurchaseOrderService purchaseOrderService,
@@ -41,7 +43,8 @@ public class WebPageController {
                              BomService bomService,
                              SaleService saleService,
                              OperatingExpenseService expenseService,
-                             TransactionStatementService transactionStatementService) {
+                             TransactionStatementService transactionStatementService,
+                             SystemSettings systemSettings) {
         this.inventoryService = inventoryService;
         this.purchaseOrderService = purchaseOrderService;
         this.receiptService = receiptService;
@@ -56,6 +59,7 @@ public class WebPageController {
         this.saleService = saleService;
         this.expenseService = expenseService;
         this.transactionStatementService = transactionStatementService;
+        this.systemSettings = systemSettings;
     }
 
     // ── 로그인 페이지 ──────────────────────────────
@@ -86,7 +90,14 @@ public class WebPageController {
     // ── 재고/물류 페이지 ───────────────────────────
     @GetMapping("/inventory")
     public String inventory(Model model) {
-        model.addAttribute("inventoryList", inventoryService.findAll());
+        var inventoryList = inventoryService.findAll();
+        int threshold = systemSettings.getLowStockThreshold();
+        var shortageList = inventoryList.stream()
+                .filter(i -> i.getQuantity() < threshold)
+                .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("inventoryList", inventoryList);
+        model.addAttribute("shortageList", shortageList);
+        model.addAttribute("lowStockThreshold", threshold);
         model.addAttribute("productList", productService.findAll());
         model.addAttribute("warehouseList", warehouseService.findAll());
         return "inventory";

@@ -19,6 +19,17 @@
             </div>
         </div>
         <div class="settings-grid">
+            <!-- 재고 부족 기준값 -->
+            <div class="settings-card">
+                <div class="card-title">📦 재고 부족 기준값</div>
+                <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">이 수량 미만이면 대시보드에 재고 부족으로 표시됩니다.</p>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <input type="number" id="lowStockInput" min="0" class="settings-input" style="width:100px;">
+                    <span style="font-size:13px;color:var(--text-muted);">개 미만</span>
+                    <button class="btn btn-primary" onclick="saveLowStock()">저장</button>
+                </div>
+                <div id="lowStockMsg" style="font-size:12px;margin-top:8px;"></div>
+            </div>
             <!-- 비밀번호 변경 -->
             <div class="settings-card">
                 <div class="card-title">🔐 비밀번호 변경</div>
@@ -113,7 +124,30 @@ function delPos(id) {
         .then(() => loadPos());
 }
 
-document.addEventListener('DOMContentLoaded', () => { loadDepts(); loadPos(); });
+function saveLowStock() {
+    const val = parseInt(document.getElementById('lowStockInput').value);
+    const msg = document.getElementById('lowStockMsg');
+    if (isNaN(val) || val < 0) { msg.className='msg-error'; msg.textContent='0 이상의 숫자를 입력하세요.'; return; }
+    fetch('/api/settings/low-stock-threshold', {
+        method:'POST', headers:{'Content-Type':'application/json',[csrfHeader]:csrf},
+        body: JSON.stringify({threshold: val})
+    }).then(r => {
+        if (!r.ok) { msg.className='msg-error'; msg.textContent='저장 실패 (권한 또는 서버 오류)'; return; }
+        return r.json();
+    }).then(data => {
+        if (!data) return;
+        if (data.error) { msg.className='msg-error'; msg.textContent=data.error; }
+        else { msg.className='msg-success'; msg.textContent=`저장됨: ${data.threshold}개 미만`; }
+    }).catch(() => { msg.className='msg-error'; msg.textContent='저장 중 오류가 발생했습니다.'; });
+}
+
+function loadLowStock() {
+    fetch('/api/settings/low-stock-threshold').then(r=>r.json()).then(data => {
+        document.getElementById('lowStockInput').value = data.threshold;
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => { loadDepts(); loadPos(); loadLowStock(); });
 </script>
 </body>
 </html>

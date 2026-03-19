@@ -54,4 +54,8 @@
         DELETE FROM inventory WHERE inventory_id = #{inventoryId}
     </delete>
 
+    <select id="findTotalQuantityByProduct" resultType="int">
+        SELECT COALESCE(SUM(quantity), 0) FROM inventory WHERE product_id = #{productId}
+    </select>
+
 </mapper>

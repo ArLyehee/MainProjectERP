@@ -1,5 +1,6 @@
 package com.gaebalfan.erp.controller;
 
+import com.gaebalfan.erp.config.SystemSettings;
 import com.gaebalfan.erp.domain.Department;
 import com.gaebalfan.erp.domain.Position;
 import com.gaebalfan.erp.mapper.EmployeeMapper;
@@ -19,11 +20,29 @@ public class SettingsController {
     private final EmployeeMapper employeeMapper;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final SystemSettings systemSettings;
 
-    public SettingsController(EmployeeMapper employeeMapper, UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    public SettingsController(EmployeeMapper employeeMapper, UserMapper userMapper,
+                              PasswordEncoder passwordEncoder, SystemSettings systemSettings) {
         this.employeeMapper = employeeMapper;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
+        this.systemSettings = systemSettings;
+    }
+
+    // 재고 부족 기준값 조회
+    @GetMapping("/low-stock-threshold")
+    public ResponseEntity<Map<String, Integer>> getLowStockThreshold() {
+        return ResponseEntity.ok(Map.of("threshold", systemSettings.getLowStockThreshold()));
+    }
+
+    // 재고 부족 기준값 변경 (페이지 자체가 /admin/** 로 보호됨)
+    @PostMapping("/low-stock-threshold")
+    public ResponseEntity<Map<String, Object>> setLowStockThreshold(@RequestBody Map<String, Integer> body) {
+        int value = body.getOrDefault("threshold", 10);
+        if (value < 0) return ResponseEntity.badRequest().body(Map.of("error", "0 이상의 값을 입력하세요."));
+        systemSettings.setLowStockThreshold(value);
+        return ResponseEntity.ok(Map.of("message", "저장되었습니다.", "threshold", value));
     }
 
     // 부서 목록

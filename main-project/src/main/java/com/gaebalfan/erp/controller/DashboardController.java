@@ -1,5 +1,6 @@
 package com.gaebalfan.erp.controller;
 
+import com.gaebalfan.erp.config.SystemSettings;
 import com.gaebalfan.erp.mapper.DashboardMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,19 +11,23 @@ import java.util.*;
 public class DashboardController {
 
     private final DashboardMapper mapper;
+    private final SystemSettings systemSettings;
 
-    public DashboardController(DashboardMapper mapper) {
+    public DashboardController(DashboardMapper mapper, SystemSettings systemSettings) {
         this.mapper = mapper;
+        this.systemSettings = systemSettings;
     }
 
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getStats() {
+        int threshold = systemSettings.getLowStockThreshold();
         Map<String, Object> stats = new LinkedHashMap<>();
 
         stats.put("productCount",   mapper.countProducts());
         stats.put("employeeCount",  mapper.countActiveEmployees());
         stats.put("pendingOrders",  mapper.countPendingOrders());
-        stats.put("lowInventory",   mapper.countLowInventory());
+        stats.put("lowInventory",   mapper.countLowInventory(threshold));
+        stats.put("lowStockThreshold", threshold);
         stats.put("monthlyWO",      mapper.countMonthlyWorkOrders());
 
         Map<String, Object> rev = mapper.getMonthlyRevenue();
@@ -32,7 +37,7 @@ public class DashboardController {
         stats.put("monthlySaleCount", saleCount != null ? saleCount : 0);
 
         stats.put("recentOrders",      mapper.getRecentOrders());
-        stats.put("lowInventoryItems", mapper.getLowInventoryItems());
+        stats.put("lowInventoryItems", mapper.getLowInventoryItems(threshold));
         stats.put("workOrderStatus",   mapper.getWorkOrderStatusCount());
 
         return ResponseEntity.ok(stats);

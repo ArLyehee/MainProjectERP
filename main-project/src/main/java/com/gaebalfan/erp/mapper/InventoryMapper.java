@@ -10,4 +10,5 @@ public interface InventoryMapper {
     Inventory findByProductAndWarehouse(@Param("productId") Long productId, @Param("warehouseId") Long warehouseId);
     void insert(Inventory inventory);
     void updateQuantity(@Param("productId") Long productId, @Param("warehouseId") Long warehouseId, @Param("quantity") int quantity);
+    int findTotalQuantityByProduct(@Param("productId") Long productId);
 }
