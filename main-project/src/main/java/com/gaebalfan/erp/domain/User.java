@@ -12,7 +12,8 @@ public class User {
     private String        phone;
     private String        role;       // ADMIN, MANAGER, EMPLOYEE
     private String        department;
-    private String        status;     // ACTIVE, INACTIVE
+    private String        status;      // ACTIVE, INACTIVE
+    private String        permissions; // comma-separated page keys
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -27,7 +28,8 @@ public class User {
     public String        getPhone()      { return phone; }
     public String        getRole()       { return role; }
     public String        getDepartment() { return department; }
-    public String        getStatus()     { return status; }
+    public String        getStatus()      { return status; }
+    public String        getPermissions() { return permissions; }
     public LocalDateTime getCreatedAt()  { return createdAt; }
     public LocalDateTime getUpdatedAt()  { return updatedAt; }
 
@@ -41,6 +43,7 @@ public class User {
     public void setRole(String role)                      { this.role = role; }
     public void setDepartment(String department)          { this.department = department; }
     public void setStatus(String status)                  { this.status = status; }
+    public void setPermissions(String permissions)        { this.permissions = permissions; }
     public void setCreatedAt(LocalDateTime createdAt)     { this.createdAt = createdAt; }
     public void setUpdatedAt(LocalDateTime updatedAt)     { this.updatedAt = updatedAt; }
 }

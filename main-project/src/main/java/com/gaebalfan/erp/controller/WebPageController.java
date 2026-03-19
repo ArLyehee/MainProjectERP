@@ -121,6 +121,8 @@ public class WebPageController {
         model.addAttribute("warehouseList", warehouseService.findAll());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageStart", Math.max(1, page - 5));
+        model.addAttribute("pageEnd", Math.min(totalPages, page + 5));
         return "receipts";
     }
 
@@ -134,6 +136,8 @@ public class WebPageController {
         model.addAttribute("warehouseList", warehouseService.findAll());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageStart", Math.max(1, page - 5));
+        model.addAttribute("pageEnd", Math.min(totalPages, page + 5));
         return "shipments";
     }
 
@@ -174,6 +178,8 @@ public class WebPageController {
         model.addAttribute("employeeList", employeeService.findAll());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageStart", Math.max(1, page - 5));
+        model.addAttribute("pageEnd", Math.min(totalPages, page + 5));
         return "attendance";
     }
 

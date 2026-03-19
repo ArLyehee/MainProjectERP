@@ -1,96 +1,19 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
-    <title>근태 관리 | 개발팬 ERP</title>
-    <link rel="stylesheet" th:href="@{/css/erp.css(v=6)}">
+<head><meta charset="UTF-8"><meta name="_csrf" th:content="${_csrf.token}"><meta name="_csrf_header" th:content="${_csrf.headerName}"><title>근태 관리 | 개발팬 ERP</title><link rel="stylesheet" th:href="@{/css/erp.css(v=6)}">
 </head>
 <body>
-<div class="layout">
-    <aside th:replace="~{fragments/sidebar :: nav('attendance')}"></aside>
-    <main class="main">
-        <div class="page-header">
-            <div class="page-title">
-                <h2>📅 근태 관리</h2>
-                <p>직원 출퇴근 현황을 조회하고 관리합니다.</p>
-            </div>
-            <button onclick="openCreate()" class="btn btn-primary">+ 출근 등록</button>
-        </div>
-        <div class="search-bar">
-            <input type="text" class="search-input" id="searchInput" placeholder="직원명 검색..." oninput="filterTable()">
-        </div>
-        <div class="card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>직원명</th>
-                        <th>날짜</th>
-                        <th>출근</th>
-                        <th>퇴근</th>
-                        <th>상태</th>
-                        <th>액션</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:if="${#lists.isEmpty(attendanceList)}">
-                        <td colspan="6" class="empty-state">등록된 근태 기록이 없습니다.</td>
-                    </tr>
-                    <tr th:each="a : ${attendanceList}">
-                        <td th:text="${a.employeeName}"></td>
-                        <td th:text="${a.workDate}"></td>
-                        <td th:text="${a.checkIn != null ? a.checkIn : '-'}"></td>
-                        <td th:text="${a.checkOut != null ? a.checkOut : '-'}"></td>
-                        <td>
-                            <span th:if="${a.checkOut != null}" class="badge badge-present">퇴근완료</span>
-                            <span th:if="${a.checkOut == null}" class="badge badge-absent">근무중</span>
-                        </td>
-                        <td>
-                            <button th:if="${a.checkOut == null}"
+<div class="layout"><aside th:replace="~{fragments/sidebar :: nav('attendance')}"></aside><main class="main"><div class="page-header"><div class="page-title"><h2>근태 관리</h2><p>직원 출퇴근 현황을 조회하고 관리합니다.</p></div><button onclick="openCreate()" class="btn btn-primary">+ 출근 등록</button></div><div class="search-bar"><input type="text" class="search-input" id="searchInput" placeholder="직원명 검색..." oninput="filterTable()"></div><div class="card"><table><thead><tr><th>직원명</th><th>날짜</th><th>출근</th><th>퇴근</th><th>상태</th><th>액션</th></tr></thead><tbody><tr th:if="${#lists.isEmpty(attendanceList)}"><td colspan="6" class="empty-state">등록된 근태 기록이 없습니다.</td></tr><tr th:each="a : ${attendanceList}"><td th:text="${a.employeeName}"></td><td th:text="${a.workDate}"></td><td th:text="${a.checkIn != null ? a.checkIn : '-'}"></td><td th:text="${a.checkOut != null ? a.checkOut : '-'}"></td><td><span th:if="${a.checkOut != null}" class="badge badge-present">퇴근완료</span><span th:if="${a.checkOut == null}" class="badge badge-absent">근무중</span></td><td><button th:if="${a.checkOut == null}"
                                     class="btn-action btn-checkout"
-                                    th:onclick="|checkOut(${a.attendanceId})|">퇴근</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- 페이지네이션 -->
-        <div class="pagination" th:if="${totalPages != null and totalPages > 1}">
-            <a th:href="@{/attendance(page=${currentPage - 1})}"
-               th:classappend="${currentPage == 1} ? 'disabled'">&laquo;</a>
-            <th:block th:each="i : ${#numbers.sequence(T(Math).max(1, currentPage - 5), T(Math).min(totalPages, currentPage + 5))}">
-                <a th:href="@{/attendance(page=${i})}"
+                                    th:onclick="|checkOut(${a.attendanceId})|">퇴근</button></td></tr></tbody></table></div><!-- 페이지네이션 --><div class="pagination" th:if="${totalPages != null and totalPages > 1}"><a th:href="@{/attendance(page=${currentPage - 1})}"
+               th:classappend="${currentPage == 1} ? 'disabled'">&laquo;</a><th:block th:each="i : ${#numbers.sequence(pageStart, pageEnd)}"><a th:href="@{/attendance(page=${i})}"
                    th:text="${i}"
-                   th:classappend="${i == currentPage} ? 'active'"></a>
-            </th:block>
-            <a th:href="@{/attendance(page=${currentPage + 1})}"
-               th:classappend="${currentPage == totalPages} ? 'disabled'">&raquo;</a>
-        </div>
-    </main>
-</div>
-
-<!-- 출근 등록 모달 -->
-<div class="modal-overlay" id="attModal">
-    <div class="modal">
-        <h3>출근 등록</h3>
-        <div class="form-group">
-            <label>직원 *</label>
-            <select id="aEmployeeId">
-                <option value="">직원 선택</option>
-                <option th:each="e : ${employeeList}" th:value="${e.employeeId}" th:text="${e.name}"></option>
-            </select>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-cancel-modal" onclick="closeModal()">취소</button>
-            <button class="btn-save" onclick="saveCheckIn()">출근 등록</button>
-        </div>
-    </div>
-</div>
-
-<script>
+                   th:classappend="${i == currentPage} ? 'active'"></a></th:block><a th:href="@{/attendance(page=${currentPage + 1})}"
+               th:classappend="${currentPage == totalPages} ? 'disabled'">&raquo;</a></div></main>
+</div><!-- 출근 등록 모달 -->
+<div class="modal-overlay" id="attModal"><div class="modal"><h3>출근 등록</h3><div class="form-group"><label>직원 *</label><select id="aEmployeeId"><option value="">직원 선택</option><option th:each="e : ${employeeList}" th:value="${e.employeeId}" th:text="${e.name}"></option></select></div><div class="modal-footer"><button class="btn-cancel-modal" onclick="closeModal()">취소</button><button class="btn-save" onclick="saveCheckIn()">출근 등록</button></div></div>
+</div><script>
 const csrf = document.querySelector('meta[name="_csrf"]').content;
 const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
