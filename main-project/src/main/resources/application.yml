@@ -22,6 +22,9 @@ mybatis:
 
 logging:
   level:
+    root: WARN
     com.gaebalfan.erp: DEBUG
     org.mybatis: DEBUG
-    org.springframework.security: DEBUG
+    org.springframework.web.servlet: DEBUG
+    org.thymeleaf: DEBUG
+    org.springframework.security: WARN

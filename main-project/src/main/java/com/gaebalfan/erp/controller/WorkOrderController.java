@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/work-orders")
@@ -20,6 +21,12 @@ public class WorkOrderController {
     @GetMapping
     public ResponseEntity<List<WorkOrder>> findAll() {
         return ResponseEntity.ok(service.findAll());
+    }
+
+    @GetMapping("/check-stock")
+    public ResponseEntity<List<Map<String, Object>>> checkStock(
+            @RequestParam Long productId, @RequestParam int quantity) {
+        return ResponseEntity.ok(service.checkStock(productId, quantity));
     }
 
     @GetMapping("/{id}")

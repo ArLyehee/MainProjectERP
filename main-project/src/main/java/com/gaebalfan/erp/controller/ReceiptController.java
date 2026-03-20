@@ -42,7 +42,7 @@ public class ReceiptController {
             return ResponseEntity.badRequest().header("X-Error-Message", "수량은 1 이상이어야 합니다.").build();
 
         Receipt receipt = new Receipt();
-        receipt.setPoId(Long.parseLong(body.get("poId").toString()));
+        receipt.setPoId(body.get("poId").toString());
         receipt.setProductId(Long.parseLong(body.get("productId").toString()));
         receipt.setQuantity(qty);
         if (body.get("receiptDate") != null && !body.get("receiptDate").toString().isEmpty()) {
@@ -60,7 +60,9 @@ public class ReceiptController {
         inventoryMapper.insert(inv);
 
         // 발주 상태 → RECEIVED
-        purchaseOrderMapper.updateStatus(receipt.getPoId(), "RECEIVED");
+        try {
+            purchaseOrderMapper.updateStatus(Long.parseLong(receipt.getPoId()), "RECEIVED");
+        } catch (NumberFormatException ignored) {}
 
         return ResponseEntity.ok().build();
     }

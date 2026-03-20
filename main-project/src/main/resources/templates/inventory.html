@@ -1,98 +1,20 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
-    <title>재고 현황 | 개발팬 ERP</title>
-    <link rel="stylesheet" th:href="@{/css/erp.css(v=6)}">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="_csrf" th:content="${_csrf.token}"><meta name="_csrf_header" th:content="${_csrf.headerName}"><title>재고 현황 | 개발팬 ERP</title><link rel="stylesheet" th:href="@{/css/erp.css(v=6)}">
 </head>
 <body>
-<div class="layout">
-    <aside th:replace="~{fragments/sidebar :: nav('inventory')}"></aside>
-    <main class="main">
-        <div class="page-header">
-            <div class="page-title">
-                <h2>📦 재고 현황</h2>
-                <p>창고별 제품 재고를 확인합니다.</p>
-            </div>
-            <button onclick="openCreate()" class="btn btn-primary">+ 재고 등록</button>
-        </div>
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="제품명 또는 창고 검색..." oninput="filterTable()" class="search-input">
-        </div>
-        <div class="card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>제품명</th>
-                        <th>창고</th>
-                        <th>수량</th>
-                        <th>상태</th>
-                        <th>최종 수정</th>
-                        <th>액션</th>
-                    </tr>
-                </thead>
-                <tbody id="inventoryTableBody">
-                    <tr th:if="${#lists.isEmpty(inventoryList)}">
-                        <td colspan="7" class="empty-state">등록된 재고가 없습니다.</td>
-                    </tr>
-                    <tr th:each="inv : ${inventoryList}">
-                        <td th:text="${inv.inventoryId}"></td>
-                        <td th:text="${inv.productName != null ? inv.productName : inv.productId}"></td>
-                        <td th:text="${inv.warehouseName != null ? inv.warehouseName : inv.warehouseId}"></td>
-                        <td class="qty" th:text="${inv.quantity}"></td>
-                        <td>
-                            <span th:if="${inv.quantity == 0}" class="badge badge-empty">재고없음</span>
-                            <span th:if="${inv.quantity > 0 and inv.quantity < 10}" class="badge badge-low">부족</span>
-                            <span th:if="${inv.quantity >= 10}" class="badge badge-ok">정상</span>
-                        </td>
-                        <td th:text="${inv.lastUpdate}"></td>
-                        <td>
-                            <button class="btn-action btn-edit" th:onclick="|openEdit(${inv.inventoryId})|">수정</button>
-                            <button class="btn-action btn-del"  th:onclick="|confirmDelete(${inv.inventoryId})|">삭제</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </main>
-</div>
-
-<!-- 재고 등록 모달 -->
-<div class="modal-overlay" id="modalOverlay">
-    <div class="modal">
-        <h3 id="modalTitle">재고 등록</h3>
-        <input type="hidden" id="inventoryId">
-        <div class="form-group">
-            <label>제품 *</label>
-            <select id="invProductId">
-                <option value="">제품 선택</option>
-                <option th:each="p : ${productList}" th:value="${p.productId}" th:text="${p.productName}"></option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>창고 *</label>
-            <select id="invWarehouseId">
-                <option value="">창고 선택</option>
-                <option th:each="w : ${warehouseList}" th:value="${w.warehouseId}" th:text="${w.warehouseName}"></option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>수량 *</label>
-            <input type="number" id="invQuantity" placeholder="수량 입력" min="0">
-        </div>
-        <div class="modal-footer">
-            <button class="btn-cancel" onclick="closeModal()">취소</button>
-            <button class="btn-save" onclick="saveInventory()">저장</button>
-        </div>
-    </div>
-</div>
-
-<script>
+<div class="layout"><aside th:replace="~{fragments/sidebar :: nav('inventory')}"></aside><main class="main"><div class="page-header"><div class="page-title"><h2>재고 현황</h2><p>창고별 제품 재고를 확인합니다.</p></div><button onclick="openCreate()" class="btn btn-primary">+ 재고 등록</button></div><!-- 재고 부족 알림 배너 --><div th:if="${!#lists.isEmpty(shortageList)}"
+             style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.3);border-radius:8px;padding:14px 18px;margin-bottom:16px;"><div style="font-size:13px;font-weight:700;color:#c0392b;margin-bottom:8px;">재고 부족 항목 <span style="background:#e74c3c;color:#fff;border-radius:10px;padding:1px 8px;font-size:11px;" th:text="${#lists.size(shortageList)}"></span><span style="font-size:11px;font-weight:400;color:#888;margin-left:8px;">기준: <span th:text="${lowStockThreshold}"></span>개 미만</span></div><div style="display:flex;flex-wrap:wrap;gap:8px;"><span th:each="s : ${shortageList}"
+                      style="font-size:12px;padding:3px 10px;border-radius:12px;border:1px solid rgba(231,76,60,0.4);"
+                      th:style="${s.quantity <= 0} ? 'background:#e74c3c;color:#fff;font-size:12px;padding:3px 10px;border-radius:12px;' : 'background:rgba(231,76,60,0.12);color:#c0392b;font-size:12px;padding:3px 10px;border-radius:12px;'"><span th:text="${s.productName}"></span>(<span th:text="${s.warehouseName}"></span>)
+                    <b th:text="${s.quantity}"></b>개
+                    <span th:if="${s.quantity <= 0}" style="font-weight:700;"> 음수</span></span></div></div><div class="search-bar"><input type="text" id="searchInput" placeholder="제품명 또는 창고 검색..." oninput="filterTable()" class="search-input"></div><div class="card"><table><thead><tr><th>#</th><th>제품명</th><th>창고</th><th>수량</th><th>상태</th><th>최종 수정</th><th>액션</th></tr></thead><tbody id="inventoryTableBody"><tr th:if="${#lists.isEmpty(inventoryList)}"><td colspan="7" class="empty-state">등록된 재고가 없습니다.</td></tr><tr th:each="inv : ${inventoryList}"
+                        th:style="${inv.quantity <= 0} ? 'background:rgba(231,76,60,0.07);' : (${inv.quantity < lowStockThreshold} ? 'background:rgba(255,183,77,0.08);' : '')"><td th:text="${inv.inventoryId}"></td><td th:text="${inv.productName != null ? inv.productName : inv.productId}"></td><td th:text="${inv.warehouseName != null ? inv.warehouseName : inv.warehouseId}"></td><td class="qty" th:text="${inv.quantity}"
+                            th:style="${inv.quantity <= 0} ? 'color:#e74c3c;font-weight:700;' : ''"></td><td><span th:if="${inv.quantity <= 0}" class="badge badge-empty">재고없음</span><span th:if="${inv.quantity > 0 and inv.quantity < lowStockThreshold}" class="badge badge-low">부족</span><span th:if="${inv.quantity >= lowStockThreshold}" class="badge badge-ok">정상</span></td><td th:text="${inv.lastUpdate}"></td><td><button class="btn-action btn-edit" th:onclick="|openEdit(${inv.inventoryId})|">수정</button><button class="btn-action btn-del"  th:onclick="|confirmDelete(${inv.inventoryId})|">삭제</button></td></tr></tbody></table></div></main>
+</div><!-- 재고 등록 모달 -->
+<div class="modal-overlay" id="modalOverlay"><div class="modal"><h3 id="modalTitle">재고 등록</h3><input type="hidden" id="inventoryId"><div class="form-group"><label>제품 *</label><select id="invProductId"><option value="">제품 선택</option><option th:each="p : ${productList}" th:value="${p.productId}" th:text="${p.productName}"></option></select></div><div class="form-group"><label>창고 *</label><select id="invWarehouseId"><option value="">창고 선택</option><option th:each="w : ${warehouseList}" th:value="${w.warehouseId}" th:text="${w.warehouseName}"></option></select></div><div class="form-group"><label>수량 *</label><input type="number" id="invQuantity" placeholder="수량 입력" min="0"></div><div class="modal-footer"><button class="btn-cancel" onclick="closeModal()">취소</button><button class="btn-save" onclick="saveInventory()">저장</button></div></div>
+</div><script>
 const CSRF_TOKEN  = document.querySelector('meta[name="_csrf"]')?.content;
 const CSRF_HEADER = document.querySelector('meta[name="_csrf_header"]')?.content;
 
@@ -131,10 +53,14 @@ function closeModal() {
 
 function saveInventory() {
     const id = document.getElementById('inventoryId').value;
+    const productId   = document.getElementById('invProductId').value;
+    const warehouseId = document.getElementById('invWarehouseId').value;
+    const quantity    = document.getElementById('invQuantity').value;
+    if (!productId || !warehouseId || quantity === '') { alert('제품, 창고, 수량을 모두 입력하세요.'); return; }
     const body = {
-        productId:   document.getElementById('invProductId').value,
-        warehouseId: document.getElementById('invWarehouseId').value,
-        quantity:    document.getElementById('invQuantity').value
+        productId:   parseInt(productId),
+        warehouseId: parseInt(warehouseId),
+        quantity:    parseInt(quantity)
     };
     const url    = id ? '/api/inventory/' + id : '/api/inventory';
     const method = id ? 'PUT' : 'POST';
@@ -142,7 +68,10 @@ function saveInventory() {
         method,
         headers: { 'Content-Type': 'application/json', [CSRF_HEADER]: CSRF_TOKEN },
         body: JSON.stringify(body)
-    }).then(r => { if (r.ok) location.reload(); });
+    }).then(r => {
+        if (r.ok) { location.reload(); }
+        else { r.text().then(t => alert('저장 실패: ' + r.status + '\n' + t)); }
+    }).catch(e => alert('네트워크 오류: ' + e));
 }
 
 function confirmDelete(id) {

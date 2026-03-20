@@ -10,7 +10,7 @@ public interface DashboardMapper {
     int countProducts();
     int countActiveEmployees();
     int countPendingOrders();      // purchase_orders PENDING+APPROVED
-    int countLowInventory();       // inventory quantity <= 10
+    int countLowInventory(int threshold);
     int countMonthlyWorkOrders();  // work_orders COMPLETED this month
 
     // 이번달 매출
@@ -20,7 +20,7 @@ public interface DashboardMapper {
     List<Map<String, Object>> getRecentOrders();
 
     // 재고 부족 목록 (5개)
-    List<Map<String, Object>> getLowInventoryItems();
+    List<Map<String, Object>> getLowInventoryItems(int threshold);
 
     // 작업지시 상태별 카운트
     List<Map<String, Object>> getWorkOrderStatusCount();

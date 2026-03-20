@@ -17,7 +17,7 @@
         SELECT w.*, p.product_name
         FROM work_orders w
         LEFT JOIN products p ON w.product_id = p.product_id
-        ORDER BY w.work_order_id DESC
+        ORDER BY w.start_date DESC, w.work_order_id DESC
     </select>
 
     <select id="findById" resultMap="WorkOrderResultMap">

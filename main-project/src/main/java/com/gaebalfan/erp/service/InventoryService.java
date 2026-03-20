@@ -25,4 +25,12 @@ public class InventoryService {
     public void insert(Inventory obj) {
         mapper.insert(obj);
     }
+
+    public void update(Inventory obj) {
+        mapper.update(obj);
+    }
+
+    public void delete(Long id) {
+        mapper.delete(id);
+    }
 }

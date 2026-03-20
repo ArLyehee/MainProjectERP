@@ -1,56 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
-    <title>시스템 설정 | 개발팬 ERP</title>
-    <link rel="stylesheet" th:href="@{/css/erp.css(v=6)}">
+<head><meta charset="UTF-8"><meta name="_csrf" th:content="${_csrf.token}"><meta name="_csrf_header" th:content="${_csrf.headerName}"><title>시스템 설정 | 개발팬 ERP</title><link rel="stylesheet" th:href="@{/css/erp.css(v=6)}">
 </head>
 <body>
-<div class="layout">
-    <aside th:replace="~{fragments/sidebar :: nav('admin-settings')}"></aside>
-    <main class="main">
-        <div class="page-header">
-            <div class="page-title">
-                <h2>⚙️ 시스템 설정</h2>
-                <p>시스템 설정 및 마스터 데이터를 관리합니다.</p>
-            </div>
-        </div>
-        <div class="settings-grid">
-            <!-- 비밀번호 변경 -->
-            <div class="settings-card">
-                <div class="card-title">🔐 비밀번호 변경</div>
-                <div class="form-group"><label>현재 비밀번호</label><input type="password" id="oldPassword"></div>
-                <div class="form-group"><label>새 비밀번호</label><input type="password" id="newPassword"></div>
-                <div class="form-group"><label>새 비밀번호 확인</label><input type="password" id="confirmPassword"></div>
-                <div id="pwMsg" style="font-size:12px;margin-bottom:10px;"></div>
-                <button class="btn btn-primary" onclick="changePassword()">변경</button>
-            </div>
-            <!-- 부서 관리 -->
-            <div class="settings-card">
-                <div class="card-title">🏢 부서 관리</div>
-                <ul id="deptList" class="item-list"></ul>
-                <div style="display:flex;gap:8px;margin-top:12px;">
-                    <input type="text" id="newDept" placeholder="새 부서명" class="settings-input">
-                    <button class="btn btn-primary" onclick="addDept()">추가</button>
-                </div>
-            </div>
-            <!-- 직급 관리 -->
-            <div class="settings-card">
-                <div class="card-title">👤 직급 관리</div>
-                <ul id="posList" class="item-list"></ul>
-                <div style="display:flex;gap:8px;margin-top:12px;">
-                    <input type="text" id="newPos" placeholder="새 직급명" class="settings-input">
-                    <button class="btn btn-primary" onclick="addPos()">추가</button>
-                </div>
-            </div>
-        </div>
-    </main>
-</div>
-
-<script>
+<div class="layout"><aside th:replace="~{fragments/sidebar :: nav('admin-settings')}"></aside><main class="main"><div class="page-header"><div class="page-title"><h2>시스템 설정</h2><p>시스템 설정 및 마스터 데이터를 관리합니다.</p></div></div><div class="settings-grid"><!-- 재고 부족 기준값 --><div class="settings-card"><div class="card-title"> 재고 부족 기준값</div><p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">이 수량 미만이면 대시보드에 재고 부족으로 표시됩니다.</p><div style="display:flex;gap:8px;align-items:center;"><input type="number" id="lowStockInput" min="0" class="settings-input" style="width:100px;"><span style="font-size:13px;color:var(--text-muted);">개 미만</span><button class="btn btn-primary" onclick="saveLowStock()">저장</button></div><div id="lowStockMsg" style="font-size:12px;margin-top:8px;"></div></div><!-- 비밀번호 변경 --><div class="settings-card"><div class="card-title"> 비밀번호 변경</div><div class="form-group"><label>현재 비밀번호</label><input type="password" id="oldPassword"></div><div class="form-group"><label>새 비밀번호</label><input type="password" id="newPassword"></div><div class="form-group"><label>새 비밀번호 확인</label><input type="password" id="confirmPassword"></div><div id="pwMsg" style="font-size:12px;margin-bottom:10px;"></div><button class="btn btn-primary" onclick="changePassword()">변경</button></div><!-- 부서 관리 --><div class="settings-card"><div class="card-title"> 부서 관리</div><ul id="deptList" class="item-list"></ul><div style="display:flex;gap:8px;margin-top:12px;"><input type="text" id="newDept" placeholder="새 부서명" class="settings-input"><button class="btn btn-primary" onclick="addDept()">추가</button></div></div><!-- 직급 관리 --><div class="settings-card"><div class="card-title"> 직급 관리</div><ul id="posList" class="item-list"></ul><div style="display:flex;gap:8px;margin-top:12px;"><input type="text" id="newPos" placeholder="새 직급명" class="settings-input"><button class="btn btn-primary" onclick="addPos()">추가</button></div></div></div></main>
+</div><script>
 const csrf = document.querySelector('meta[name="_csrf"]').content;
 const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
@@ -76,8 +31,7 @@ function changePassword() {
 // 부서 로드
 function loadDepts() {
     fetch('/api/settings/departments').then(r=>r.json()).then(list => {
-        document.getElementById('deptList').innerHTML = list.map(d =>
-            `<li>${d.departmentName}<button class="btn-del-sm" onclick="delDept(${d.departmentId})">삭제</button></li>`
+        document.getElementById('deptList').innerHTML = list.map(d =>`<li>${d.departmentName}<button class="btn-del-sm" onclick="delDept(${d.departmentId})">삭제</button></li>`
         ).join('') || '<li style="color:#6b7280">등록된 부서 없음</li>';
     });
 }
@@ -96,8 +50,7 @@ function delDept(id) {
 // 직급 로드
 function loadPos() {
     fetch('/api/settings/positions').then(r=>r.json()).then(list => {
-        document.getElementById('posList').innerHTML = list.map(p =>
-            `<li>${p.positionName}<button class="btn-del-sm" onclick="delPos(${p.positionId})">삭제</button></li>`
+        document.getElementById('posList').innerHTML = list.map(p =>`<li>${p.positionName}<button class="btn-del-sm" onclick="delPos(${p.positionId})">삭제</button></li>`
         ).join('') || '<li style="color:#6b7280">등록된 직급 없음</li>';
     });
 }
@@ -113,7 +66,30 @@ function delPos(id) {
         .then(() => loadPos());
 }
 
-document.addEventListener('DOMContentLoaded', () => { loadDepts(); loadPos(); });
+function saveLowStock() {
+    const val = parseInt(document.getElementById('lowStockInput').value);
+    const msg = document.getElementById('lowStockMsg');
+    if (isNaN(val) || val < 0) { msg.className='msg-error'; msg.textContent='0 이상의 숫자를 입력하세요.'; return; }
+    fetch('/api/settings/low-stock-threshold', {
+        method:'POST', headers:{'Content-Type':'application/json',[csrfHeader]:csrf},
+        body: JSON.stringify({threshold: val})
+    }).then(r => {
+        if (!r.ok) { msg.className='msg-error'; msg.textContent='저장 실패 (권한 또는 서버 오류)'; return; }
+        return r.json();
+    }).then(data => {
+        if (!data) return;
+        if (data.error) { msg.className='msg-error'; msg.textContent=data.error; }
+        else { msg.className='msg-success'; msg.textContent=`저장됨: ${data.threshold}개 미만`; }
+    }).catch(() => { msg.className='msg-error'; msg.textContent='저장 중 오류가 발생했습니다.'; });
+}
+
+function loadLowStock() {
+    fetch('/api/settings/low-stock-threshold').then(r=>r.json()).then(data => {
+        document.getElementById('lowStockInput').value = data.threshold;
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => { loadDepts(); loadPos(); loadLowStock(); });
 </script>
 </body>
 </html>

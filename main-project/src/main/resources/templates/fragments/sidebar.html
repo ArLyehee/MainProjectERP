@@ -4,41 +4,41 @@
 <body>
 <aside th:fragment="nav(current)" class="sidebar">
     <div class="sidebar-logo">
-        <div class="s-icon">🌬️</div>
-        <div class="brand">개발환기좀해 ERP<small>GAEBALFAN</small></div>
+        <div class="s-icon" style="background:#5b8dee; box-shadow:none; border-radius:8px; font-size:18px;"></div>
+        <div class="brand" style="font-size:14px; font-weight:700; letter-spacing:0;">개발환기좀해 ERP<small style="font-size:10px; color:var(--sb-muted); letter-spacing:0; font-weight:400;">풍기산업</small></div>
     </div>
 
     <div class="nav-section">메인</div>
-    <a href="/dashboard"       th:class="${current == 'dashboard'}       ? 'nav-item active' : 'nav-item'"><span class="ni">📊</span> 대시보드</a>
+    <a href="/dashboard"       th:class="${current == 'dashboard'}       ? 'nav-item active' : 'nav-item'">대시보드</a>
 
     <div class="nav-section">재고/물류</div>
-    <a href="/inventory"       th:class="${current == 'inventory'}       ? 'nav-item active' : 'nav-item'"><span class="ni">📦</span> 재고 현황</a>
-    <a href="/purchase-orders" th:class="${current == 'purchase-orders'} ? 'nav-item active' : 'nav-item'"><span class="ni">📋</span> 발주 관리</a>
-    <a href="/receipts"        th:class="${current == 'receipts'}        ? 'nav-item active' : 'nav-item'"><span class="ni">📥</span> 입고 관리</a>
-    <a href="/shipments"       th:class="${current == 'shipments'}       ? 'nav-item active' : 'nav-item'"><span class="ni">📤</span> 출고 관리</a>
-    <a href="/sales"           th:class="${current == 'sales'}           ? 'nav-item active' : 'nav-item'"><span class="ni">💰</span> 매출 관리</a>
-    <a href="/expenses"        th:class="${current == 'expenses'}        ? 'nav-item active' : 'nav-item'"><span class="ni">💸</span> 비용 관리</a>
-    <a href="/transaction-statements" th:class="${current == 'transaction-statements'} ? 'nav-item active' : 'nav-item'"><span class="ni">🧾</span> 거래명세서</a>
+    <a href="/inventory"       th:if="${#authentication.principal.hasPermission('inventory')}"       th:class="${current == 'inventory'}       ? 'nav-item active' : 'nav-item'">재고 현황</a>
+    <a href="/purchase-orders" th:if="${#authentication.principal.hasPermission('purchase-orders')}" th:class="${current == 'purchase-orders'} ? 'nav-item active' : 'nav-item'">발주 관리</a>
+    <a href="/receipts"        th:if="${#authentication.principal.hasPermission('receipts')}"        th:class="${current == 'receipts'}        ? 'nav-item active' : 'nav-item'">입고 관리</a>
+    <a href="/shipments"       th:if="${#authentication.principal.hasPermission('shipments')}"       th:class="${current == 'shipments'}       ? 'nav-item active' : 'nav-item'">출고 관리</a>
+    <a href="/sales"           th:if="${#authentication.principal.hasPermission('sales')}"           th:class="${current == 'sales'}           ? 'nav-item active' : 'nav-item'">매출 관리</a>
+    <a href="/expenses"        th:if="${#authentication.principal.hasPermission('expenses')}"        th:class="${current == 'expenses'}        ? 'nav-item active' : 'nav-item'">비용 관리</a>
+    <a href="/transaction-statements" th:if="${#authentication.principal.hasPermission('transaction-statements')}" th:class="${current == 'transaction-statements'} ? 'nav-item active' : 'nav-item'">거래명세서</a>
 
     <div class="nav-section">경영</div>
-    <a href="/finance" th:class="${current == 'finance'} ? 'nav-item active' : 'nav-item'"><span class="ni">📈</span> 재무제표</a>
+    <a href="/finance" th:if="${#authentication.principal.hasPermission('finance')}" th:class="${current == 'finance'} ? 'nav-item active' : 'nav-item'">재무제표</a>
 
     <div class="nav-section">기준정보</div>
-    <a href="/products"        th:class="${current == 'products'}        ? 'nav-item active' : 'nav-item'"><span class="ni">🔧</span> 제품 관리</a>
-    <a href="/suppliers"       th:class="${current == 'suppliers'}       ? 'nav-item active' : 'nav-item'"><span class="ni">🏭</span> 공급업체</a>
-    <a href="/warehouses"      th:class="${current == 'warehouses'}      ? 'nav-item active' : 'nav-item'"><span class="ni">🏢</span> 창고 관리</a>
+    <a href="/products"   th:if="${#authentication.principal.hasPermission('products')}"   th:class="${current == 'products'}   ? 'nav-item active' : 'nav-item'">제품 관리</a>
+    <a href="/suppliers"  th:if="${#authentication.principal.hasPermission('suppliers')}"  th:class="${current == 'suppliers'}  ? 'nav-item active' : 'nav-item'">공급업체</a>
+    <a href="/warehouses" th:if="${#authentication.principal.hasPermission('warehouses')}" th:class="${current == 'warehouses'} ? 'nav-item active' : 'nav-item'">창고 관리</a>
 
     <div class="nav-section">인사</div>
-    <a href="/employees"       th:class="${current == 'employees'}       ? 'nav-item active' : 'nav-item'"><span class="ni">👤</span> 직원 관리</a>
-    <a href="/attendance"      th:class="${current == 'attendance'}      ? 'nav-item active' : 'nav-item'"><span class="ni">📅</span> 근태 관리</a>
+    <a href="/employees"  th:if="${#authentication.principal.hasPermission('employees')}"  th:class="${current == 'employees'}  ? 'nav-item active' : 'nav-item'">직원 관리</a>
+    <a href="/attendance" th:if="${#authentication.principal.hasPermission('attendance')}" th:class="${current == 'attendance'} ? 'nav-item active' : 'nav-item'">근태 관리</a>
 
     <div class="nav-section">생산관리</div>
-    <a href="/work-orders"     th:class="${current == 'work-orders'}     ? 'nav-item active' : 'nav-item'"><span class="ni">⚙️</span> 작업지시</a>
-    <a href="/bom"             th:class="${current == 'bom'}             ? 'nav-item active' : 'nav-item'"><span class="ni">📋</span> BOM 관리</a>
+    <a href="/work-orders" th:if="${#authentication.principal.hasPermission('work-orders')}" th:class="${current == 'work-orders'} ? 'nav-item active' : 'nav-item'">작업지시</a>
+    <a href="/bom"         th:if="${#authentication.principal.hasPermission('bom')}"         th:class="${current == 'bom'}         ? 'nav-item active' : 'nav-item'">BOM 관리</a>
 
     <div class="nav-section" sec:authorize="hasRole('ADMIN')">관리자</div>
-    <a href="/admin/users" class="nav-item" sec:authorize="hasRole('ADMIN')"><span class="ni">👥</span> 사용자 관리</a>
-    <a href="/admin/settings" th:class="${current == 'admin-settings'} ? 'nav-item active' : 'nav-item'" sec:authorize="hasRole('ADMIN')"><span class="ni">⚙️</span> 시스템 설정</a>
+    <a href="/admin/users" class="nav-item" sec:authorize="hasRole('ADMIN')">사용자 관리</a>
+    <a href="/admin/settings" th:class="${current == 'admin-settings'} ? 'nav-item active' : 'nav-item'" sec:authorize="hasRole('ADMIN')">시스템 설정</a>
 
     <div class="sidebar-bottom">
         <div class="user-info">

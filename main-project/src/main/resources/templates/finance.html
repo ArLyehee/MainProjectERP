@@ -1,146 +1,13 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
-    <title>재무제표 | 개발팬 ERP</title>
-    <link rel="stylesheet" th:href="@{/css/erp.css(v=6)}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<head><meta charset="UTF-8"><meta name="_csrf" th:content="${_csrf.token}"><meta name="_csrf_header" th:content="${_csrf.headerName}"><title>재무제표 | 개발팬 ERP</title><link rel="stylesheet" th:href="@{/css/erp.css(v=6)}"><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-<div class="layout">
-    <aside th:replace="~{fragments/sidebar :: nav('finance')}"></aside>
-    <main class="main">
-        <div class="page-header">
-            <div class="page-title">
-                <h2>📈 재무제표</h2>
-                <p>연간 손익계산서 및 월별 실적을 분석합니다.</p>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;">
-                <div class="year-nav">
-                    <button onclick="changeYear(-1)">◀</button>
-                    <span class="year-display" id="yearDisplay" th:text="${currentYear}">2025</span>
-                    <button onclick="changeYear(1)">▶</button>
-                </div>
-                <button onclick="saveStatements()" style="padding:8px 16px;border-radius:8px;border:none;background:rgba(34,197,94,.15);color:#4ade80;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500;transition:background .15s;" onmouseover="this.style.background='rgba(34,197,94,.25)'" onmouseout="this.style.background='rgba(34,197,94,.15)'">💾 저장</button>
-                <button onclick="downloadCsv()" style="padding:8px 16px;border-radius:8px;border:none;background:rgba(79,142,247,.15);color:#4f8ef7;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500;transition:background .15s;" onmouseover="this.style.background='rgba(79,142,247,.25)'" onmouseout="this.style.background='rgba(79,142,247,.15)'">⬇ 단일연도</button>
-                <button onclick="openRangeModal()" style="padding:8px 16px;border-radius:8px;border:none;background:rgba(245,158,11,.15);color:#f59e0b;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500;transition:background .15s;" onmouseover="this.style.background='rgba(245,158,11,.25)'" onmouseout="this.style.background='rgba(245,158,11,.15)'">📅 범위 다운로드</button>
-            </div>
-        </div>
-
-        <!-- 요약 카드 -->
-        <div class="summary-grid">
-            <div class="sum-card blue">
-                <div class="card-label">매출액</div>
-                <div class="card-value" id="sumRevenue">—</div>
-                <div class="card-sub" id="subSaleCount">—</div>
-            </div>
-            <div class="sum-card orange">
-                <div class="card-label">매출원가</div>
-                <div class="card-value" id="sumCogs">—</div>
-                <div class="card-sub" id="subCogsRate">—</div>
-            </div>
-            <div class="sum-card green">
-                <div class="card-label">매출총이익</div>
-                <div class="card-value" id="sumGross">—</div>
-                <div class="card-sub" id="subGrossRate">—</div>
-            </div>
-            <div class="sum-card purple">
-                <div class="card-label">판매비·관리비</div>
-                <div class="card-value" id="sumExpenses">—</div>
-                <div class="card-sub">영업비용 합계</div>
-            </div>
-            <div class="sum-card profit">
-                <div class="card-label">영업이익</div>
-                <div class="card-value" id="sumOpProfit">—</div>
-                <div class="card-sub" id="subOpMargin">—</div>
-            </div>
-        </div>
-
-        <!-- 차트 -->
-        <div class="chart-grid">
-            <div class="panel">
-                <div class="panel-title"><div class="dot"></div>월별 매출 / 영업이익</div>
-                <div class="chart-wrap"><canvas id="barChart"></canvas></div>
-            </div>
-            <div class="panel">
-                <div class="panel-title"><div class="dot"></div>비용 유형별 구성</div>
-                <div class="chart-wrap" style="height:200px;"><canvas id="donutChart"></canvas></div>
-                <div id="donutLegend" style="margin-top:12px;font-size:12px;"></div>
-            </div>
-        </div>
-
-        <!-- 월별 상세 테이블 -->
-        <div class="card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>월</th>
-                        <th>매출액</th>
-                        <th>매출원가</th>
-                        <th>매출총이익</th>
-                        <th>판관비</th>
-                        <th>영업이익</th>
-                        <th>영업이익률</th>
-                    </tr>
-                </thead>
-                <tbody id="monthlyTable">
-                    <tr><td colspan="7" class="loading">데이터 로딩 중...</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- 저장된 재무제표 -->
-        <div style="margin-top:20px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                <div style="font-size:14px;font-weight:600;">📋 저장된 재무제표</div>
-                <span style="font-size:12px;color:#6b7280">재무제표 저장 버튼으로 현재 데이터를 저장할 수 있습니다.</span>
-            </div>
-            <div class="card">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="text-align:left">월</th>
-                            <th>매출액</th>
-                            <th>매출원가</th>
-                            <th>매출총이익</th>
-                            <th>판관비</th>
-                            <th>영업이익</th>
-                            <th>영업이익률</th>
-                        </tr>
-                    </thead>
-                    <tbody id="savedTable">
-                        <tr><td colspan="7" class="loading">저장된 데이터 없음</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
-</div>
-
-<!-- 범위 다운로드 모달 -->
-<div class="modal-overlay" id="rangeModal">
-    <div class="modal" style="max-width:360px;">
-        <h3>📅 연도 범위 선택</h3>
-        <p style="font-size:13px;color:#9ca3af;margin-bottom:16px;">선택한 기간의 재무보고서를 엑셀로 다운로드합니다.</p>
-        <div class="form-group">
-            <label>시작 연도</label>
-            <input type="number" id="rangeFromYear" placeholder="예: 2023" min="2000" max="2099">
-        </div>
-        <div class="form-group">
-            <label>종료 연도</label>
-            <input type="number" id="rangeToYear" placeholder="예: 2026" min="2000" max="2099">
-        </div>
-        <div class="modal-footer">
-            <button class="btn-cancel" onclick="closeRangeModal()">취소</button>
-            <button class="btn-save" onclick="downloadRange()">⬇ 다운로드</button>
-        </div>
-    </div>
-</div>
-
-<script>
+<div class="layout"><aside th:replace="~{fragments/sidebar :: nav('finance')}"></aside><main class="main"><div class="page-header"><div class="page-title"><h2>재무제표</h2><p>연간 손익계산서 및 월별 실적을 분석합니다.</p></div><div style="display:flex;align-items:center;gap:12px;"><div class="year-nav"><button onclick="changeYear(-1)"></button><span class="year-display" id="yearDisplay" th:text="${currentYear}">2025</span><button onclick="changeYear(1)"></button></div><button onclick="saveStatements()" style="padding:8px 16px;border-radius:8px;border:none;background:rgba(34,197,94,.15);color:#4ade80;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500;transition:background .15s;" onmouseover="this.style.background='rgba(34,197,94,.25)'" onmouseout="this.style.background='rgba(34,197,94,.15)'"> 저장</button><button onclick="downloadCsv()" style="padding:8px 16px;border-radius:8px;border:none;background:rgba(79,142,247,.15);color:#4f8ef7;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500;transition:background .15s;" onmouseover="this.style.background='rgba(79,142,247,.25)'" onmouseout="this.style.background='rgba(79,142,247,.15)'">⬇ 단일연도</button><button onclick="openRangeModal()" style="padding:8px 16px;border-radius:8px;border:none;background:rgba(245,158,11,.15);color:#f59e0b;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500;transition:background .15s;" onmouseover="this.style.background='rgba(245,158,11,.25)'" onmouseout="this.style.background='rgba(245,158,11,.15)'"> 범위 다운로드</button></div></div><!-- 요약 카드 --><div class="summary-grid"><div class="sum-card blue"><div class="card-label">매출액</div><div class="card-value" id="sumRevenue">—</div><div class="card-sub" id="subSaleCount">—</div></div><div class="sum-card orange"><div class="card-label">매출원가</div><div class="card-value" id="sumCogs">—</div><div class="card-sub" id="subCogsRate">—</div></div><div class="sum-card green"><div class="card-label">매출총이익</div><div class="card-value" id="sumGross">—</div><div class="card-sub" id="subGrossRate">—</div></div><div class="sum-card purple"><div class="card-label">판매비·관리비</div><div class="card-value" id="sumExpenses">—</div><div class="card-sub">영업비용 합계</div></div><div class="sum-card profit"><div class="card-label">영업이익</div><div class="card-value" id="sumOpProfit">—</div><div class="card-sub" id="subOpMargin">—</div></div></div><!-- 차트 --><div class="chart-grid"><div class="panel"><div class="panel-title"><div class="dot"></div>월별 매출 / 영업이익</div><div class="chart-wrap"><canvas id="barChart"></canvas></div></div><div class="panel"><div class="panel-title"><div class="dot"></div>비용 유형별 구성</div><div class="chart-wrap" style="height:200px;"><canvas id="donutChart"></canvas></div><div id="donutLegend" style="margin-top:12px;font-size:12px;"></div></div></div><!-- 월별 상세 테이블 --><div class="card"><table><thead><tr><th>월</th><th>매출액</th><th>매출원가</th><th>매출총이익</th><th>판관비</th><th>영업이익</th><th>영업이익률</th></tr></thead><tbody id="monthlyTable"><tr><td colspan="7" class="loading">데이터 로딩 중...</td></tr></tbody></table></div><!-- 저장된 재무제표 --><div style="margin-top:20px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:14px;font-weight:600;"> 저장된 재무제표</div><span style="font-size:12px;color:#6b7280">재무제표 저장 버튼으로 현재 데이터를 저장할 수 있습니다.</span></div><div class="card"><table><thead><tr><th style="text-align:left">월</th><th>매출액</th><th>매출원가</th><th>매출총이익</th><th>판관비</th><th>영업이익</th><th>영업이익률</th></tr></thead><tbody id="savedTable"><tr><td colspan="7" class="loading">저장된 데이터 없음</td></tr></tbody></table></div></div></main>
+</div><!-- 범위 다운로드 모달 -->
+<div class="modal-overlay" id="rangeModal"><div class="modal" style="max-width:360px;"><h3>연도 범위 선택</h3><p style="font-size:13px;color:#9ca3af;margin-bottom:16px;">선택한 기간의 재무보고서를 엑셀로 다운로드합니다.</p><div class="form-group"><label>시작 연도</label><input type="number" id="rangeFromYear" placeholder="예: 2023" min="2000" max="2099"></div><div class="form-group"><label>종료 연도</label><input type="number" id="rangeToYear" placeholder="예: 2026" min="2000" max="2099"></div><div class="modal-footer"><button class="btn-cancel" onclick="closeRangeModal()">취소</button><button class="btn-save" onclick="downloadRange()">⬇ 다운로드</button></div></div>
+</div><script>
 let currentYear = parseInt(document.getElementById('yearDisplay').textContent) || new Date().getFullYear();
 let barChartInst = null;
 let donutChartInst = null;
@@ -212,15 +79,7 @@ function loadSaved() {
                 const op  = parseFloat(s.operatingProfit || 0);
                 const margin = rev ? (op/rev*100).toFixed(1) : '0.0';
                 const opSign = op >= 0 ? 'positive' : 'negative';
-                return `<tr>
-                    <td>${s.month}</td>
-                    <td>${fmtShort(s.revenue)}</td>
-                    <td>${fmtShort(s.cogs)}</td>
-                    <td>${fmtShort(s.grossProfit)}</td>
-                    <td>${fmtShort(s.expenses)}</td>
-                    <td class="${opSign}">${fmtShort(s.operatingProfit)}</td>
-                    <td class="${opSign}">${margin}%</td>
-                </tr>`;
+                return `<tr><td>${s.month}</td><td>${fmtShort(s.revenue)}</td><td>${fmtShort(s.cogs)}</td><td>${fmtShort(s.grossProfit)}</td><td>${fmtShort(s.expenses)}</td><td class="${opSign}">${fmtShort(s.operatingProfit)}</td><td class="${opSign}">${margin}%</td></tr>`;
             }).join('');
         });
 }
@@ -294,11 +153,7 @@ function renderDonut(expByType) {
         }
     });
     const total = values.reduce((a, b) => a + b, 0);
-    document.getElementById('donutLegend').innerHTML = labels.map((l, i) =>
-        `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #2a2d3a">
-            <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${colors[i]};margin-right:6px;vertical-align:middle"></span>${l}</span>
-            <span style="font-family:monospace;color:#9ca3af">${(values[i]/total*100).toFixed(1)}%</span>
-        </div>`
+    document.getElementById('donutLegend').innerHTML = labels.map((l, i) =>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #2a2d3a"><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${colors[i]};margin-right:6px;vertical-align:middle"></span>${l}</span><span style="font-family:monospace;color:#9ca3af">${(values[i]/total*100).toFixed(1)}%</span></div>`
     ).join('');
 }
 
@@ -313,28 +168,12 @@ function renderTable(monthly, totalRevenue) {
         totalRev += rev; totalCogs += cg; totalGp += gp; totalExp += exp; totalOp += op;
         const opSign = op >= 0 ? 'positive' : 'negative';
         const margin = rev ? (op/rev*100).toFixed(1) : '0.0';
-        return `<tr>
-            <td>${m.month}월</td>
-            <td>${fmtShort(rev)}</td>
-            <td>${fmtShort(cg)}</td>
-            <td>${fmtShort(gp)}</td>
-            <td>${fmtShort(exp)}</td>
-            <td class="${opSign}">${fmtShort(op)}</td>
-            <td class="${opSign}">${margin}%</td>
-        </tr>`;
+        return `<tr><td>${m.month}월</td><td>${fmtShort(rev)}</td><td>${fmtShort(cg)}</td><td>${fmtShort(gp)}</td><td>${fmtShort(exp)}</td><td class="${opSign}">${fmtShort(op)}</td><td class="${opSign}">${margin}%</td></tr>`;
     }).join('');
 
     const opTotalSign = totalOp >= 0 ? 'positive' : 'negative';
     const totalMargin = totalRev ? (totalOp/totalRev*100).toFixed(1) : '0.0';
-    const totalRow = `<tr class="total-row">
-        <td>합계</td>
-        <td>${fmtShort(totalRev)}</td>
-        <td>${fmtShort(totalCogs)}</td>
-        <td>${fmtShort(totalGp)}</td>
-        <td>${fmtShort(totalExp)}</td>
-        <td class="${opTotalSign}">${fmtShort(totalOp)}</td>
-        <td class="${opTotalSign}">${totalMargin}%</td>
-    </tr>`;
+    const totalRow = `<tr class="total-row"><td>합계</td><td>${fmtShort(totalRev)}</td><td>${fmtShort(totalCogs)}</td><td>${fmtShort(totalGp)}</td><td>${fmtShort(totalExp)}</td><td class="${opTotalSign}">${fmtShort(totalOp)}</td><td class="${opTotalSign}">${totalMargin}%</td></tr>`;
 
     document.getElementById('monthlyTable').innerHTML = rows + totalRow;
 }

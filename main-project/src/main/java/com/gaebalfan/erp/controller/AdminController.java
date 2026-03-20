@@ -38,6 +38,7 @@ public class AdminController {
         user.setRole(body.getOrDefault("role", "EMPLOYEE"));
         user.setDepartment(body.get("department"));
         user.setStatus("ACTIVE");
+        user.setPermissions(body.get("permissions"));
         userMapper.insertUser(user);
         return ResponseEntity.ok().build();
     }
@@ -58,6 +59,7 @@ public class AdminController {
         user.setPhone(body.get("phone"));
         user.setRole(body.getOrDefault("role", "EMPLOYEE"));
         user.setDepartment(body.get("department"));
+        user.setPermissions(body.get("permissions"));
         userMapper.updateUser(user);
         // 비밀번호 변경 요청이 있을 경우
         if (body.get("password") != null && !body.get("password").isEmpty()) {

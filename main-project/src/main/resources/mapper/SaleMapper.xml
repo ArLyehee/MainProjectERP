@@ -19,7 +19,7 @@
         SELECT s.*, p.product_name
         FROM sales s
         LEFT JOIN products p ON s.product_id = p.product_id
-        ORDER BY s.sale_id DESC
+        ORDER BY s.sale_date DESC
     </select>
 
     <insert id="insert" parameterType="com.gaebalfan.erp.domain.Sale"

@@ -17,7 +17,7 @@
     </select>
 
     <select id="countLowInventory" resultType="int">
-        SELECT COUNT(*) FROM inventory WHERE quantity &lt;= 10
+        SELECT COUNT(*) FROM inventory WHERE quantity &lt; #{threshold}
     </select>
 
     <select id="countMonthlyWorkOrders" resultType="int">
@@ -49,7 +49,7 @@
         FROM inventory i
         LEFT JOIN products p ON i.product_id = p.product_id
         LEFT JOIN warehouses w ON i.warehouse_id = w.warehouse_id
-        WHERE i.quantity &lt;= 10
+        WHERE i.quantity &lt; #{threshold}
         ORDER BY i.quantity ASC
         LIMIT 5
     </select>
