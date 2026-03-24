@@ -13,6 +13,18 @@
         <result property="productName"  column="product_name"/>
     </resultMap>
 
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM work_orders
+    </select>
+
+    <select id="findAllPaged" resultMap="WorkOrderResultMap">
+        SELECT w.*, p.product_name
+        FROM work_orders w
+        LEFT JOIN products p ON w.product_id = p.product_id
+        ORDER BY w.start_date DESC, w.work_order_id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
     <select id="findAll" resultMap="WorkOrderResultMap">
         SELECT w.*, p.product_name
         FROM work_orders w

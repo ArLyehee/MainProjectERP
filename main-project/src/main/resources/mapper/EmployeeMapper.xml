@@ -28,6 +28,19 @@
         <result property="positionName" column="position_name"/>
     </resultMap>
 
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM employees
+    </select>
+
+    <select id="findAllPaged" resultMap="EmployeeResultMap">
+        SELECT e.*, d.department_name, p.position_name
+        FROM employees e
+        LEFT JOIN departments d ON e.department_id = d.department_id
+        LEFT JOIN positions   p ON e.position_id   = p.position_id
+        ORDER BY e.employee_id
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
     <select id="findAll" resultMap="EmployeeResultMap">
         SELECT e.*, d.department_name, p.position_name
         FROM employees e

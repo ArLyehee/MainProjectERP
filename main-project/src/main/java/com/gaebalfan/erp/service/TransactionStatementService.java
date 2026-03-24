@@ -21,6 +21,14 @@ public class TransactionStatementService {
         return mapper.findAll();
     }
 
+    public List<TransactionStatement> findAllPaged(int page, int size) {
+        return mapper.findAllPaged((page - 1) * size, size);
+    }
+
+    public int count() {
+        return mapper.count();
+    }
+
     public TransactionStatement findById(Long id) {
         TransactionStatement s = mapper.findById(id);
         if (s != null) {

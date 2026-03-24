@@ -4,9 +4,25 @@
 <head><meta charset="UTF-8"><meta name="_csrf" th:content="${_csrf.token}"><meta name="_csrf_header" th:content="${_csrf.headerName}"><title>공급업체 관리 | 개발팬 ERP</title><link rel="stylesheet" th:href="@{/css/erp.css(v=6)}">
 </head>
 <body>
-<div class="layout"><aside th:replace="~{fragments/sidebar :: nav('suppliers')}"></aside><main class="main"><div class="page-header"><div class="page-title"><h2>공급업체 관리</h2><p>부품 및 원자재 공급업체를 관리합니다.</p></div><button onclick="openCreate()" class="btn btn-primary">+ 공급업체 등록</button></div><div class="search-bar"><input type="text" id="searchInput" placeholder="검색..." oninput="filterTable()" class="search-input"></div><div class="card"><table><thead><tr><th>#</th><th>업체명</th><th>연락처</th><th>주소</th><th>액션</th></tr></thead><tbody><tr th:if="${#lists.isEmpty(supplierList)}"><td colspan="5" class="empty-state">등록된 공급업체가 없습니다.</td></tr><tr th:each="s : ${supplierList}"><td th:text="${s.supplierId}"></td><td th:text="${s.supplierName}"></td><td class="phone" th:text="${s.phone}"></td><td class="address" th:text="${s.address}"></td><td><button class="btn-action btn-edit" th:onclick="|openEdit(${s.supplierId})|">수정</button><button class="btn-action btn-del"  th:onclick="|confirmDelete(${s.supplierId})|">삭제</button></td></tr></tbody></table></div></main>
+<div class="layout"><aside th:replace="~{fragments/sidebar :: nav('suppliers')}"></aside><main class="main"><div class="page-header"><div class="page-title"><h2>공급업체 관리</h2><p>부품 및 원자재 공급업체를 관리합니다.</p></div><button onclick="openCreate()" class="btn btn-primary">+ 공급업체 등록</button></div><div class="search-bar"><input type="text" id="searchInput" placeholder="업체명, 연락처, 주소 검색..." oninput="filterTable()" class="search-input"></div><div class="card"><table><thead><tr><th class="sort-th" onclick="sortTable(this,0,'num')">#<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,1,'str')">업체명<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,2,'str')">연락처<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,3,'str')">주소<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th>액션</th></tr></thead><tbody><tr th:if="${#lists.isEmpty(supplierList)}"><td colspan="5" class="empty-state">등록된 공급업체가 없습니다.</td></tr><tr th:each="s : ${supplierList}"><td th:text="${s.supplierId}"></td><td th:text="${s.supplierName}"></td><td class="phone" th:text="${s.phone}"></td><td class="address" th:text="${s.address}"></td><td><button class="btn-action btn-edit" th:onclick="|openEdit(${s.supplierId})|">수정</button><button class="btn-action btn-del"  th:onclick="|confirmDelete(${s.supplierId})|">삭제</button></td></tr></tbody></table></div></main>
 </div><div class="modal-overlay" id="modalOverlay"><div class="modal"><h3 id="modalTitle">공급업체 등록</h3><input type="hidden" id="supplierId"><div class="form-group"><label>업체명 *</label><input type="text" id="supplierName" placeholder="업체명 입력"></div><div class="form-group"><label>연락처</label><input type="text" id="phone" placeholder="연락처 입력"></div><div class="form-group"><label>주소</label><input type="text" id="address" placeholder="주소 입력"></div><div class="modal-footer"><button class="btn-cancel" onclick="closeModal()">취소</button><button class="btn-save" onclick="saveSupplier()">저장</button></div></div>
 </div><script>
+const _sort = {col:-1, asc:true};
+function sortTable(th, col, type) {
+    document.querySelectorAll('.sort-th').forEach(t => t.classList.remove('sort-asc','sort-desc'));
+    _sort.asc = _sort.col === col ? !_sort.asc : true;
+    _sort.col = col;
+    th.classList.add(_sort.asc ? 'sort-asc' : 'sort-desc');
+    const tbody = document.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr')).filter(tr => tr.querySelectorAll('td').length > 1);
+    rows.sort((a, b) => {
+        const va = a.querySelectorAll('td')[col].textContent.trim();
+        const vb = b.querySelectorAll('td')[col].textContent.trim();
+        const cmp = type === 'num' ? (parseFloat(va.replace(/,/g,''))||0) - (parseFloat(vb.replace(/,/g,''))||0) : va.localeCompare(vb, 'ko');
+        return _sort.asc ? cmp : -cmp;
+    });
+    rows.forEach(r => tbody.appendChild(r));
+}
 function filterTable() {
     const q = document.getElementById('searchInput').value.toLowerCase();
     document.querySelectorAll('tbody tr').forEach(tr => {

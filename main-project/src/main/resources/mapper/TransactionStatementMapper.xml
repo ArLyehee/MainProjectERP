@@ -9,6 +9,7 @@
         <result property="statementNo"   column="statement_no"/>
         <result property="issueDate"     column="issue_date"/>
         <result property="customerName"  column="customer_name"/>
+        <result property="supplyName"    column="supply_name"/>
         <result property="customerAddr"  column="customer_addr"/>
         <result property="customerTel"   column="customer_tel"/>
         <result property="customerBizNo" column="customer_biz_no"/>
@@ -29,6 +30,15 @@
         <result property="amount"      column="amount"/>
     </resultMap>
 
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM transaction_statements
+    </select>
+
+    <select id="findAllPaged" resultMap="StatementResultMap">
+        SELECT * FROM transaction_statements ORDER BY statement_id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
     <select id="findAll" resultMap="StatementResultMap">
         SELECT * FROM transaction_statements ORDER BY statement_id DESC
     </select>
@@ -44,10 +54,10 @@
     <insert id="insert" parameterType="com.gaebalfan.erp.domain.TransactionStatement"
             useGeneratedKeys="true" keyProperty="statementId">
         INSERT INTO transaction_statements
-            (statement_no, issue_date, customer_name, customer_addr, customer_tel,
+            (statement_no, issue_date, customer_name, supply_name, customer_addr, customer_tel,
              customer_biz_no, total_amount, tax_amount, grand_total, notes, manager_name)
         VALUES
-            (#{statementNo}, #{issueDate}, #{customerName}, #{customerAddr}, #{customerTel},
+            (#{statementNo}, #{issueDate}, #{customerName}, #{supplyName}, #{customerAddr}, #{customerTel},
              #{customerBizNo}, #{totalAmount}, #{taxAmount}, #{grandTotal}, #{notes}, #{managerName})
     </insert>
 
@@ -61,6 +71,7 @@
         UPDATE transaction_statements SET
             issue_date      = #{issueDate},
             customer_name   = #{customerName},
+            supply_name     = #{supplyName},
             customer_addr   = #{customerAddr},
             customer_tel    = #{customerTel},
             customer_biz_no = #{customerBizNo},

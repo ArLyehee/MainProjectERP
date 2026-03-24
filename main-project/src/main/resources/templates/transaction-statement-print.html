@@ -51,12 +51,12 @@
     <div class="doc-title">거 래 명 세 서</div>
 
     <div class="info-section">
-        <!-- 공급받는자 -->
+        <!-- 공급자 (납품처) -->
         <div class="info-block border-right">
-            <div class="info-label" style="font-size:13px;font-weight:700;margin-bottom:8px;">▶ 공급받는자</div>
+            <div class="info-label" style="font-size:13px;font-weight:700;margin-bottom:8px;">▶ 공급자</div>
             <div class="info-row">
                 <span class="lbl">상호(법인명)</span>
-                <span class="val" th:text="${statement.customerName}"></span>
+                <span class="val" th:text="${statement.supplyName}"></span>
             </div>
             <div class="info-row">
                 <span class="lbl">사업자번호</span>
@@ -71,9 +71,9 @@
                 <span class="val" th:text="${statement.customerAddr != null ? statement.customerAddr : ''}"></span>
             </div>
         </div>
-        <!-- 공급자 (우리회사) -->
+        <!-- 공급받는자 (우리회사) -->
         <div class="info-block">
-            <div class="info-label" style="font-size:13px;font-weight:700;margin-bottom:8px;">▶ 공급자</div>
+            <div class="info-label" style="font-size:13px;font-weight:700;margin-bottom:8px;">▶ 공급받는자</div>
             <div class="info-row">
                 <span class="lbl">상호(법인명)</span>
                 <span class="val">개발환기좀해 ERP</span>

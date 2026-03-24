@@ -1096,3 +1096,27 @@ body.login-page::after {
     opacity: 0.4;
     pointer-events: none;
 }
+
+/* ============================================================
+   Sort Column Headers
+   ============================================================ */
+.sort-th { cursor: pointer; user-select: none; white-space: nowrap; }
+.sort-th:hover { background: rgba(37,99,235,0.06); }
+.sort-btn {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-left: 6px;
+    vertical-align: middle;
+    line-height: 1;
+}
+.sort-btn .arr-up,
+.sort-btn .arr-down {
+    font-size: 9px;
+    color: #d1d5db;
+    line-height: 1;
+    display: block;
+    transition: color 0.15s;
+}
+.sort-th.sort-asc  .arr-up   { color: #2563eb; }
+.sort-th.sort-desc .arr-down { color: #2563eb; }

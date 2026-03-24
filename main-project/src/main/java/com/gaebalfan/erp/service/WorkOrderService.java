@@ -36,6 +36,14 @@ public class WorkOrderService {
         return mapper.findAll();
     }
 
+    public List<WorkOrder> findAllPaged(int page, int size) {
+        return mapper.findAllPaged((page - 1) * size, size);
+    }
+
+    public int count() {
+        return mapper.count();
+    }
+
     public WorkOrder findById(Long id) {
         return mapper.findById(id);
     }

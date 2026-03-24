@@ -143,8 +143,15 @@ public class WebPageController {
 
     // ── 기준정보 페이지 ────────────────────────────
     @GetMapping("/products")
-    public String products(Model model) {
-        model.addAttribute("productList", productService.findAll());
+    public String products(@RequestParam(defaultValue = "1") int page, Model model) {
+        int size = 20;
+        int total = productService.count();
+        int totalPages = (int) Math.ceil((double) total / size);
+        model.addAttribute("productList", productService.findAllPaged(page, size));
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageStart", Math.max(1, page - 5));
+        model.addAttribute("pageEnd", Math.min(totalPages, page + 5));
         return "products";
     }
 
@@ -162,10 +169,17 @@ public class WebPageController {
 
     // ── 인사 페이지 ───────────────────────────────
     @GetMapping("/employees")
-    public String employees(Model model) {
-        model.addAttribute("employeeList", employeeService.findAll());
+    public String employees(@RequestParam(defaultValue = "1") int page, Model model) {
+        int size = 20;
+        int total = employeeService.count();
+        int totalPages = (int) Math.ceil((double) total / size);
+        model.addAttribute("employeeList", employeeService.findAllPaged(page, size));
         model.addAttribute("departmentList", employeeService.findAllDepartments());
         model.addAttribute("positionList", employeeService.findAllPositions());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageStart", Math.max(1, page - 5));
+        model.addAttribute("pageEnd", Math.min(totalPages, page + 5));
         return "employees";
     }
 
@@ -185,10 +199,17 @@ public class WebPageController {
 
     // ── 생산 페이지 ───────────────────────────────
     @GetMapping("/work-orders")
-    public String workOrders(Model model) {
-        model.addAttribute("workOrderList", workOrderService.findAll());
+    public String workOrders(@RequestParam(defaultValue = "1") int page, Model model) {
+        int size = 20;
+        int total = workOrderService.count();
+        int totalPages = (int) Math.ceil((double) total / size);
+        model.addAttribute("workOrderList", workOrderService.findAllPaged(page, size));
         model.addAttribute("productList", productService.findAll());
         model.addAttribute("warehouseList", warehouseService.findAll());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageStart", Math.max(1, page - 5));
+        model.addAttribute("pageEnd", Math.min(totalPages, page + 5));
         return "work-orders";
     }
 
@@ -223,8 +244,15 @@ public class WebPageController {
 
     // ── 거래명세서 페이지 ─────────────────────────
     @GetMapping("/transaction-statements")
-    public String transactionStatements(Model model) {
-        model.addAttribute("statementList", transactionStatementService.findAll());
+    public String transactionStatements(@RequestParam(defaultValue = "1") int page, Model model) {
+        int size = 20;
+        int total = transactionStatementService.count();
+        int totalPages = (int) Math.ceil((double) total / size);
+        model.addAttribute("statementList", transactionStatementService.findAllPaged(page, size));
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageStart", Math.max(1, page - 5));
+        model.addAttribute("pageEnd", Math.min(totalPages, page + 5));
         return "transaction-statements";
     }
 
