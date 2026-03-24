@@ -10,6 +10,7 @@ public class TransactionStatement {
     private String        statementNo;
     private LocalDate     issueDate;
     private String        customerName;
+    private String        supplyName;
     private String        customerAddr;
     private String        customerTel;
     private String        customerBizNo;
@@ -25,6 +26,7 @@ public class TransactionStatement {
     public String getStatementNo() { return statementNo; }
     public LocalDate getIssueDate() { return issueDate; }
     public String getCustomerName() { return customerName; }
+    public String getSupplyName() { return supplyName; }
     public String getCustomerAddr() { return customerAddr; }
     public String getCustomerTel() { return customerTel; }
     public String getCustomerBizNo() { return customerBizNo; }
@@ -40,6 +42,7 @@ public class TransactionStatement {
     public void setStatementNo(String statementNo) { this.statementNo = statementNo; }
     public void setIssueDate(LocalDate issueDate) { this.issueDate = issueDate; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
+    public void setSupplyName(String supplyName) { this.supplyName = supplyName; }
     public void setCustomerAddr(String customerAddr) { this.customerAddr = customerAddr; }
     public void setCustomerTel(String customerTel) { this.customerTel = customerTel; }
     public void setCustomerBizNo(String customerBizNo) { this.customerBizNo = customerBizNo; }

@@ -20,6 +20,12 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
 
+ocr:
+  python:
+    cmd: python
+  project:
+    path: C:/Users/3class_013/Desktop/main_project/MainProjectOCR
+
 logging:
   level:
     root: WARN

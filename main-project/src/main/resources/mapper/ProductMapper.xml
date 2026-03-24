@@ -13,6 +13,15 @@
         <result property="description" column="description"/>
     </resultMap>
 
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM products
+    </select>
+
+    <select id="findAllPaged" resultMap="ProductResultMap">
+        SELECT * FROM products ORDER BY product_id
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
     <select id="findAll" resultMap="ProductResultMap">
         SELECT * FROM products ORDER BY product_id
     </select>

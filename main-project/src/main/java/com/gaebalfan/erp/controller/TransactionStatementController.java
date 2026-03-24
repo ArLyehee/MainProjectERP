@@ -41,6 +41,7 @@ public class TransactionStatementController {
 
         TransactionStatement stmt = new TransactionStatement();
         stmt.setCustomerName(body.get("customerName").toString());
+        stmt.setSupplyName(body.get("supplyName") != null ? body.get("supplyName").toString() : "");
         stmt.setCustomerAddr(body.get("customerAddr") != null ? body.get("customerAddr").toString() : "");
         stmt.setCustomerTel(body.get("customerTel") != null ? body.get("customerTel").toString() : "");
         stmt.setCustomerBizNo(body.get("customerBizNo") != null ? body.get("customerBizNo").toString() : "");
@@ -87,6 +88,7 @@ public class TransactionStatementController {
 
         TransactionStatement stmt = new TransactionStatement();
         stmt.setCustomerName(body.get("customerName").toString());
+        stmt.setSupplyName(body.get("supplyName") != null ? body.get("supplyName").toString() : "");
         stmt.setCustomerAddr(body.get("customerAddr") != null ? body.get("customerAddr").toString() : "");
         stmt.setCustomerTel(body.get("customerTel") != null ? body.get("customerTel").toString() : "");
         stmt.setCustomerBizNo(body.get("customerBizNo") != null ? body.get("customerBizNo").toString() : "");

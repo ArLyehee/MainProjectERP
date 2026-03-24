@@ -18,6 +18,14 @@ public class ProductService {
         return mapper.findAll();
     }
 
+    public List<Product> findAllPaged(int page, int size) {
+        return mapper.findAllPaged((page - 1) * size, size);
+    }
+
+    public int count() {
+        return mapper.count();
+    }
+
     public Product findById(Long id) {
         return mapper.findById(id);
     }

@@ -20,6 +20,14 @@ public class EmployeeService {
         return mapper.findAll();
     }
 
+    public List<Employee> findAllPaged(int page, int size) {
+        return mapper.findAllPaged((page - 1) * size, size);
+    }
+
+    public int count() {
+        return mapper.count();
+    }
+
     public Employee findById(Long id) {
         return mapper.findById(id);
     }

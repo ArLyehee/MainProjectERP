@@ -19,9 +19,9 @@
     </style>
 </head>
 <body>
-<div class="layout"><aside th:replace="~{fragments/sidebar :: nav('transaction-statements')}"></aside><main class="main"><div class="page-header"><div class="page-title"><h2>거래명세서</h2><p>거래명세서를 등록하고 인쇄합니다.</p></div><button onclick="openModal()" class="btn btn-primary">+ 거래명세서 등록</button></div><div class="card"><table><thead><tr><th>명세서번호</th><th>발행일</th><th>거래처명</th><th>사업자번호</th><th>연락처</th><th class="text-right">공급가액</th><th class="text-right">세액(10%)</th><th class="text-right">합계금액</th><th>액션</th></tr></thead><tbody><tr th:if="${#lists.isEmpty(statementList)}"><td colspan="9" class="empty-state">등록된 거래명세서가 없습니다.</td></tr><tr th:each="s : ${statementList}"><td><span class="badge-no" th:text="${s.statementNo}"></span></td><td th:text="${s.issueDate}"></td><td th:text="${s.customerName}"></td><td th:text="${s.customerBizNo != null ? s.customerBizNo : '-'}"></td><td th:text="${s.customerTel != null ? s.customerTel : '-'}"></td><td class="text-right" th:text="${#numbers.formatInteger(s.totalAmount, 1, 'COMMA') + '원'}"></td><td class="text-right" th:text="${#numbers.formatInteger(s.taxAmount, 1, 'COMMA') + '원'}"></td><td class="text-right" style="font-weight:600;" th:text="${#numbers.formatInteger(s.grandTotal, 1, 'COMMA') + '원'}"></td><td><div class="action-btns"><button class="btn-edit" th:onclick="'openEditModal(' + ${s.statementId} + ')'">수정</button><button class="btn-print" th:onclick="'printStatement(' + ${s.statementId} + ')'"> 인쇄</button><button class="btn-del-sm" th:onclick="'deleteStatement(' + ${s.statementId} + ')'">삭제</button></div></td></tr></tbody></table></div></main>
-</div><!-- 등록 모달 -->
-<div class="modal-overlay" id="stmtModal"><div class="modal" style="max-width:700px;width:95%;"><h3 id="modalTitle">거래명세서 등록</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;"><div class="form-group"><label>발행일 *</label><input type="date" id="issueDate"></div><div class="form-group"><label>거래처명 *</label><input type="text" id="customerName" placeholder="(주)홍길동물산"></div><div class="form-group"><label>사업자번호</label><input type="text" id="customerBizNo" placeholder="000-00-00000"></div><div class="form-group"><label>연락처</label><input type="text" id="customerTel" placeholder="02-0000-0000"></div><div class="form-group" style="grid-column:1/-1;"><label>주소</label><input type="text" id="customerAddr" placeholder="서울시 강남구 ..."></div><div class="form-group"><label>담당자</label><input type="text" id="managerName" placeholder="홍길동"></div><div class="form-group"><label>비고</label><input type="text" id="notes" placeholder="특이사항 입력"></div></div><div style="font-weight:600;margin:8px 0 4px;">품목</div><button class="btn-add-row" onclick="addRow()">+ 품목 추가</button><table class="items-table"><thead><tr><th style="width:40%">품목명</th><th style="width:15%">수량</th><th style="width:20%">단가</th><th style="width:20%">금액</th><th style="width:5%"></th></tr></thead><tbody id="itemsBody"></tbody></table><div style="background:#f9fafb;border-radius:6px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:flex-end;gap:16px;font-size:13px;flex-wrap:wrap;"><span>공급가액: <b id="sumTotal">0</b>원</span><span style="display:flex;align-items:center;gap:4px;">세율: <input type="number" id="taxRate" value="10" min="0" max="100"
+<div class="layout"><aside th:replace="~{fragments/sidebar :: nav('transaction-statements')}"></aside><main class="main"><div class="page-header"><div class="page-title"><h2>거래명세서</h2><p>거래명세서를 등록하고 인쇄합니다.</p></div><button onclick="openModal()" class="btn btn-primary">+ 거래명세서 등록</button><button onclick="openOcrModal()" class="btn btn-secondary" style="margin-left:8px;">📷 명세서 자동등록 (OCR)</button></div><div class="search-bar"><input type="text" id="searchInput" placeholder="명세서번호, 공급자명, 사업자번호 검색..." oninput="filterTable()" class="search-input"></div><div class="card"><table><thead><tr><th class="sort-th" onclick="sortTable(this,0,'str')">명세서번호<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,1,'str')">발행일<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,2,'str')">공급자명<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,3,'str')">사업자번호<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,4,'str')">연락처<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th text-right" onclick="sortTable(this,5,'num')">공급가액<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th text-right" onclick="sortTable(this,6,'num')">세액(10%)<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th text-right" onclick="sortTable(this,7,'num')">합계금액<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th>액션</th></tr></thead><tbody><tr th:if="${#lists.isEmpty(statementList)}"><td colspan="9" class="empty-state">등록된 거래명세서가 없습니다.</td></tr><tr th:each="s : ${statementList}"><td><span class="badge-no" th:text="${s.statementNo}"></span></td><td th:text="${s.issueDate}"></td><td th:text="${s.supplyName}"></td><td th:text="${s.customerBizNo != null ? s.customerBizNo : '-'}"></td><td th:text="${s.customerTel != null ? s.customerTel : '-'}"></td><td class="text-right" th:text="${#numbers.formatInteger(s.totalAmount, 1, 'COMMA') + '원'}"></td><td class="text-right" th:text="${#numbers.formatInteger(s.taxAmount, 1, 'COMMA') + '원'}"></td><td class="text-right" style="font-weight:600;" th:text="${#numbers.formatInteger(s.grandTotal, 1, 'COMMA') + '원'}"></td><td><div class="action-btns"><button class="btn-edit" th:onclick="'openEditModal(' + ${s.statementId} + ')'">수정</button><button class="btn-print" th:onclick="'printStatement(' + ${s.statementId} + ')'"> 인쇄</button><button class="btn-del-sm" th:onclick="'deleteStatement(' + ${s.statementId} + ')'">삭제</button></div></td></tr></tbody></table></div><!-- 페이지네이션 --><div class="pagination" th:if="${totalPages != null and totalPages > 1}"><a th:href="@{/transaction-statements(page=${currentPage - 1})}" th:classappend="${currentPage == 1} ? 'disabled'">&laquo;</a><th:block th:each="i : ${#numbers.sequence(pageStart, pageEnd)}"><a th:href="@{/transaction-statements(page=${i})}" th:text="${i}" th:classappend="${i == currentPage} ? 'active'"></a></th:block><a th:href="@{/transaction-statements(page=${currentPage + 1})}" th:classappend="${currentPage == totalPages} ? 'disabled'">&raquo;</a></div></main>
+</div><!-- OCR 모달 --><div class="modal-overlay" id="ocrModal"><div class="modal" style="max-width:500px;width:95%;"><h3>📷 명세서 자동등록 (OCR)</h3><p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">거래명세서 이미지(JPG, PNG, PDF)를 업로드하면 자동으로 내용을 인식합니다.</p><div class="form-group"><label>명세서 파일 *</label><input type="file" id="ocrFile" accept="image/*,.pdf" style="width:100%;padding:8px;border:1px dashed #d1d5db;border-radius:6px;"></div><div id="ocrStatus" style="display:none;padding:12px;border-radius:6px;font-size:13px;margin-top:8px;"></div><div class="modal-footer"><button class="btn-cancel-modal" onclick="closeOcrModal()">취소</button><button class="btn-save" onclick="submitOcr()">자동 인식 시작</button></div></div></div><!-- 등록 모달 -->
+<div class="modal-overlay" id="stmtModal"><div class="modal" style="max-width:700px;width:95%;"><h3 id="modalTitle">거래명세서 등록</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;"><div class="form-group"><label>발행일 *</label><input type="date" id="issueDate"></div><div class="form-group"><label>공급자명 *</label><input type="text" id="supplyName" placeholder="(주)홍길동물산"></div><div class="form-group"><label>사업자번호</label><input type="text" id="customerBizNo" placeholder="000-00-00000"></div><div class="form-group"><label>연락처</label><input type="text" id="customerTel" placeholder="02-0000-0000"></div><div class="form-group" style="grid-column:1/-1;"><label>주소</label><input type="text" id="customerAddr" placeholder="서울시 강남구 ..."></div><div class="form-group"><label>담당자</label><input type="text" id="managerName" placeholder="홍길동"></div><div class="form-group"><label>비고</label><input type="text" id="notes" placeholder="특이사항 입력"></div></div><div style="font-weight:600;margin:8px 0 4px;">품목</div><button class="btn-add-row" onclick="addRow()">+ 품목 추가</button><table class="items-table"><thead><tr><th style="width:40%">품목명</th><th style="width:15%">수량</th><th style="width:20%">단가</th><th style="width:20%">금액</th><th style="width:5%"></th></tr></thead><tbody id="itemsBody"></tbody></table><div style="background:#f9fafb;border-radius:6px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:flex-end;gap:16px;font-size:13px;flex-wrap:wrap;"><span>공급가액: <b id="sumTotal">0</b>원</span><span style="display:flex;align-items:center;gap:4px;">세율: <input type="number" id="taxRate" value="10" min="0" max="100"
                     style="width:48px;text-align:center;border:1px solid #d1d5db;border-radius:4px;padding:2px 4px;font-size:13px;"
                     oninput="onTaxRateChange()">%
             </span><span style="display:flex;align-items:center;gap:4px;">세액: <input type="number" id="taxAmountInput" value="0" min="0"
@@ -32,12 +32,65 @@
 const csrf = document.querySelector('meta[name="_csrf"]').content;
 const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 let editingId = null;
+const _sort = {col:-1, asc:true};
+function sortTable(th, col, type) {
+    document.querySelectorAll('.sort-th').forEach(t => t.classList.remove('sort-asc','sort-desc'));
+    _sort.asc = _sort.col === col ? !_sort.asc : true;
+    _sort.col = col;
+    th.classList.add(_sort.asc ? 'sort-asc' : 'sort-desc');
+    const tbody = document.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr')).filter(tr => tr.querySelectorAll('td').length > 1);
+    rows.sort((a, b) => {
+        const va = a.querySelectorAll('td')[col].textContent.trim();
+        const vb = b.querySelectorAll('td')[col].textContent.trim();
+        const cmp = type === 'num' ? (parseFloat(va.replace(/,/g,''))||0) - (parseFloat(vb.replace(/,/g,''))||0) : va.localeCompare(vb, 'ko');
+        return _sort.asc ? cmp : -cmp;
+    });
+    rows.forEach(r => tbody.appendChild(r));
+}
+
+function filterTable() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('tbody tr').forEach(tr => {
+        tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+function openOcrModal() { document.getElementById('ocrModal').classList.add('open'); }
+function closeOcrModal() { document.getElementById('ocrModal').classList.remove('open'); document.getElementById('ocrStatus').style.display='none'; }
+function submitOcr() {
+    const file = document.getElementById('ocrFile').files[0];
+    if (!file) { alert('파일을 선택해주세요.'); return; }
+    const status = document.getElementById('ocrStatus');
+    status.style.display = 'block';
+    status.style.background = '#eff6ff';
+    status.style.color = '#1e40af';
+    status.textContent = '인식 중...';
+    const formData = new FormData();
+    formData.append('file', file);
+    fetch('/api/ocr/transaction-statement', { method:'POST', headers:{[csrfHeader]:csrf}, body:formData })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                closeOcrModal();
+                location.reload();
+            } else {
+                status.style.background = '#fef2f2';
+                status.style.color = '#dc2626';
+                status.textContent = data.message || 'OCR 처리 실패. 관리자에게 문의하세요.';
+            }
+        })
+        .catch(() => {
+            status.style.background = '#fef2f2';
+            status.style.color = '#dc2626';
+            status.textContent = 'OCR API가 아직 연동되지 않았습니다. 관리자에게 문의하세요.';
+        });
+}
 
 function openModal() {
     editingId = null;
     document.getElementById('modalTitle').textContent = ' 거래명세서 등록';
     document.getElementById('issueDate').value = new Date().toISOString().slice(0,10);
-    document.getElementById('customerName').value = '';
+    document.getElementById('supplyName').value = '';
     document.getElementById('customerBizNo').value = '';
     document.getElementById('customerTel').value = '';
     document.getElementById('customerAddr').value = '';
@@ -53,12 +106,12 @@ function openModal() {
 
 function openEditModal(id) {
     fetch('/api/transaction-statements/' + id)
-        .then(r => r.json())
+        .then(r => { if (!r.ok) throw new Error('서버 오류 ' + r.status); return r.json(); })
         .then(s => {
             editingId = id;
             document.getElementById('modalTitle').textContent = ' 거래명세서 수정 (' + s.statementNo + ')';
             document.getElementById('issueDate').value = s.issueDate;
-            document.getElementById('customerName').value = s.customerName || '';
+            document.getElementById('supplyName').value = s.supplyName || '';
             document.getElementById('customerBizNo').value = s.customerBizNo || '';
             document.getElementById('customerTel').value = s.customerTel || '';
             document.getElementById('customerAddr').value = s.customerAddr || '';
@@ -81,7 +134,8 @@ function openEditModal(id) {
             document.getElementById('taxAmountInput').value = loadedTax; // calcTotal이 덮어쓰므로 재세팅
             document.getElementById('sumGrand').textContent = (loadedTotal + loadedTax).toLocaleString();
             document.getElementById('stmtModal').classList.add('open');
-        });
+        })
+        .catch(err => alert('수정 로드 실패: ' + err.message));
 }
 
 function escHtml(str) {
@@ -140,8 +194,8 @@ function onTaxAmountChange() {
 }
 
 function saveStatement() {
-    const customerName = document.getElementById('customerName').value.trim();
-    if (!customerName) { alert('거래처명을 입력하세요.'); return; }
+    const supplyName = document.getElementById('supplyName').value.trim();
+    if (!supplyName) { alert('공급자명을 입력하세요.'); return; }
     const rows = document.querySelectorAll('#itemsBody tr');
     if (rows.length === 0) { alert('품목을 1개 이상 추가하세요.'); return; }
     const items = [];
@@ -157,7 +211,8 @@ function saveStatement() {
     }
     const data = {
         issueDate: document.getElementById('issueDate').value,
-        customerName: customerName,
+        customerName: '개발환기좀해 ERP',
+        supplyName: supplyName,
         customerBizNo: document.getElementById('customerBizNo').value,
         customerTel: document.getElementById('customerTel').value,
         customerAddr: document.getElementById('customerAddr').value,

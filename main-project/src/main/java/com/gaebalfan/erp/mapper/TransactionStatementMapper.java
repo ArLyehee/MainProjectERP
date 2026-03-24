@@ -9,6 +9,8 @@ import java.util.List;
 @Mapper
 public interface TransactionStatementMapper {
     List<TransactionStatement> findAll();
+    List<TransactionStatement> findAllPaged(@Param("offset") int offset, @Param("size") int size);
+    int count();
     TransactionStatement findById(@Param("statementId") Long statementId);
     List<TransactionStatementItem> findItemsByStatementId(@Param("statementId") Long statementId);
     void insert(TransactionStatement statement);
