@@ -15,15 +15,17 @@ public class ErpUserDetails implements UserDetails {
     private final Long   userId;
     private final String username;
     private final String password;
+    private final String displayName;
     private final Collection<? extends GrantedAuthority> authorities;
     private final Set<String> permissions;
 
-    public ErpUserDetails(Long userId, String username, String password,
+    public ErpUserDetails(Long userId, String username, String password, String displayName,
                           List<? extends GrantedAuthority> authorities,
                           Set<String> permissions) {
         this.userId      = userId;
         this.username    = username;
         this.password    = password;
+        this.displayName = displayName;
         this.authorities = authorities;
         this.permissions = permissions;
     }
@@ -48,4 +50,5 @@ public class ErpUserDetails implements UserDetails {
     @Override public boolean isEnabled()               { return true; }
 
     public Long getUserId() { return userId; }
+    public String getDisplayName() { return displayName; }
 }

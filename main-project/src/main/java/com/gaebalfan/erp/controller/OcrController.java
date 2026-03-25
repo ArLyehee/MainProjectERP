@@ -32,13 +32,20 @@ public class OcrController {
     @Value("${ocr.project.path}")
     private String ocrProjectPath;
 
+    @Value("${ocr.gemini.api-key:}")
+    private String geminiApiKey;
+
+    @Value("${ocr.groq.api-key:}")
+    private String groqApiKey;
+
     public OcrController(TransactionStatementService statementService) {
         this.statementService = statementService;
     }
 
     @PostMapping("/transaction-statement")
     @SuppressWarnings("unchecked")
-    public ResponseEntity<Map<String, Object>> processOcr(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Map<String, Object>> processOcr(@RequestParam("file") MultipartFile file,
+                                                           @RequestParam(value = "managerName", required = false) String managerName) {
         File tempFile = null;
         try {
             // 1. 파일을 OCR input 폴더에 임시 저장
@@ -53,13 +60,19 @@ public class OcrController {
             ProcessBuilder pb = new ProcessBuilder(pythonCmd, mainPy, "--erp-mode", tempFile.getAbsolutePath());
             pb.directory(new File(ocrProjectPath));
             pb.redirectErrorStream(false);
+            if (geminiApiKey != null && !geminiApiKey.isBlank()) {
+                pb.environment().put("GEMINI_API_KEY", geminiApiKey);
+            }
+            if (groqApiKey != null && !groqApiKey.isBlank()) {
+                pb.environment().put("GROQ_API_KEY", groqApiKey);
+            }
             Process process = pb.start();
             String stdout = new String(process.getInputStream().readAllBytes(), "UTF-8").trim();
             String stderr = new String(process.getErrorStream().readAllBytes(), "UTF-8").trim();
             process.waitFor();
 
             if (!stderr.isEmpty()) {
-                log.debug("OCR stderr:\n{}", stderr);
+                log.info("OCR stderr:\n{}", stderr);
             }
             if (stdout.isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of("success", false, "message", "OCR 실행 실패: " + stderr));
@@ -90,7 +103,10 @@ public class OcrController {
             stmt.setCustomerBizNo(str(data, "customer_biz_no"));
             stmt.setCustomerTel(str(data, "customer_tel"));
             stmt.setCustomerAddr(str(data, "customer_addr"));
-            stmt.setManagerName(str(data, "manager_name"));
+            String ocrManager = str(data, "manager_name");
+            System.err.println("[DEBUG] OCR manager_name='" + ocrManager + "', form managerName='" + managerName + "'");
+            log.info("OCR 담당자: '{}', 폼 담당자: '{}'", ocrManager, managerName);
+            stmt.setManagerName(managerName != null && !managerName.isBlank() ? managerName : ocrManager);
             stmt.setNotes(str(data, "notes"));
             stmt.setTotalAmount(decimal(data, "total_amount"));
             stmt.setTaxAmount(decimal(data, "tax_amount"));

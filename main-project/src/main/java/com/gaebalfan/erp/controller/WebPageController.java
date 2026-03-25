@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.gaebalfan.erp.security.ErpUserDetails;
+import org.springframework.security.core.Authentication;
+
 import java.security.Principal;
 
 @Controller
@@ -89,24 +92,44 @@ public class WebPageController {
 
     // ── 재고/물류 페이지 ───────────────────────────
     @GetMapping("/inventory")
-    public String inventory(Model model) {
-        var inventoryList = inventoryService.findAll();
+    public String inventory(@RequestParam(defaultValue = "1") int page,
+                            @RequestParam(defaultValue = "") String q,
+                            Model model) {
+        int size = 20;
+        int total = inventoryService.count(q);
+        int totalPages = Math.max(1, (int) Math.ceil((double) total / size));
+        var allList = inventoryService.findAll();
         int threshold = systemSettings.getLowStockThreshold();
-        var shortageList = inventoryList.stream()
+        var shortageList = allList.stream()
                 .filter(i -> i.getQuantity() < threshold)
                 .collect(java.util.stream.Collectors.toList());
-        model.addAttribute("inventoryList", inventoryList);
+        model.addAttribute("inventoryList", inventoryService.findAllPaged(page, size, q));
         model.addAttribute("shortageList", shortageList);
         model.addAttribute("lowStockThreshold", threshold);
         model.addAttribute("productList", productService.findAll());
         model.addAttribute("warehouseList", warehouseService.findAll());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageStart", Math.max(1, page - 5));
+        model.addAttribute("pageEnd", Math.min(totalPages, page + 5));
+        model.addAttribute("q", q);
         return "inventory";
     }
 
     @GetMapping("/purchase-orders")
-    public String purchaseOrders(Model model) {
-        model.addAttribute("purchaseOrderList", purchaseOrderService.findAll());
+    public String purchaseOrders(@RequestParam(defaultValue = "1") int page,
+                                 @RequestParam(defaultValue = "") String q,
+                                 Model model) {
+        int size = 20;
+        int total = purchaseOrderService.count(q);
+        int totalPages = Math.max(1, (int) Math.ceil((double) total / size));
+        model.addAttribute("purchaseOrderList", purchaseOrderService.findAllPaged(page, size, q));
         model.addAttribute("supplierList", supplierService.findAll());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageStart", Math.max(1, page - 5));
+        model.addAttribute("pageEnd", Math.min(totalPages, page + 5));
+        model.addAttribute("q", q);
         return "purchase-orders";
     }
 
@@ -156,8 +179,18 @@ public class WebPageController {
     }
 
     @GetMapping("/suppliers")
-    public String suppliers(Model model) {
-        model.addAttribute("supplierList", supplierService.findAll());
+    public String suppliers(@RequestParam(defaultValue = "1") int page,
+                            @RequestParam(defaultValue = "") String q,
+                            Model model) {
+        int size = 20;
+        int total = supplierService.count(q);
+        int totalPages = Math.max(1, (int) Math.ceil((double) total / size));
+        model.addAttribute("supplierList", supplierService.findAllPaged(page, size, q));
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageStart", Math.max(1, page - 5));
+        model.addAttribute("pageEnd", Math.min(totalPages, page + 5));
+        model.addAttribute("q", q);
         return "suppliers";
     }
 
@@ -244,7 +277,7 @@ public class WebPageController {
 
     // ── 거래명세서 페이지 ─────────────────────────
     @GetMapping("/transaction-statements")
-    public String transactionStatements(@RequestParam(defaultValue = "1") int page, Model model) {
+    public String transactionStatements(@RequestParam(defaultValue = "1") int page, Model model, Authentication authentication) {
         int size = 20;
         int total = transactionStatementService.count();
         int totalPages = (int) Math.ceil((double) total / size);
@@ -253,6 +286,9 @@ public class WebPageController {
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("pageStart", Math.max(1, page - 5));
         model.addAttribute("pageEnd", Math.min(totalPages, page + 5));
+        if (authentication != null && authentication.getPrincipal() instanceof ErpUserDetails u) {
+            model.addAttribute("currentUserName", u.getDisplayName());
+        }
         return "transaction-statements";
     }
 

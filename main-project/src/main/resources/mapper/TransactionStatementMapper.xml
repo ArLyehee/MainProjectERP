@@ -19,6 +19,7 @@
         <result property="notes"         column="notes"/>
         <result property="managerName"   column="manager_name"/>
         <result property="createdAt"     column="created_at"/>
+        <result property="itemSummary"   column="item_summary"/>
     </resultMap>
 
     <resultMap id="ItemResultMap" type="com.gaebalfan.erp.domain.TransactionStatementItem">
@@ -35,12 +36,22 @@
     </select>
 
     <select id="findAllPaged" resultMap="StatementResultMap">
-        SELECT * FROM transaction_statements ORDER BY statement_id DESC
+        SELECT *,
+               (SELECT GROUP_CONCAT(item_name ORDER BY item_id SEPARATOR ', ')
+                FROM transaction_statement_items
+                WHERE statement_id = s.statement_id) AS item_summary
+        FROM transaction_statements s
+        ORDER BY statement_id DESC
         LIMIT #{size} OFFSET #{offset}
     </select>
 
     <select id="findAll" resultMap="StatementResultMap">
-        SELECT * FROM transaction_statements ORDER BY statement_id DESC
+        SELECT *,
+               (SELECT GROUP_CONCAT(item_name ORDER BY item_id SEPARATOR ', ')
+                FROM transaction_statement_items
+                WHERE statement_id = s.statement_id) AS item_summary
+        FROM transaction_statements s
+        ORDER BY statement_id DESC
     </select>
 
     <select id="findById" resultMap="StatementResultMap">

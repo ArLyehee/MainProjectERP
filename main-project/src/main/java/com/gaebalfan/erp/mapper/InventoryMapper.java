@@ -6,6 +6,8 @@ import java.util.List;
 @Mapper
 public interface InventoryMapper {
     List<Inventory> findAll();
+    List<Inventory> findAllPaged(@Param("offset") int offset, @Param("size") int size, @Param("q") String q);
+    int count(@Param("q") String q);
     Inventory findById(@Param("inventoryId") Long inventoryId);
     Inventory findByProductAndWarehouse(@Param("productId") Long productId, @Param("warehouseId") Long warehouseId);
     void insert(Inventory inventory);

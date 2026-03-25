@@ -1,4 +1,5 @@
 /target/
+src/main/resources/application-secret.yml
 bin/
 *.log
 *.class

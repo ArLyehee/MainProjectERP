@@ -35,6 +35,7 @@ public class ErpUserDetailsService implements UserDetailsService {
                 user.getUserId(),
                 user.getUsername(),
                 user.getPassword(),
+                user.getName(),
                 List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole())),
                 permSet
         );

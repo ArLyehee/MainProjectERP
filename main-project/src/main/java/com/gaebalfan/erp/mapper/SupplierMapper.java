@@ -6,6 +6,8 @@ import java.util.List;
 @Mapper
 public interface SupplierMapper {
     List<Supplier> findAll();
+    List<Supplier> findAllPaged(@Param("offset") int offset, @Param("size") int size, @Param("q") String q);
+    int count(@Param("q") String q);
     Supplier findById(@Param("supplierId") Long supplierId);
     void insert(Supplier supplier);
     void update(Supplier supplier);

@@ -2,6 +2,8 @@ server:
   port: 8080  
 
 spring:
+  config:
+    import: optional:classpath:application-secret.yml
   datasource:
     url: jdbc:mariadb://192.168.0.224:3306/gaebalfan_erp
     username: root
@@ -25,6 +27,10 @@ ocr:
     cmd: python
   project:
     path: C:/Users/3class_013/Desktop/main_project/MainProjectOCR
+  gemini:
+    api-key:
+  groq:
+    api-key:
 
 logging:
   level:
