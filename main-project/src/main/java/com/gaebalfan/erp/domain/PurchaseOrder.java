@@ -8,6 +8,7 @@ public class PurchaseOrder {
     private Long          supplierId;
     private LocalDateTime orderDate;
     private String        status;   // PENDING, APPROVED, COMPLETED, CANCELLED
+    private Integer       item;     // 품목 수량
 
     // 조인용
     private String        supplierName;
@@ -17,6 +18,7 @@ public class PurchaseOrder {
     public Long          getSupplierId()   { return supplierId; }
     public LocalDateTime getOrderDate()    { return orderDate; }
     public String        getStatus()       { return status; }
+    public Integer       getItem()         { return item; }
     public String        getSupplierName() { return supplierName; }
 
     public void setPoId(Integer poId)                     { this.poId = poId; }
@@ -24,5 +26,6 @@ public class PurchaseOrder {
     public void setSupplierId(Long supplierId)            { this.supplierId = supplierId; }
     public void setOrderDate(LocalDateTime orderDate)     { this.orderDate = orderDate; }
     public void setStatus(String status)                  { this.status = status; }
+    public void setItem(Integer item)                     { this.item = item; }
     public void setSupplierName(String supplierName)      { this.supplierName = supplierName; }
 }

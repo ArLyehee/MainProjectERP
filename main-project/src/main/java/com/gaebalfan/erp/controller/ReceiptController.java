@@ -1,9 +1,6 @@
 package com.gaebalfan.erp.controller;
 
-import com.gaebalfan.erp.domain.Inventory;
 import com.gaebalfan.erp.domain.Receipt;
-import com.gaebalfan.erp.mapper.InventoryMapper;
-import com.gaebalfan.erp.mapper.PurchaseOrderMapper;
 import com.gaebalfan.erp.service.ReceiptService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,13 +12,9 @@ import java.util.Map;
 public class ReceiptController {
 
     private final ReceiptService service;
-    private final InventoryMapper inventoryMapper;
-    private final PurchaseOrderMapper purchaseOrderMapper;
 
-    public ReceiptController(ReceiptService service, InventoryMapper inventoryMapper, PurchaseOrderMapper purchaseOrderMapper) {
+    public ReceiptController(ReceiptService service) {
         this.service = service;
-        this.inventoryMapper = inventoryMapper;
-        this.purchaseOrderMapper = purchaseOrderMapper;
     }
 
     @GetMapping
@@ -37,9 +30,15 @@ public class ReceiptController {
             return ResponseEntity.badRequest().header("X-Error-Message", "제품을 선택하세요.").build();
         if (body.get("warehouseId") == null || body.get("warehouseId").toString().isBlank())
             return ResponseEntity.badRequest().header("X-Error-Message", "입고 창고를 선택하세요.").build();
-        int qty = body.get("quantity") != null ? Integer.parseInt(body.get("quantity").toString()) : 0;
+        int qty;
+        try {
+            qty = body.get("quantity") != null && !body.get("quantity").toString().isBlank()
+                    ? Integer.parseInt(body.get("quantity").toString()) : 0;
+        } catch (NumberFormatException e) {
+            qty = 0;
+        }
         if (qty <= 0)
-            return ResponseEntity.badRequest().header("X-Error-Message", "수량은 1 이상이어야 합니다.").build();
+            return ResponseEntity.badRequest().header("X-Error-Message", "수량을 입력하세요. (1 이상)").build();
 
         Receipt receipt = new Receipt();
         receipt.setPoId(body.get("poId").toString());
@@ -50,20 +49,8 @@ public class ReceiptController {
         } else {
             receipt.setReceiptDate(java.time.LocalDateTime.now());
         }
-        service.insert(receipt);
 
-        // 재고 자동 반영
-        Inventory inv = new Inventory();
-        inv.setProductId(receipt.getProductId());
-        inv.setWarehouseId(Long.parseLong(body.get("warehouseId").toString()));
-        inv.setQuantity(receipt.getQuantity());
-        inventoryMapper.insert(inv);
-
-        // 발주 상태 → RECEIVED
-        try {
-            purchaseOrderMapper.updateStatus(Long.parseLong(receipt.getPoId()), "RECEIVED");
-        } catch (NumberFormatException ignored) {}
-
+        service.receive(receipt, Long.parseLong(body.get("warehouseId").toString()));
         return ResponseEntity.ok().build();
     }
 }

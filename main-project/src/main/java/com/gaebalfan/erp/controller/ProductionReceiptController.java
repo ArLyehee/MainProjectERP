@@ -1,9 +1,6 @@
 package com.gaebalfan.erp.controller;
 
-import com.gaebalfan.erp.domain.Inventory;
 import com.gaebalfan.erp.domain.ProductionReceipt;
-import com.gaebalfan.erp.mapper.InventoryMapper;
-import com.gaebalfan.erp.mapper.WorkOrderMapper;
 import com.gaebalfan.erp.service.ProductionReceiptService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,13 +12,9 @@ import java.util.Map;
 public class ProductionReceiptController {
 
     private final ProductionReceiptService service;
-    private final InventoryMapper inventoryMapper;
-    private final WorkOrderMapper workOrderMapper;
 
-    public ProductionReceiptController(ProductionReceiptService service, InventoryMapper inventoryMapper, WorkOrderMapper workOrderMapper) {
+    public ProductionReceiptController(ProductionReceiptService service) {
         this.service = service;
-        this.inventoryMapper = inventoryMapper;
-        this.workOrderMapper = workOrderMapper;
     }
 
     @GetMapping
@@ -44,18 +37,7 @@ public class ProductionReceiptController {
         } else {
             pr.setReceiptDate(java.time.LocalDateTime.now());
         }
-        service.insert(pr);
-
-        // 완제품 재고 자동 반영
-        Inventory inv = new Inventory();
-        inv.setProductId(pr.getProductId());
-        inv.setWarehouseId(Long.parseLong(body.get("warehouseId").toString()));
-        inv.setQuantity(pr.getQuantity());
-        inventoryMapper.insert(inv);
-
-        // 작업지시 상태 → COMPLETED
-        workOrderMapper.updateStatus(pr.getWorkOrderId(), "COMPLETED");
-
+        service.receive(pr, Long.parseLong(body.get("warehouseId").toString()));
         return ResponseEntity.ok().build();
     }
 }

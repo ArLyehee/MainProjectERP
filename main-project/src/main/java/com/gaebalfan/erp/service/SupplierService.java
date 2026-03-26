@@ -18,6 +18,14 @@ public class SupplierService {
         return mapper.findAll();
     }
 
+    public List<Supplier> findAllPaged(int page, int size, String q) {
+        return mapper.findAllPaged((page - 1) * size, size, q);
+    }
+
+    public int count(String q) {
+        return mapper.count(q);
+    }
+
     public Supplier findById(Long id) {
         return mapper.findById(id);
     }

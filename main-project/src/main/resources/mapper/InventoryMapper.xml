@@ -20,6 +20,33 @@
         ORDER BY i.last_update DESC
     </select>
 
+    <select id="findAllPaged" resultMap="InventoryResultMap">
+        SELECT i.*, p.product_name, w.warehouse_name
+        FROM inventory i
+        LEFT JOIN products p ON i.product_id = p.product_id
+        LEFT JOIN warehouses w ON i.warehouse_id = w.warehouse_id
+        <where>
+            <if test="q != null and q != ''">
+                (p.product_name LIKE CONCAT('%', #{q}, '%')
+                OR w.warehouse_name LIKE CONCAT('%', #{q}, '%'))
+            </if>
+        </where>
+        ORDER BY i.last_update DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM inventory i
+        LEFT JOIN products p ON i.product_id = p.product_id
+        LEFT JOIN warehouses w ON i.warehouse_id = w.warehouse_id
+        <where>
+            <if test="q != null and q != ''">
+                (p.product_name LIKE CONCAT('%', #{q}, '%')
+                OR w.warehouse_name LIKE CONCAT('%', #{q}, '%'))
+            </if>
+        </where>
+    </select>
+
     <select id="findById" resultMap="InventoryResultMap">
         SELECT * FROM inventory WHERE inventory_id = #{inventoryId}
     </select>

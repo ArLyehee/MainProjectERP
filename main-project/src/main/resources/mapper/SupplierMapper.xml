@@ -15,6 +15,30 @@
         SELECT * FROM suppliers ORDER BY supplier_id
     </select>
 
+    <select id="findAllPaged" resultMap="SupplierResultMap">
+        SELECT * FROM suppliers
+        <where>
+            <if test="q != null and q != ''">
+                (supplier_name LIKE CONCAT('%', #{q}, '%')
+                OR phone LIKE CONCAT('%', #{q}, '%')
+                OR address LIKE CONCAT('%', #{q}, '%'))
+            </if>
+        </where>
+        ORDER BY supplier_id
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM suppliers
+        <where>
+            <if test="q != null and q != ''">
+                (supplier_name LIKE CONCAT('%', #{q}, '%')
+                OR phone LIKE CONCAT('%', #{q}, '%')
+                OR address LIKE CONCAT('%', #{q}, '%'))
+            </if>
+        </where>
+    </select>
+
     <select id="findById" resultMap="SupplierResultMap">
         SELECT * FROM suppliers WHERE supplier_id = #{supplierId}
     </select>

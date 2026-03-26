@@ -21,6 +21,7 @@ public class TransactionStatement {
     private String        managerName;
     private LocalDateTime createdAt;
     private List<TransactionStatementItem> items;
+    private String        itemSummary;
 
     public Long getStatementId() { return statementId; }
     public String getStatementNo() { return statementNo; }
@@ -37,6 +38,7 @@ public class TransactionStatement {
     public String getManagerName() { return managerName; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public List<TransactionStatementItem> getItems() { return items; }
+    public String getItemSummary() { return itemSummary; }
 
     public void setStatementId(Long statementId) { this.statementId = statementId; }
     public void setStatementNo(String statementNo) { this.statementNo = statementNo; }
@@ -53,4 +55,5 @@ public class TransactionStatement {
     public void setManagerName(String managerName) { this.managerName = managerName; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public void setItems(List<TransactionStatementItem> items) { this.items = items; }
+    public void setItemSummary(String itemSummary) { this.itemSummary = itemSummary; }
 }

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
-<head><meta charset="UTF-8"><meta name="_csrf" th:content="${_csrf.token}"><meta name="_csrf_header" th:content="${_csrf.headerName}"><title>BOM 관리 | 개발팬 ERP</title><link rel="stylesheet" th:href="@{/css/erp.css(v=6)}">
+<head><meta charset="UTF-8"><meta name="_csrf" th:content="${_csrf.token}"><meta name="_csrf_header" th:content="${_csrf.headerName}"><title>BOM 관리 | 개발팬 ERP</title><link rel="stylesheet" th:href="@{/css/erp.css(v=13)}">
 </head>
 <body>
 <div class="layout"><aside th:replace="~{fragments/sidebar :: nav('bom')}"></aside><main class="main"><div class="page-header"><div class="page-title"><h2>BOM 관리</h2><p>제품 자재명세서(BOM)를 조회하고 관리합니다.</p></div><button onclick="openCreate()" class="btn btn-primary">+ BOM 등록</button></div><div class="search-bar"><input type="text" id="searchInput" placeholder="제품명, BOM명, 버전 검색..." oninput="filterTable()" class="search-input"></div><div class="card"><table><thead><tr><th>BOM ID</th><th>제품명</th><th>BOM명</th><th>버전</th><th>액션</th></tr></thead><tbody><tr th:if="${#lists.isEmpty(bomList)}"><td colspan="5" class="empty-state">등록된 BOM이 없습니다.</td></tr><tr th:each="b : ${bomList}"><td th:text="${b.bomId}"></td><td th:text="${b.productName != null ? b.productName : b.productId}"></td><td th:text="${b.bomName}"></td><td th:text="${b.version}"></td><td><button class="btn-action btn-edit" th:onclick="|openItems(${b.bomId})|">부품 관리</button></td></tr></tbody></table></div></main>

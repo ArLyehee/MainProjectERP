@@ -1,17 +1,5 @@
 /target/
-<<<<<<< HEAD
-*.log
-*.class
-.DS_Store
-.idea/
-.vscode/
-.classpath
-.factorypath
-.project
-.settings/
-.idea/
-bin/
-=======
+src/main/resources/application-secret.yml
 bin/
 *.log
 *.class
@@ -22,4 +10,3 @@ bin/
 .factorypath
 .project
 .settings/
->>>>>>> refs/remotes/origin/test
