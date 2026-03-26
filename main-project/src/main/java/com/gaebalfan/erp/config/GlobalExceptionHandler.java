@@ -1,14 +1,10 @@
 package com.gaebalfan.erp.config;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
-
-import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -16,14 +12,8 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(Exception.class)
-    public Object handleAll(Exception ex, HttpServletRequest request) {
-        log.error("=== ERROR [{}] ===", request.getRequestURI(), ex);
-        // /api/** 요청은 JSON 에러 반환
-        if (request.getRequestURI().startsWith("/api/")) {
-            String msg = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
-            return ResponseEntity.status(500).body(Map.of("error", msg));
-        }
-        // 일반 페이지는 기존 에러 뷰 반환
+    public ModelAndView handleAll(Exception ex) {
+        log.error("=== PAGE ERROR ===", ex);
         ModelAndView mav = new ModelAndView("error-debug");
         mav.addObject("errorMessage", ex.getMessage());
         mav.addObject("causeMessage", ex.getCause() != null ? ex.getCause().getMessage() : "없음");
