@@ -15,38 +15,39 @@
         <result property="lateMinutes"       column="late_minutes"/>
         <result property="earlyLeaveMinutes" column="early_leave_minutes"/>
         <result property="dailyPay"          column="daily_pay"/>
+        <result property="leaveType"         column="leave_type"/>
         <result property="employeeName"      column="name"/>
     </resultMap>
 
-    <select id="findByEmployeeId" resultType="Attendance">
+    <select id="findByEmployeeId" resultMap="AttendanceResultMap">
         SELECT a.attendance_id, a.employee_id, a.work_date,
                TIME_FORMAT(a.check_in,  '%H:%i') AS check_in,
                TIME_FORMAT(a.check_out, '%H:%i') AS check_out,
                a.work_hours, a.overtime_hours, a.late_minutes, a.early_leave_minutes, a.daily_pay,
-               e.name AS employee_name
+               a.leave_type, e.name
         FROM attendance a
         LEFT JOIN employees e ON a.employee_id = e.employee_id
         WHERE a.employee_id = #{employeeId}
         ORDER BY a.work_date DESC
     </select>
 
-    <select id="findAll" resultType="Attendance">
+    <select id="findAll" resultMap="AttendanceResultMap">
         SELECT a.attendance_id, a.employee_id, a.work_date,
                TIME_FORMAT(a.check_in,  '%H:%i') AS check_in,
                TIME_FORMAT(a.check_out, '%H:%i') AS check_out,
                a.work_hours, a.overtime_hours, a.late_minutes, a.early_leave_minutes, a.daily_pay,
-               e.name AS employee_name
+               a.leave_type, e.name
         FROM attendance a
         LEFT JOIN employees e ON a.employee_id = e.employee_id
         ORDER BY a.work_date DESC, a.attendance_id DESC
     </select>
 
-    <select id="findAllPaged" resultType="Attendance">
+    <select id="findAllPaged" resultMap="AttendanceResultMap">
         SELECT a.attendance_id, a.employee_id, a.work_date,
                TIME_FORMAT(a.check_in,  '%H:%i') AS check_in,
                TIME_FORMAT(a.check_out, '%H:%i') AS check_out,
                a.work_hours, a.overtime_hours, a.late_minutes, a.early_leave_minutes, a.daily_pay,
-               e.name AS employee_name
+               a.leave_type, e.name
         FROM attendance a
         LEFT JOIN employees e ON a.employee_id = e.employee_id
         ORDER BY a.work_date DESC, a.attendance_id DESC
@@ -61,6 +62,12 @@
             useGeneratedKeys="true" keyProperty="attendanceId">
         INSERT INTO attendance (employee_id, work_date, check_in)
         VALUES (#{employeeId}, #{workDate}, #{checkIn})
+    </insert>
+
+    <insert id="insertLeave" parameterType="com.gaebalfan.erp.domain.Attendance"
+            useGeneratedKeys="true" keyProperty="attendanceId">
+        INSERT INTO attendance (employee_id, work_date, leave_type)
+        VALUES (#{employeeId}, #{workDate}, #{leaveType})
     </insert>
 
     <update id="updateCheckOut">

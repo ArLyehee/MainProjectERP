@@ -15,6 +15,8 @@ public class Attendance {
     private Integer    earlyLeaveMinutes;
     private Integer    dailyPay;
 
+    private String     leaveType;
+
     // 조인용
     private String     employeeName;
 
@@ -28,6 +30,7 @@ public class Attendance {
     public Integer    getLateMinutes()       { return lateMinutes; }
     public Integer    getEarlyLeaveMinutes() { return earlyLeaveMinutes; }
     public Integer    getDailyPay()          { return dailyPay; }
+    public String     getLeaveType()          { return leaveType; }
     public String     getEmployeeName()      { return employeeName; }
 
     public void setAttendanceId(Long v)        { this.attendanceId = v; }
@@ -40,5 +43,6 @@ public class Attendance {
     public void setLateMinutes(Integer v)      { this.lateMinutes = v; }
     public void setEarlyLeaveMinutes(Integer v){ this.earlyLeaveMinutes = v; }
     public void setDailyPay(Integer v)         { this.dailyPay = v; }
+    public void setLeaveType(String v)         { this.leaveType = v; }
     public void setEmployeeName(String v)      { this.employeeName = v; }
 }

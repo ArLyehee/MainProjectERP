@@ -34,6 +34,10 @@ public class AttendanceService {
         mapper.insert(obj);
     }
 
+    public void insertLeave(Attendance obj) {
+        mapper.insertLeave(obj);
+    }
+
     public void checkOut(Long attendanceId) {
         mapper.updateCheckOut(attendanceId);
     }

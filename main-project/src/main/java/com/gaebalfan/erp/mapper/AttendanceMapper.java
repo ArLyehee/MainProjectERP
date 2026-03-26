@@ -10,5 +10,6 @@ public interface AttendanceMapper {
     int count();
     List<Attendance> findByEmployeeId(@Param("employeeId") Long employeeId);
     void insert(Attendance attendance);
+    void insertLeave(Attendance attendance);
     void updateCheckOut(@Param("attendanceId") Long attendanceId);
 }

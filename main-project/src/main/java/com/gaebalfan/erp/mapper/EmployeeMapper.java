@@ -8,12 +8,14 @@ import java.util.List;
 @Mapper
 public interface EmployeeMapper {
     List<Employee> findAll();
-    List<Employee> findAllPaged(@Param("offset") int offset, @Param("size") int size);
-    int count();
+    List<Employee> findAllPaged(@Param("offset") int offset, @Param("size") int size, @Param("q") String q);
+    int count(@Param("q") String q);
     Employee findById(@Param("employeeId") Long employeeId);
     void insert(Employee employee);
     void update(Employee employee);
     void updateStatus(@Param("employeeId") Long employeeId, @Param("status") String status);
+    void decrementRemaining(@Param("employeeId") Long employeeId);
+    void updatePhoto(@Param("employeeId") Long employeeId, @Param("photoPath") String photoPath);
     List<Department> findAllDepartments();
     List<Position> findAllPositions();
     void insertDepartment(@Param("departmentName") String departmentName);

@@ -202,17 +202,20 @@ public class WebPageController {
 
     // ── 인사 페이지 ───────────────────────────────
     @GetMapping("/employees")
-    public String employees(@RequestParam(defaultValue = "1") int page, Model model) {
+    public String employees(@RequestParam(defaultValue = "1") int page,
+                            @RequestParam(defaultValue = "") String q,
+                            Model model) {
         int size = 20;
-        int total = employeeService.count();
-        int totalPages = (int) Math.ceil((double) total / size);
-        model.addAttribute("employeeList", employeeService.findAllPaged(page, size));
+        int total = employeeService.count(q);
+        int totalPages = Math.max(1, (int) Math.ceil((double) total / size));
+        model.addAttribute("employeeList", employeeService.findAllPaged(page, size, q));
         model.addAttribute("departmentList", employeeService.findAllDepartments());
         model.addAttribute("positionList", employeeService.findAllPositions());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("pageStart", Math.max(1, page - 5));
         model.addAttribute("pageEnd", Math.min(totalPages, page + 5));
+        model.addAttribute("q", q);
         return "employees";
     }
 
@@ -255,16 +258,33 @@ public class WebPageController {
 
     // ── 매출/비용 페이지 ──────────────────────────
     @GetMapping("/sales")
-    public String sales(Model model) {
-        model.addAttribute("saleList", saleService.findAll());
+    public String sales(@RequestParam(defaultValue = "1") int page, Model model) {
+        int size = 20;
+        int total = saleService.count();
+        int totalPages = Math.max(1, (int) Math.ceil((double) total / size));
+        model.addAttribute("saleList", saleService.findAllPaged(page, size));
         model.addAttribute("productList", productService.findAll());
         model.addAttribute("warehouseList", warehouseService.findAll());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageStart", Math.max(1, page - 5));
+        model.addAttribute("pageEnd", Math.min(totalPages, page + 5));
         return "sales";
     }
 
     @GetMapping("/expenses")
-    public String expenses(Model model) {
-        model.addAttribute("expenseList", expenseService.findAll());
+    public String expenses(@RequestParam(defaultValue = "1") int page,
+                           @RequestParam(defaultValue = "") String q,
+                           Model model) {
+        int size = 20;
+        int total = expenseService.count(q);
+        int totalPages = Math.max(1, (int) Math.ceil((double) total / size));
+        model.addAttribute("expenseList", expenseService.findAllPaged(page, size, q));
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageStart", Math.max(1, page - 5));
+        model.addAttribute("pageEnd", Math.min(totalPages, page + 5));
+        model.addAttribute("q", q);
         return "expenses";
     }
 

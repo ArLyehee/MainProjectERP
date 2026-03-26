@@ -7,6 +7,8 @@ import java.util.Map;
 @Mapper
 public interface OperatingExpenseMapper {
     List<OperatingExpense> findAll();
+    List<OperatingExpense> findAllPaged(@Param("offset") int offset, @Param("size") int size, @Param("q") String q);
+    int count(@Param("q") String q);
     void insert(OperatingExpense expense);
     List<Map<String, Object>> findMonthlySummary(@Param("year") int year);
     Map<String, Object> findYearlySummary(@Param("year") int year);

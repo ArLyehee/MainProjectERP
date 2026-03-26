@@ -14,6 +14,9 @@
         <result property="positionId"     column="position_id"/>
         <result property="salary"         column="salary"/>
         <result property="status"         column="status"/>
+        <result property="annualLeave"    column="annual_leave"/>
+        <result property="remaining"      column="remaining"/>
+        <result property="photoPath"      column="photo_path"/>
         <result property="departmentName" column="department_name"/>
         <result property="positionName"   column="position_name"/>
     </resultMap>
@@ -29,7 +32,19 @@
     </resultMap>
 
     <select id="count" resultType="int">
-        SELECT COUNT(*) FROM employees
+        SELECT COUNT(*)
+        FROM employees e
+        LEFT JOIN departments d ON e.department_id = d.department_id
+        LEFT JOIN positions   p ON e.position_id   = p.position_id
+        <where>
+            <if test="q != null and q != ''">
+                (e.name LIKE CONCAT('%',#{q},'%')
+                 OR d.department_name LIKE CONCAT('%',#{q},'%')
+                 OR p.position_name   LIKE CONCAT('%',#{q},'%')
+                 OR e.email           LIKE CONCAT('%',#{q},'%')
+                 OR e.phone           LIKE CONCAT('%',#{q},'%'))
+            </if>
+        </where>
     </select>
 
     <select id="findAllPaged" resultMap="EmployeeResultMap">
@@ -37,6 +52,15 @@
         FROM employees e
         LEFT JOIN departments d ON e.department_id = d.department_id
         LEFT JOIN positions   p ON e.position_id   = p.position_id
+        <where>
+            <if test="q != null and q != ''">
+                (e.name LIKE CONCAT('%',#{q},'%')
+                 OR d.department_name LIKE CONCAT('%',#{q},'%')
+                 OR p.position_name   LIKE CONCAT('%',#{q},'%')
+                 OR e.email           LIKE CONCAT('%',#{q},'%')
+                 OR e.phone           LIKE CONCAT('%',#{q},'%'))
+            </if>
+        </where>
         ORDER BY e.employee_id
         LIMIT #{size} OFFSET #{offset}
     </select>
@@ -86,6 +110,17 @@
 
     <update id="updateStatus">
         UPDATE employees SET status = #{status} WHERE employee_id = #{employeeId}
+    </update>
+
+    <update id="updatePhoto">
+        UPDATE employees SET photo_path = #{photoPath} WHERE employee_id = #{employeeId}
+    </update>
+
+    <update id="decrementRemaining">
+        UPDATE employees
+        SET remaining = GREATEST(0, remaining - 1),
+            annual_leave = annual_leave + 1
+        WHERE employee_id = #{employeeId}
     </update>
 
     <insert id="insertDepartment">

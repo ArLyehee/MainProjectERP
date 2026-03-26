@@ -20,12 +20,12 @@ public class EmployeeService {
         return mapper.findAll();
     }
 
-    public List<Employee> findAllPaged(int page, int size) {
-        return mapper.findAllPaged((page - 1) * size, size);
+    public List<Employee> findAllPaged(int page, int size, String q) {
+        return mapper.findAllPaged((page - 1) * size, size, q);
     }
 
-    public int count() {
-        return mapper.count();
+    public int count(String q) {
+        return mapper.count(q);
     }
 
     public Employee findById(Long id) {
@@ -42,6 +42,10 @@ public class EmployeeService {
 
     public void updateStatus(Long id, String status) {
         mapper.updateStatus(id, status);
+    }
+
+    public void updatePhoto(Long id, String photoPath) {
+        mapper.updatePhoto(id, photoPath);
     }
 
     public List<Department> findAllDepartments() {

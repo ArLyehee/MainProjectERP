@@ -15,6 +15,9 @@ public class Employee {
     private BigDecimal    salary;
     private String        status;  // ACTIVE, RESIGNED
     private LocalDateTime createdAt;
+    private Integer       annualLeave;
+    private Integer       remaining;
+    private String        photoPath;
 
     // 조인용
     private String        departmentName;
@@ -30,6 +33,9 @@ public class Employee {
     public BigDecimal    getSalary()        { return salary; }
     public String        getStatus()        { return status; }
     public LocalDateTime getCreatedAt()     { return createdAt; }
+    public Integer       getAnnualLeave()   { return annualLeave; }
+    public Integer       getRemaining()     { return remaining; }
+    public String        getPhotoPath()     { return photoPath; }
     public String        getDepartmentName(){ return departmentName; }
     public String        getPositionName()  { return positionName; }
 
@@ -43,6 +49,9 @@ public class Employee {
     public void setSalary(BigDecimal salary)              { this.salary = salary; }
     public void setStatus(String status)                  { this.status = status; }
     public void setCreatedAt(LocalDateTime createdAt)     { this.createdAt = createdAt; }
+    public void setAnnualLeave(Integer annualLeave)        { this.annualLeave = annualLeave; }
+    public void setRemaining(Integer remaining)            { this.remaining = remaining; }
+    public void setPhotoPath(String photoPath)             { this.photoPath = photoPath; }
     public void setDepartmentName(String departmentName)  { this.departmentName = departmentName; }
     public void setPositionName(String positionName)      { this.positionName = positionName; }
 }

@@ -22,6 +22,18 @@
         ORDER BY s.sale_date DESC
     </select>
 
+    <select id="findAllPaged" resultMap="SaleResultMap">
+        SELECT s.*, p.product_name
+        FROM sales s
+        LEFT JOIN products p ON s.product_id = p.product_id
+        ORDER BY s.sale_date DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM sales
+    </select>
+
     <insert id="insert" parameterType="com.gaebalfan.erp.domain.Sale"
             useGeneratedKeys="true" keyProperty="saleId">
         INSERT INTO sales (product_id, quantity, unit_price, total_price, cost_price, sale_date)

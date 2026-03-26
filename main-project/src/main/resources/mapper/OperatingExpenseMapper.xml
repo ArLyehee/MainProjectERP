@@ -15,6 +15,28 @@
         SELECT * FROM operating_expenses ORDER BY expense_date DESC, expense_id DESC
     </select>
 
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM operating_expenses
+        <where>
+            <if test="q != null and q != ''">
+                (expense_type LIKE CONCAT('%',#{q},'%')
+                 OR CAST(expense_date AS CHAR) LIKE CONCAT('%',#{q},'%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="findAllPaged" resultMap="ExpenseResultMap">
+        SELECT * FROM operating_expenses
+        <where>
+            <if test="q != null and q != ''">
+                (expense_type LIKE CONCAT('%',#{q},'%')
+                 OR CAST(expense_date AS CHAR) LIKE CONCAT('%',#{q},'%'))
+            </if>
+        </where>
+        ORDER BY expense_date DESC, expense_id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
     <insert id="insert" parameterType="com.gaebalfan.erp.domain.OperatingExpense"
             useGeneratedKeys="true" keyProperty="expenseId">
         INSERT INTO operating_expenses (expense_type, amount, expense_date)
