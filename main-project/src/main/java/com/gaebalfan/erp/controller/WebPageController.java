@@ -28,6 +28,7 @@ public class WebPageController {
     private final WorkOrderService workOrderService;
     private final AttendanceService attendanceService;
     private final BomService bomService;
+    private final OrderService orderService;
     private final SaleService saleService;
     private final OperatingExpenseService expenseService;
     private final TransactionStatementService transactionStatementService;
@@ -47,6 +48,7 @@ public class WebPageController {
                              SaleService saleService,
                              OperatingExpenseService expenseService,
                              TransactionStatementService transactionStatementService,
+                             OrderService orderService,
                              SystemSettings systemSettings) {
         this.inventoryService = inventoryService;
         this.purchaseOrderService = purchaseOrderService;
@@ -59,6 +61,7 @@ public class WebPageController {
         this.workOrderService = workOrderService;
         this.attendanceService = attendanceService;
         this.bomService = bomService;
+        this.orderService = orderService;
         this.saleService = saleService;
         this.expenseService = expenseService;
         this.transactionStatementService = transactionStatementService;
@@ -316,6 +319,21 @@ public class WebPageController {
     public String printStatement(@PathVariable Long id, Model model) {
         model.addAttribute("statement", transactionStatementService.findById(id));
         return "transaction-statement-print";
+    }
+
+    // ── 주문 관리 페이지 ──────────────────────────
+    @GetMapping("/orders")
+    public String orders(@RequestParam(defaultValue = "1") int page, Model model) {
+        int size = 20;
+        int total = orderService.count();
+        int totalPages = Math.max(1, (int) Math.ceil((double) total / size));
+        model.addAttribute("orderList", orderService.findAllPaged(page, size));
+        model.addAttribute("productList", productService.findAll());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageStart", Math.max(1, page - 5));
+        model.addAttribute("pageEnd", Math.min(totalPages, page + 5));
+        return "orders";
     }
 
     // ── 관리자 페이지 ─────────────────────────────

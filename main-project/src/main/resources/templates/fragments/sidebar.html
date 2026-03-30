@@ -18,6 +18,16 @@
         </div>
     </div>
 
+    <!-- 주문 관리 -->
+    <div th:class="${current == 'orders'} ? 'nav-category open' : 'nav-category'">
+        <div class="nav-category-header" onclick="toggleNav(this)">
+            <span>주문 관리</span><span class="nav-arrow">▾</span>
+        </div>
+        <div class="nav-category-body">
+            <a href="/orders" th:class="${current == 'orders'} ? 'nav-item active' : 'nav-item'">주문 처리 현황</a>
+        </div>
+    </div>
+
     <!-- 재고/물류 -->
     <div th:class="${current == 'inventory' or current == 'purchase-orders' or current == 'receipts' or current == 'shipments' or current == 'sales' or current == 'expenses' or current == 'transaction-statements'} ? 'nav-category open' : 'nav-category'">
         <div class="nav-category-header" onclick="toggleNav(this)">

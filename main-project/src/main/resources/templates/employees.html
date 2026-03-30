@@ -19,7 +19,7 @@
     <h3>직원 상세</h3>
     <div style="display:flex;gap:24px;align-items:flex-start;margin-bottom:16px;">
       <div style="flex-shrink:0;text-align:center;">
-        <img id="detailPhoto" src="" alt="사진" style="width:100px;height:100px;border-radius:50%;object-fit:cover;background:#2a2a3e;display:block;margin-bottom:8px;" onerror="this.src='/img/default-avatar.png'">
+        <img id="detailPhoto" src="" alt="사진" style="width:100px;height:100px;border-radius:50%;object-fit:cover;background:#2a2a3e;display:block;margin-bottom:8px;" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%232a2a3e%22/><circle cx=%2250%22 cy=%2238%22 r=%2218%22 fill=%22%236b7280%22/><ellipse cx=%2250%22 cy=%2285%22 rx=%2230%22 ry=%2220%22 fill=%22%236b7280%22/></svg>'">
         <label style="cursor:pointer;font-size:12px;color:#7c8cf8;">
           📷 사진 변경
           <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="uploadPhoto()">
@@ -51,7 +51,8 @@ function openDetail(id) {
     fetch('/api/employees/' + id)
         .then(r => r.json())
         .then(e => {
-            document.getElementById('detailPhoto').src = e.photoPath || '/img/default-avatar.png';
+            const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%232a2a3e'/><circle cx='50' cy='38' r='18' fill='%236b7280'/><ellipse cx='50' cy='85' rx='30' ry='20' fill='%236b7280'/></svg>";
+            document.getElementById('detailPhoto').src = e.photoPath || defaultAvatar;
             document.getElementById('detailName').textContent = e.name || '';
             document.getElementById('detailDept').textContent = e.departmentName || '-';
             document.getElementById('detailPos').textContent = e.positionName || '-';

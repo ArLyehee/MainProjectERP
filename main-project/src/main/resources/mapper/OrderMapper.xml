@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gaebalfan.erp.mapper.OrderMapper">
+
+    <resultMap id="OrderResultMap" type="com.gaebalfan.erp.domain.CustomerOrder">
+        <id     property="orderId"         column="order_id"/>
+        <result property="orderNo"         column="order_no"/>
+        <result property="customerName"    column="customer_name"/>
+        <result property="productId"       column="product_id"/>
+        <result property="quantity"        column="quantity"/>
+        <result property="unitPrice"       column="unit_price"/>
+        <result property="status"          column="status"/>
+        <result property="workOrderId"     column="work_order_id"/>
+        <result property="purchaseOrderId" column="purchase_order_id"/>
+        <result property="shipmentId"      column="shipment_id"/>
+        <result property="notes"           column="notes"/>
+        <result property="createdAt"       column="created_at"/>
+        <result property="updatedAt"       column="updated_at"/>
+        <result property="productName"     column="product_name"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="OrderResultMap">
+        SELECT o.*, p.product_name
+        FROM customer_orders o
+        LEFT JOIN products p ON o.product_id = p.product_id
+        ORDER BY o.order_id DESC
+    </select>
+
+    <select id="findAllPaged" resultMap="OrderResultMap">
+        SELECT o.*, p.product_name
+        FROM customer_orders o
+        LEFT JOIN products p ON o.product_id = p.product_id
+        ORDER BY o.order_id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM customer_orders
+    </select>
+
+    <select id="findById" resultMap="OrderResultMap">
+        SELECT o.*, p.product_name
+        FROM customer_orders o
+        LEFT JOIN products p ON o.product_id = p.product_id
+        WHERE o.order_id = #{orderId}
+    </select>
+
+    <insert id="insert" parameterType="com.gaebalfan.erp.domain.CustomerOrder"
+            useGeneratedKeys="true" keyProperty="orderId">
+        INSERT INTO customer_orders
+            (order_no, customer_name, product_id, quantity, unit_price, status, notes)
+        VALUES
+            (#{orderNo}, #{customerName}, #{productId}, #{quantity}, #{unitPrice}, 'PENDING', #{notes})
+    </insert>
+
+    <update id="updateStatus">
+        UPDATE customer_orders SET status = #{status}, updated_at = NOW()
+        WHERE order_id = #{orderId}
+    </update>
+
+    <update id="updateAfterApprove">
+        UPDATE customer_orders
+        SET status            = #{status},
+            work_order_id     = #{workOrderId},
+            purchase_order_id = #{purchaseOrderId},
+            shipment_id       = #{shipmentId},
+            updated_at        = NOW()
+        WHERE order_id = #{orderId}
+    </update>
+
+</mapper>
