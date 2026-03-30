@@ -10,11 +10,10 @@ spring:
     password: 9927
     driver-class-name: org.mariadb.jdbc.Driver
 
-  thymeleaf:
-    prefix: classpath:/templates/
-    suffix: .html
-    cache: false
-    encoding: UTF-8
+  mvc:
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp
 
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml
@@ -38,5 +37,4 @@ logging:
     com.gaebalfan.erp: DEBUG
     org.mybatis: DEBUG
     org.springframework.web.servlet: DEBUG
-    org.thymeleaf: DEBUG
     org.springframework.security: WARN

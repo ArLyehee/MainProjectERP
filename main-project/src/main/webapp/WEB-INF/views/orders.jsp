@@ -1,12 +1,16 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
+<html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="_csrf" th:content="${_csrf.token}">
-<meta name="_csrf_header" th:content="${_csrf.headerName}">
+<meta name="_csrf" content="${_csrf.token}">
+<meta name="_csrf_header" content="${_csrf.headerName}">
 <title>주문 처리 현황 | 개발팬 ERP</title>
-<link rel="stylesheet" th:href="@{/css/erp.css(v=13)}">
+<link rel="stylesheet" href="/css/erp.css?v=15">
 <style>
 /* ── 주문 상태 배지 ── */
 .badge-pending       { background:#fef3c7; color:#92400e; border:1px solid #f59e0b; }
@@ -72,7 +76,9 @@
 </head>
 <body>
 <div class="layout">
-<aside th:replace="~{fragments/sidebar :: nav('orders')}"></aside>
+<jsp:include page="/WEB-INF/views/fragments/sidebar.jsp">
+  <jsp:param name="current" value="orders"/>
+</jsp:include>
 <main class="main">
 
     <div class="page-header">
@@ -125,66 +131,70 @@
                 </tr>
             </thead>
             <tbody>
-                <tr th:if="${#lists.isEmpty(orderList)}">
+                <c:if test="${empty orderList}">
+                <tr>
                     <td colspan="7" class="empty-state">등록된 주문이 없습니다.</td>
                 </tr>
-                <tr th:each="o : ${orderList}" th:data-status="${o.status}">
-                    <td th:text="${o.orderNo}"></td>
-                    <td th:text="${o.customerName}"></td>
-                    <td th:text="${o.productName != null ? o.productName : o.productId}"></td>
-                    <td class="qty" th:text="${o.quantity}"></td>
+                </c:if>
+                <c:forEach var="o" items="${orderList}">
+                <tr data-status="${o.status}">
+                    <td>${o.orderNo}</td>
+                    <td>${o.customerName}</td>
+                    <td>${o.productName != null ? o.productName : o.productId}</td>
+                    <td class="qty">${o.quantity}</td>
                     <td>
-                        <span th:if="${o.status == 'PENDING'}"       class="badge badge-pending">검토 대기</span>
-                        <span th:if="${o.status == 'HOLD'}"          class="badge badge-hold">보류</span>
-                        <span th:if="${o.status == 'IN_PRODUCTION'}" class="badge badge-in-production">생산 중</span>
-                        <span th:if="${o.status == 'ORDERED'}"       class="badge badge-ordered">발주 처리</span>
-                        <span th:if="${o.status == 'READY'}"         class="badge badge-ready">출고 준비</span>
-                        <span th:if="${o.status == 'SHIPPED'}"       class="badge badge-shipped">출고 완료</span>
+                        <c:if test="${o.status == 'PENDING'}"><span class="badge badge-pending">검토 대기</span></c:if>
+                        <c:if test="${o.status == 'HOLD'}"><span class="badge badge-hold">보류</span></c:if>
+                        <c:if test="${o.status == 'IN_PRODUCTION'}"><span class="badge badge-in-production">생산 중</span></c:if>
+                        <c:if test="${o.status == 'ORDERED'}"><span class="badge badge-ordered">발주 처리</span></c:if>
+                        <c:if test="${o.status == 'READY'}"><span class="badge badge-ready">출고 준비</span></c:if>
+                        <c:if test="${o.status == 'SHIPPED'}"><span class="badge badge-shipped">출고 완료</span></c:if>
                     </td>
-                    <td th:text="${o.createdAt != null ? #temporals.format(o.createdAt, 'yyyy-MM-dd') : ''}"></td>
+                    <td>${o.createdAt != null ? fn:substring(o.createdAt.toString(), 0, 10) : ''}</td>
                     <td>
                         <!-- PENDING: 수락 / 보류 -->
-                        <button th:if="${o.status == 'PENDING'}"
-                                class="btn-approve"
-                                th:onclick="|approveOrder(${o.orderId})|">수락</button>
-                        <button th:if="${o.status == 'PENDING'}"
-                                class="btn-hold"
-                                th:onclick="|holdOrder(${o.orderId})|">보류</button>
+                        <c:if test="${o.status == 'PENDING'}">
+                        <button class="btn-approve" onclick="approveOrder(${o.orderId})">수락</button>
+                        <button class="btn-hold" onclick="holdOrder(${o.orderId})">보류</button>
+                        </c:if>
 
                         <!-- HOLD: 재검토 -->
-                        <button th:if="${o.status == 'HOLD'}"
-                                class="btn-reopen"
-                                th:onclick="|reopenOrder(${o.orderId})|">재검토</button>
+                        <c:if test="${o.status == 'HOLD'}">
+                        <button class="btn-reopen" onclick="reopenOrder(${o.orderId})">재검토</button>
+                        </c:if>
 
                         <!-- READY: 출고 처리 -->
-                        <button th:if="${o.status == 'READY'}"
-                                class="btn-ship"
-                                th:onclick="|shipOrder(${o.orderId})|">출고 처리</button>
+                        <c:if test="${o.status == 'READY'}">
+                        <button class="btn-ship" onclick="shipOrder(${o.orderId})">출고 처리</button>
+                        </c:if>
 
                         <!-- 연계 정보 링크 -->
-                        <a th:if="${o.workOrderId != null}"
-                           href="/work-orders"
-                           style="font-size:11px;color:#6366f1;margin-left:4px;">작업지시↗</a>
-                        <a th:if="${o.purchaseOrderId != null}"
-                           href="/purchase-orders"
-                           style="font-size:11px;color:#f59e0b;margin-left:4px;">발주↗</a>
-                        <a th:if="${o.shipmentId != null}"
-                           href="/shipments"
-                           style="font-size:11px;color:#16a34a;margin-left:4px;">출고↗</a>
+                        <c:if test="${o.workOrderId != null}">
+                        <a href="/work-orders" style="font-size:11px;color:#6366f1;margin-left:4px;">작업지시↗</a>
+                        </c:if>
+                        <c:if test="${o.purchaseOrderId != null}">
+                        <a href="/purchase-orders" style="font-size:11px;color:#f59e0b;margin-left:4px;">발주↗</a>
+                        </c:if>
+                        <c:if test="${o.shipmentId != null}">
+                        <a href="/shipments" style="font-size:11px;color:#16a34a;margin-left:4px;">출고↗</a>
+                        </c:if>
                     </td>
                 </tr>
+                </c:forEach>
             </tbody>
         </table>
     </div>
 
     <!-- 페이지네이션 -->
-    <div class="pagination" th:if="${totalPages != null and totalPages > 1}">
-        <a th:href="@{/orders(page=${currentPage - 1})}" th:classappend="${currentPage == 1} ? 'disabled'">&laquo;</a>
-        <th:block th:each="i : ${#numbers.sequence(pageStart, pageEnd)}">
-            <a th:href="@{/orders(page=${i})}" th:text="${i}" th:classappend="${i == currentPage} ? 'active'"></a>
-        </th:block>
-        <a th:href="@{/orders(page=${currentPage + 1})}" th:classappend="${currentPage == totalPages} ? 'disabled'">&raquo;</a>
+    <c:if test="${totalPages != null and totalPages > 1}">
+    <div class="pagination">
+        <a href="/orders?page=${currentPage - 1}" class="${currentPage == 1 ? 'disabled' : ''}">&laquo;</a>
+        <c:forEach begin="${pageStart}" end="${pageEnd}" var="i">
+            <a href="/orders?page=${i}" class="${i == currentPage ? 'active' : ''}">${i}</a>
+        </c:forEach>
+        <a href="/orders?page=${currentPage + 1}" class="${currentPage == totalPages ? 'disabled' : ''}">&raquo;</a>
     </div>
+    </c:if>
 
 </main>
 </div>
@@ -201,7 +211,7 @@
             <label>제품 *</label>
             <select id="productId">
                 <option value="">제품 선택</option>
-                <option th:each="p : ${productList}" th:value="${p.productId}" th:text="${p.productName}"></option>
+                <c:forEach var="p" items="${productList}"><option value="${p.productId}">${p.productName}</option></c:forEach>
             </select>
         </div>
         <div class="form-group">

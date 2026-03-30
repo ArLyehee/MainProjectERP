@@ -1,5 +1,6 @@
 package com.gaebalfan.erp.controller;
 
+import com.gaebalfan.erp.domain.Product;
 import com.gaebalfan.erp.domain.PurchaseOrder;
 import com.gaebalfan.erp.service.PurchaseOrderService;
 import org.springframework.http.ResponseEntity;
@@ -37,5 +38,11 @@ public class PurchaseOrderController {
     public ResponseEntity<Void> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
         service.updateStatus(id, body.get("status"));
         return ResponseEntity.ok().build();
+    }
+
+    // 작업2: 거래처별 취급 부품 조회
+    @GetMapping("/supplier/{supplierId}/products")
+    public ResponseEntity<List<Product>> findProductsBySupplier(@PathVariable Long supplierId) {
+        return ResponseEntity.ok(service.findProductsBySupplier(supplierId));
     }
 }

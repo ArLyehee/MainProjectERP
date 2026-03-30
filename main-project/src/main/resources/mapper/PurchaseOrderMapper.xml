@@ -67,4 +67,19 @@
         DELETE FROM purchase_orders WHERE id = #{poId}
     </delete>
 
+    <!-- 작업1: purchase_order_items INSERT -->
+    <insert id="insertItem" parameterType="com.gaebalfan.erp.domain.PurchaseOrderItem">
+        INSERT INTO purchase_order_items (po_id, product_id, quantity, unit_price)
+        VALUES (#{poId}, #{productId}, #{quantity}, #{unitPrice})
+    </insert>
+
+    <!-- 작업2: 거래처별 취급 부품 조회 -->
+    <select id="findProductsBySupplier" resultType="com.gaebalfan.erp.domain.Product">
+        SELECT p.product_id, p.product_name, p.cost_price
+        FROM supplier_products sp
+        JOIN products p ON sp.product_id = p.product_id
+        WHERE sp.supplier_id = #{supplierId}
+        ORDER BY p.product_name
+    </select>
+
 </mapper>

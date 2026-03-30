@@ -1,5 +1,7 @@
 package com.gaebalfan.erp.mapper;
+import com.gaebalfan.erp.domain.Product;
 import com.gaebalfan.erp.domain.PurchaseOrder;
+import com.gaebalfan.erp.domain.PurchaseOrderItem;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import java.util.List;
@@ -11,4 +13,6 @@ public interface PurchaseOrderMapper {
     PurchaseOrder findById(@Param("poId") Long poId);
     void insert(PurchaseOrder po);
     void updateStatus(@Param("poId") Long poId, @Param("status") String status);
+    void insertItem(PurchaseOrderItem item);
+    List<Product> findProductsBySupplier(@Param("supplierId") Long supplierId);
 }

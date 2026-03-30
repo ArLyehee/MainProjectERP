@@ -1,0 +1,68 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
+<!DOCTYPE html>
+<html lang="ko">
+<head><meta charset="UTF-8">
+<meta name="_csrf" content="${_csrf.token}">
+<meta name="_csrf_header" content="${_csrf.headerName}">
+<title>시스템 설정 | 개발팬 ERP</title>
+<link rel="stylesheet" href="/css/erp.css?v=15">
+</head>
+<body>
+<div class="layout">
+<jsp:include page="/WEB-INF/views/fragments/sidebar.jsp"><jsp:param name="current" value="admin-settings"/></jsp:include>
+<main class="main">
+<div class="page-header"><div class="page-title"><h2>시스템 설정</h2><p>시스템 설정 및 마스터 데이터를 관리합니다.</p></div></div>
+<div class="settings-grid">
+<!-- 재고 부족 기준값 -->
+<div class="settings-card"><div class="card-title"> 재고 부족 기준값</div><p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">이 수량 미만이면 대시보드에 재고 부족으로 표시됩니다.</p><div style="display:flex;gap:8px;align-items:center;"><input type="number" id="lowStockInput" min="0" class="settings-input" style="width:100px;"><span style="font-size:13px;color:var(--text-muted);">개 미만</span><button class="btn btn-primary" onclick="saveLowStock()">저장</button></div><div id="lowStockMsg" style="font-size:12px;margin-top:8px;"></div></div>
+<!-- 비밀번호 변경 -->
+<div class="settings-card"><div class="card-title"> 비밀번호 변경</div><div class="form-group"><label>현재 비밀번호</label><input type="password" id="oldPassword"></div><div class="form-group"><label>새 비밀번호</label><input type="password" id="newPassword"></div><div class="form-group"><label>새 비밀번호 확인</label><input type="password" id="confirmPassword"></div><div id="pwMsg" style="font-size:12px;margin-bottom:10px;"></div><button class="btn btn-primary" onclick="changePassword()">변경</button></div>
+<!-- 부서 관리 -->
+<div class="settings-card"><div class="card-title"> 부서 관리</div><ul id="deptList" class="item-list"></ul><div style="display:flex;gap:8px;margin-top:12px;"><input type="text" id="newDept" placeholder="새 부서명" class="settings-input"><button class="btn btn-primary" onclick="addDept()">추가</button></div></div>
+<!-- 직급 관리 -->
+<div class="settings-card"><div class="card-title"> 직급 관리</div><ul id="posList" class="item-list"></ul><div style="display:flex;gap:8px;margin-top:12px;"><input type="text" id="newPos" placeholder="새 직급명" class="settings-input"><button class="btn btn-primary" onclick="addPos()">추가</button></div></div>
+</div>
+</main>
+</div>
+<script>
+const csrf = document.querySelector('meta[name="_csrf"]').content;
+const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+function changePassword() {
+    const oldPw = document.getElementById('oldPassword').value;
+    const newPw = document.getElementById('newPassword').value;
+    const confirm = document.getElementById('confirmPassword').value;
+    const msg = document.getElementById('pwMsg');
+    if (newPw !== confirm) { msg.className='msg-error'; msg.textContent='새 비밀번호가 일치하지 않습니다.'; return; }
+    if (newPw.length < 4) { msg.className='msg-error'; msg.textContent='비밀번호는 4자 이상이어야 합니다.'; return; }
+    fetch('/api/settings/change-password', { method:'POST', headers:{'Content-Type':'application/json',[csrfHeader]:csrf}, body: JSON.stringify({oldPassword: oldPw, newPassword: newPw}) })
+    .then(r => r.json()).then(data => { if (data.error) { msg.className='msg-error'; msg.textContent=data.error; } else { msg.className='msg-success'; msg.textContent=data.message; document.getElementById('oldPassword').value=''; document.getElementById('newPassword').value=''; document.getElementById('confirmPassword').value=''; } });
+}
+function loadDepts() {
+    fetch('/api/settings/departments').then(r=>r.json()).then(list => {
+        document.getElementById('deptList').innerHTML = list.map(d =>`<li>${d.departmentName}<button class="btn-del-sm" onclick="delDept(${d.departmentId})">삭제</button></li>`).join('') || '<li style="color:#6b7280">등록된 부서 없음</li>';
+    });
+}
+function addDept() { const name = document.getElementById('newDept').value.trim(); if (!name) return; fetch('/api/settings/departments', { method:'POST', headers:{'Content-Type':'application/json',[csrfHeader]:csrf}, body:JSON.stringify({departmentName:name}) }).then(() => { document.getElementById('newDept').value=''; loadDepts(); }); }
+function delDept(id) { if (!confirm('삭제하시겠습니까?')) return; fetch('/api/settings/departments/' + id, { method:'DELETE', headers:{[csrfHeader]:csrf} }).then(() => loadDepts()); }
+function loadPos() {
+    fetch('/api/settings/positions').then(r=>r.json()).then(list => {
+        document.getElementById('posList').innerHTML = list.map(p =>`<li>${p.positionName}<button class="btn-del-sm" onclick="delPos(${p.positionId})">삭제</button></li>`).join('') || '<li style="color:#6b7280">등록된 직급 없음</li>';
+    });
+}
+function addPos() { const name = document.getElementById('newPos').value.trim(); if (!name) return; fetch('/api/settings/positions', { method:'POST', headers:{'Content-Type':'application/json',[csrfHeader]:csrf}, body:JSON.stringify({positionName:name}) }).then(() => { document.getElementById('newPos').value=''; loadPos(); }); }
+function delPos(id) { if (!confirm('삭제하시겠습니까?')) return; fetch('/api/settings/positions/' + id, { method:'DELETE', headers:{[csrfHeader]:csrf} }).then(() => loadPos()); }
+function saveLowStock() {
+    const val = parseInt(document.getElementById('lowStockInput').value);
+    const msg = document.getElementById('lowStockMsg');
+    if (isNaN(val) || val < 0) { msg.className='msg-error'; msg.textContent='0 이상의 숫자를 입력하세요.'; return; }
+    fetch('/api/settings/low-stock-threshold', { method:'POST', headers:{'Content-Type':'application/json',[csrfHeader]:csrf}, body: JSON.stringify({threshold: val}) })
+    .then(r => { if (!r.ok) { msg.className='msg-error'; msg.textContent='저장 실패'; return; } return r.json(); })
+    .then(data => { if (!data) return; if (data.error) { msg.className='msg-error'; msg.textContent=data.error; } else { msg.className='msg-success'; msg.textContent=`저장됨: ${data.threshold}개 미만`; } });
+}
+function loadLowStock() { fetch('/api/settings/low-stock-threshold').then(r=>r.json()).then(data => { document.getElementById('lowStockInput').value = data.threshold; }); }
+document.addEventListener('DOMContentLoaded', () => { loadDepts(); loadPos(); loadLowStock(); });
+</script>
+</body>
+</html>

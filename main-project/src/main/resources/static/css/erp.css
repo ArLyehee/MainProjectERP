@@ -107,7 +107,7 @@ body {
     position: fixed;
     top: 0; left: 0; bottom: 0;
     z-index: 100;
-    overflow-y: auto;
+    overflow-y: hidden;
     border-right: 1px solid var(--sb-border);
 }
 
@@ -249,8 +249,15 @@ body {
 
 .ni { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
 
+.nav-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
 .sidebar-bottom {
-    margin-top: auto;
+    flex-shrink: 0;
     padding: 14px;
     border-top: 1px solid var(--sb-border);
 }

@@ -1,10 +1,18 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
-<head><meta charset="UTF-8"><meta name="_csrf" th:content="${_csrf.token}"><meta name="_csrf_header" th:content="${_csrf.headerName}"><title>창고 관리 | 개발팬 ERP</title><link rel="stylesheet" th:href="@{/css/erp.css(v=13)}">
+<html lang="ko">
+<head><meta charset="UTF-8"><meta name="_csrf" content="${_csrf.token}"><meta name="_csrf_header" content="${_csrf.headerName}"><title>창고 관리 | 개발팬 ERP</title><link rel="stylesheet" href="/css/erp.css?v=15">
 </head>
 <body>
-<div class="layout"><aside th:replace="~{fragments/sidebar :: nav('warehouses')}"></aside><main class="main"><div class="page-header"><div class="page-title"><h2>창고 관리</h2><p>제품 보관 창고 현황을 관리합니다.</p></div><button onclick="openCreate()" class="btn btn-primary">+ 창고 등록</button></div><div class="search-bar"><input type="text" id="searchInput" placeholder="창고명, 위치 검색..." oninput="filterTable()" class="search-input"></div><div class="card"><table><thead><tr><th class="sort-th" onclick="sortTable(this,0,'num')">#<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,1,'str')">창고명<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,2,'str')">위치<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th>액션</th></tr></thead><tbody><tr th:if="${#lists.isEmpty(warehouseList)}"><td colspan="4" class="empty-state">등록된 창고가 없습니다.</td></tr><tr th:each="w : ${warehouseList}"><td th:text="${w.warehouseId}"></td><td th:text="${w.warehouseName}"></td><td class="location" th:text="${w.location}"></td><td><button class="btn-action btn-edit" th:onclick="|openEdit(${w.warehouseId})|">수정</button><button class="btn-action btn-del"  th:onclick="|confirmDelete(${w.warehouseId})|">삭제</button></td></tr></tbody></table></div></main>
+<div class="layout"><jsp:include page="/WEB-INF/views/fragments/sidebar.jsp">
+  <jsp:param name="current" value="warehouses"/>
+</jsp:include><main class="main"><div class="page-header"><div class="page-title"><h2>창고 관리</h2><p>제품 보관 창고 현황을 관리합니다.</p></div><button onclick="openCreate()" class="btn btn-primary">+ 창고 등록</button></div><div class="search-bar"><input type="text" id="searchInput" placeholder="창고명, 위치 검색..." oninput="filterTable()" class="search-input"></div><div class="card"><table><thead><tr><th class="sort-th" onclick="sortTable(this,0,'num')">#<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,1,'str')">창고명<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,2,'str')">위치<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th>액션</th></tr></thead><tbody><c:if test="${empty warehouseList}"><tr><td colspan="4" class="empty-state">등록된 창고가 없습니다.</td></tr></c:if><c:forEach var="w" items="${warehouseList}">
+<tr><td>${w.warehouseId}</td><td>${w.warehouseName}</td><td class="location">${w.location}</td><td><button class="btn-action btn-edit" onclick="openEdit(${w.warehouseId})">수정</button><button class="btn-action btn-del"  onclick="confirmDelete(${w.warehouseId})">삭제</button></td></tr>
+</c:forEach></tbody></table></div></main>
 </div><div class="modal-overlay" id="modalOverlay"><div class="modal"><h3 id="modalTitle">창고 등록</h3><input type="hidden" id="warehouseId"><div class="form-group"><label>창고명 *</label><input type="text" id="warehouseName" placeholder="창고명 입력"></div><div class="form-group"><label>위치</label><input type="text" id="location" placeholder="위치 입력"></div><div class="modal-footer"><button class="btn-cancel" onclick="closeModal()">취소</button><button class="btn-save" onclick="saveWarehouse()">저장</button></div></div>
 </div><script>
 const _sort = {col:-1, asc:true};

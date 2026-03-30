@@ -1,6 +1,7 @@
 package com.gaebalfan.erp.domain;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class PurchaseOrder {
     private Integer       poId;        // purchase_orders.id (INT PK)
@@ -12,6 +13,9 @@ public class PurchaseOrder {
 
     // 조인용
     private String        supplierName;
+
+    // 발주 항목 (purchase_order_items)
+    private List<PurchaseOrderItem> items;
 
     public Integer       getPoId()         { return poId; }
     public String        getPoCode()       { return poCode; }
@@ -28,4 +32,7 @@ public class PurchaseOrder {
     public void setStatus(String status)                  { this.status = status; }
     public void setItem(Integer item)                     { this.item = item; }
     public void setSupplierName(String supplierName)      { this.supplierName = supplierName; }
+
+    public List<PurchaseOrderItem> getItems() { return items; }
+    public void setItems(List<PurchaseOrderItem> items) { this.items = items; }
 }

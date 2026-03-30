@@ -1,0 +1,107 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
+<!DOCTYPE html>
+<html lang="ko">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>대시보드 | 개발팬 ERP</title><link rel="stylesheet" href="/css/erp.css?v=15">
+</head>
+<body>
+<jsp:include page="/WEB-INF/views/fragments/sidebar.jsp">
+  <jsp:param name="current" value="dashboard"/>
+</jsp:include><main class="main"><div class="topbar"><h1>대시보드</h1><span class="date" id="currentDate"></span></div><div class="content"><!-- 통계 카드 6개 --><div class="stats-grid"><div class="stat-card blue" onclick="location.href='/products'" style="cursor:pointer;"><div class="stat-label">총 제품 수</div><div class="stat-value" id="statProducts">—</div><div class="stat-sub">등록된 제품</div></div><div class="stat-card teal" onclick="location.href='/employees'" style="cursor:pointer;"><div class="stat-label">재직 직원</div><div class="stat-value" id="statEmployees">—</div><div class="stat-sub">활성 상태</div></div><div class="stat-card yellow" onclick="location.href='/purchase-orders'" style="cursor:pointer;"><div class="stat-label">처리중 발주</div><div class="stat-value" id="statOrders">—</div><div class="stat-sub">승인 대기 포함</div></div><div class="stat-card red" onclick="showLowStockDetail()" style="cursor:pointer;"><div class="stat-label">재고 부족</div><div class="stat-value" id="statLowInv">—</div><div class="stat-sub" id="statLowSub">수량 기준 이하</div></div><div class="stat-card green" onclick="location.href='/sales'" style="cursor:pointer;"><div class="stat-label">이번달 매출</div><div class="stat-value" id="statRevenue">—</div><div class="stat-sub" id="statRevSub">—</div></div><div class="stat-card purple" onclick="location.href='/work-orders'" style="cursor:pointer;"><div class="stat-label">이번달 생산완료</div><div class="stat-value" id="statWO">—</div><div class="stat-sub">완료된 작업지시</div></div></div><!-- 작업지시 현황 --><div class="panel" style="margin-bottom:24px;"><div class="panel-title"><div class="dot"></div>작업지시 현황</div><div class="wo-grid" id="woStatusGrid"><div class="wo-item"><div class="wo-label">대기</div><div class="wo-value wo-pending" id="woPending">—</div></div><div class="wo-item"><div class="wo-label">진행중</div><div class="wo-value wo-progress" id="woProgress">—</div></div><div class="wo-item"><div class="wo-label">완료</div><div class="wo-value wo-completed" id="woCompleted">—</div></div><div class="wo-item"><div class="wo-label">취소</div><div class="wo-value wo-cancelled" id="woCancelled">—</div></div></div></div><div class="bottom-grid"><!-- 최근 발주 --><div class="panel"><div class="panel-title"><div class="dot"></div>최근 발주 현황</div><div id="recentOrders"><div class="empty-notice">로딩 중...</div></div></div><!-- 재고 부족 알림 --><div class="panel"><div class="panel-title"><div class="dot" style="background:var(--danger)"></div>재고 부족 알림</div><div id="lowInventory"><div class="empty-notice">로딩 중...</div></div></div></div><!-- 빠른 메뉴 --><div class="panel"><div class="panel-title"><div class="dot"></div>빠른 메뉴</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"><a href="/purchase-orders" class="quick-btn"><span class="q-label">발주 관리</span><span class="q-arrow">→</span></a><a href="/work-orders" class="quick-btn"><span class="q-label">작업지시 관리</span><span class="q-arrow">→</span></a><a href="/inventory" class="quick-btn"><span class="q-label">재고 현황</span><span class="q-arrow">→</span></a><a href="/sales" class="quick-btn"><span class="q-label">매출 관리</span><span class="q-arrow">→</span></a><a href="/employees" class="quick-btn"><span class="q-label">직원 관리</span><span class="q-arrow">→</span></a><a href="/finance" class="quick-btn"><span class="q-label">재무제표</span><span class="q-arrow">→</span></a></div></div></div>
+</main><!-- 재고부족 상세 모달 -->
+<div id="lowStockModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;align-items:center;justify-content:center;"><div style="background:#fff;border-radius:12px;width:520px;max-width:95vw;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.18);"><div style="padding:20px 24px 16px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:16px;font-weight:700;color:#1a1a2e;"> 재고 부족 항목</div><div style="font-size:12px;color:#888;margin-top:2px;" id="lowStockModalSub"></div></div><button onclick="closeLowStockModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#888;line-height:1;"></button></div><div style="padding:16px 24px;overflow-y:auto;" id="lowStockModalBody"></div><div style="padding:12px 24px;border-top:1px solid #f0f0f0;text-align:right;"><a href="/inventory" style="font-size:13px;color:#4e6ef2;text-decoration:none;font-weight:600;">재고현황 바로가기 →</a></div></div>
+</div><script>
+function updateDate() {
+    const now = new Date();
+    const opts = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit' };
+    document.getElementById('currentDate').textContent = now.toLocaleDateString('ko-KR', opts);
+}
+updateDate();
+setInterval(updateDate, 60000);
+
+function fmtMoney(n) {
+    const num = parseFloat(n || 0);
+    if (num >= 100000000) return (num/100000000).toFixed(1) + '억원';
+    if (num >= 10000) return (num/10000).toFixed(0) + '만원';
+    return Math.round(num).toLocaleString('ko-KR') + '원';
+}
+
+function getStatusBadge(status) {
+    const map = { PENDING:'badge-pending', APPROVED:'badge-approved', RECEIVED:'badge-received', CANCELLED:'badge-cancelled' };
+    const labelMap = { PENDING:'대기', APPROVED:'승인', RECEIVED:'입고완료', CANCELLED:'취소' };
+    return `<span class="list-badge \${map[status] || ''}">\${labelMap[status] || status}</span>`;
+}
+
+let statsData = {};
+
+function showLowStockDetail() {
+    const low = statsData.lowInventoryItems || [];
+    const threshold = statsData.lowStockThreshold ?? 10;
+    document.getElementById('lowStockModalSub').textContent = `기준: \${threshold}개 이하 · 총 \${statsData.lowInventory || 0}개 항목`;
+    const body = document.getElementById('lowStockModalBody');
+    if (low.length === 0) {
+        body.innerHTML = '<div style="text-align:center;padding:32px;color:#27ae60;font-size:14px;"> 재고 부족 항목이 없습니다.</div>';
+    } else {
+        body.innerHTML = low.map(i => {
+            const qty = i.quantity ?? i.QUANTITY ?? 0;
+            const shortage = Math.max(0, threshold - qty);
+            const isNeg = qty <= 0;
+            return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f5f5f5;"><div><div style="font-size:14px;font-weight:600;color:#1a1a2e;">\${i.product_name || i.productName || '-'}</div><div style="font-size:12px;color:#888;margin-top:2px;">\${i.warehouse_name || i.warehouseName || '-'}</div></div><div style="text-align:right;"><div style="font-size:15px;font-weight:700;color:\${isNeg ? '#e74c3c' : '#e67e22'};">\${qty}개</div><div style="font-size:11px;color:#e74c3c;margin-top:2px;">\${isNeg ? ' 음수 재고' : shortage + '개 부족'}</div></div></div>`;
+        }).join('');
+    }
+    document.getElementById('lowStockModal').style.display = 'flex';
+}
+function closeLowStockModal() { document.getElementById('lowStockModal').style.display = 'none'; }
+document.addEventListener('click', e => { if (e.target === document.getElementById('lowStockModal')) closeLowStockModal(); });
+
+function loadStats() {
+    fetch('/api/dashboard/stats')
+        .then(r => r.json())
+        .then(d => {
+            statsData = d;
+            document.getElementById('statProducts').textContent  = d.productCount  ?? '—';
+            document.getElementById('statEmployees').textContent = d.employeeCount ?? '—';
+            document.getElementById('statOrders').textContent    = d.pendingOrders ?? '—';
+            document.getElementById('statLowInv').textContent    = d.lowInventory  ?? '—';
+            document.getElementById('statWO').textContent        = d.monthlyWO     ?? '—';
+            document.getElementById('statRevenue').textContent   = fmtMoney(d.monthlyRevenue);
+            document.getElementById('statRevSub').textContent    = '이번달 ' + (d.monthlySaleCount || 0) + '건';
+            document.getElementById('statLowSub').textContent    = `수량 \${d.lowStockThreshold ?? 10}개 이하`;
+
+            // 작업지시 상태
+            const wo = { PENDING:0, IN_PROGRESS:0, COMPLETED:0, CANCELLED:0 };
+            (d.workOrderStatus || []).forEach(w => {
+                const s = w.status || w.STATUS;
+                const c = parseInt(w.cnt || w.CNT || 0);
+                if (s in wo) wo[s] = c;
+            });
+            document.getElementById('woPending').textContent   = wo.PENDING;
+            document.getElementById('woProgress').textContent  = wo.IN_PROGRESS;
+            document.getElementById('woCompleted').textContent = wo.COMPLETED;
+            document.getElementById('woCancelled').textContent = wo.CANCELLED;
+
+            // 최근 발주
+            const orders = d.recentOrders || [];
+            document.getElementById('recentOrders').innerHTML = orders.length === 0
+                ? '<div class="empty-notice">발주 내역이 없습니다.</div>'
+                : orders.map(o => `<div class="list-item"><div><div class="list-name">PO-\${o.po_id || o.poId || '-'} · \${o.supplier_name || o.supplierName || '-'}</div><div class="list-sub">\${o.order_date || o.orderDate || ''}</div></div>\${getStatusBadge(o.status || o.STATUS || '')}
+                </div>`).join('');
+
+            // 재고 부족
+            const low = d.lowInventoryItems || [];
+            document.getElementById('lowInventory').innerHTML = low.length === 0
+                ? '<div class="empty-notice" style="color:var(--success)"> 재고 부족 항목 없음</div>'
+                : low.map(i => `<div class="list-item"><div><div class="list-name">\${i.product_name || i.productName || '-'}</div><div class="list-sub">\${i.warehouse_name || i.warehouseName || '-'}</div></div><span class="qty-low">\${i.quantity}</span></div>`).join('');
+        })
+        .catch(() => {
+            document.getElementById('statProducts').textContent = 'err';
+        });
+}
+
+document.addEventListener('DOMContentLoaded', loadStats);
+</script>
+</body>
+</html>
