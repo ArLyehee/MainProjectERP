@@ -56,6 +56,15 @@
         </where>
     </select>
 
+    <select id="findByPoCode" resultMap="PurchaseOrderResultMap">
+        SELECT po.id, po.po_id, po.supplier_id, po.order_date, po.status, po.item,
+               s.supplier_name, co.customer_name
+        FROM purchase_orders po
+        LEFT JOIN suppliers s ON po.supplier_id = s.supplier_id
+        LEFT JOIN customer_orders co ON po.po_id LIKE CONCAT('%', co.order_no)
+        WHERE po.po_id = #{poCode}
+    </select>
+
     <select id="findById" resultMap="PurchaseOrderResultMap">
         SELECT id, po_id, supplier_id, order_date, status FROM purchase_orders WHERE id = #{poId}
     </select>
@@ -65,6 +74,12 @@
         INSERT INTO purchase_orders (po_id, supplier_id, order_date, status, item)
         VALUES (#{poCode}, #{supplierId}, #{orderDate}, #{status}, #{item})
     </insert>
+
+    <update id="cancelByWorkOrderId">
+        UPDATE purchase_orders SET status = 'CANCELLED'
+        WHERE po_id LIKE CONCAT('PO-PARTS-', #{workOrderId}, '-%')
+        AND status = 'PENDING'
+    </update>
 
     <update id="updateSupplier">
         UPDATE purchase_orders SET supplier_id = #{supplierId}
@@ -80,11 +95,30 @@
         DELETE FROM purchase_orders WHERE id = #{poId}
     </delete>
 
+    <update id="updateItemPrice">
+        UPDATE purchase_order_items SET unit_price = #{unitPrice}
+        WHERE po_item_id = #{poItemId}
+    </update>
+
     <!-- 작업1: purchase_order_items INSERT -->
     <insert id="insertItem" parameterType="com.gaebalfan.erp.domain.PurchaseOrderItem">
         INSERT INTO purchase_order_items (po_id, product_id, quantity, unit_price)
         VALUES (#{poId}, #{productId}, #{quantity}, #{unitPrice})
     </insert>
+
+    <select id="findItemsByPoCode" resultType="com.gaebalfan.erp.domain.PurchaseOrderItem">
+        SELECT poi.po_item_id, poi.po_id, poi.product_id, poi.quantity, poi.unit_price,
+               p.product_name
+        FROM purchase_order_items poi
+        LEFT JOIN products p ON poi.product_id = p.product_id
+        WHERE poi.po_id = #{poCode}
+    </select>
+
+    <select id="findSupplierIdByProduct" resultType="java.lang.Long">
+        SELECT supplier_id FROM supplier_products
+        WHERE product_id = #{productId}
+        LIMIT 1
+    </select>
 
     <!-- 작업2: 거래처별 취급 부품 조회 -->
     <select id="findProductsBySupplier" resultType="com.gaebalfan.erp.domain.Product">

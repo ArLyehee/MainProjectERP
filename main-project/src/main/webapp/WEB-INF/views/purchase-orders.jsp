@@ -11,37 +11,35 @@
 <div class="layout"><jsp:include page="/WEB-INF/views/fragments/sidebar.jsp">
   <jsp:param name="current" value="purchase-orders"/>
 </jsp:include><main class="main"><div class="page-header"><div class="page-title"><h2>발주 관리</h2><p>공급업체 발주 현황을 관리합니다.</p></div><button onclick="openCreate()" class="btn btn-primary">+ 발주 등록</button></div><div class="search-bar"><input type="text" id="searchInput" value="${q}" placeholder="공급업체, 상태 검색..." class="search-input" onkeydown="if(event.key==='Enter'){location.href='/purchase-orders?q='+encodeURIComponent(this.value)+'&page=1';}"><button onclick="location.href='/purchase-orders?q='+encodeURIComponent(document.getElementById('searchInput').value)+'&page=1'" class="btn btn-secondary" style="margin-left:6px;">검색</button></div><div class="card"><table id="poTable"><thead><tr><th class="sort-th" onclick="sortTable(this,0,'str')">공급업체<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,1,'str')">발주일<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,2,'num')">품목 수<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,3,'str')">상태<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th>액션</th></tr></thead><tbody><c:if test="${empty purchaseOrderList}"><tr><td colspan="5" class="empty-state">등록된 발주가 없습니다.</td></tr></c:if><c:forEach var="po" items="${purchaseOrderList}">
-<tr><td><div>${po.supplierName != null ? po.supplierName : (po.customerName != null ? po.customerName : '거래처 미지정')}</div><div class="sub-text">${po.poCode}</div></td><td>${po.orderDateStr}</td><td>${po.totalQuantity != null ? po.totalQuantity : (po.item != null ? po.item : '-')}</td><td><span class="badge badge-${fn:toLowerCase(po.status)}">${po.status == 'PENDING' ? '대기' : po.status == 'APPROVED' ? '승인' : po.status == 'RECEIVED' ? '입고완료' : po.status == 'COMPLETED' ? '완료' : '취소'}</span></td><td>
-  <c:choose>
-    <c:when test="${po.supplierId == null and po.customerName == null}">
-      <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
-        <select id="sup_${po.poId}" style="font-size:11px;padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;">
-          <option value="">거래처 선택</option>
-          <c:forEach var="s" items="${supplierList}"><option value="${s.supplierId}">${s.supplierName}</option></c:forEach>
-        </select>
-        <button class="btn-action" style="background:#6366f1;color:#fff;font-size:11px;padding:3px 8px;" onclick="assignSupplier(${po.poId})">배정</button>
-      </div>
-    </c:when>
-    <c:otherwise>
-      <c:if test="${po.status == 'PENDING'}"><button class="btn-action btn-approve" onclick="changePoStatus(${po.poId},'COMPLETED')">승인</button></c:if>
-      <c:if test="${po.status == 'APPROVED'}"><span style="font-size:12px;color:#6b7280;">입고 대기중</span></c:if>
-      <c:if test="${po.status == 'COMPLETED'}"><span style="font-size:12px;color:#9ca3af;">완료됨</span></c:if>
-      <c:if test="${po.status == 'PENDING' and po.supplierId == null}">
-        <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-top:4px;">
-          <select id="sup_${po.poId}" style="font-size:11px;padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;">
-            <option value="">거래처 선택</option>
-            <c:forEach var="s" items="${supplierList}"><option value="${s.supplierId}">${s.supplierName}</option></c:forEach>
-          </select>
-          <button class="btn-action" style="background:#6366f1;color:#fff;font-size:11px;padding:3px 8px;" onclick="assignSupplier(${po.poId})">배정</button>
-        </div>
-      </c:if>
-    </c:otherwise>
-  </c:choose>
+<tr style="cursor:pointer;" onclick="openDetail(${po.poId}, '${po.poCode}')"><td><div>${po.supplierName != null ? po.supplierName : (po.customerName != null ? po.customerName : '거래처 미지정')}</div><div class="sub-text">${po.poCode}</div></td><td>${po.orderDateStr}</td><td>${po.totalQuantity != null ? po.totalQuantity : (po.item != null ? po.item : '-')}</td><td><span class="badge badge-${fn:toLowerCase(po.status)}">${po.status == 'PENDING' ? '대기' : po.status == 'APPROVED' ? '승인' : po.status == 'RECEIVED' ? '입고완료' : po.status == 'COMPLETED' ? '완료' : '취소'}</span></td><td>
+  <c:if test="${po.status == 'PENDING'}"><button class="btn-action btn-approve" onclick="event.stopPropagation();changePoStatus(${po.poId},'COMPLETED')">승인</button></c:if>
+  <c:if test="${po.status == 'APPROVED'}"><span style="font-size:12px;color:#6b7280;">입고 대기중</span></c:if>
+  <c:if test="${po.status == 'COMPLETED'}"><span style="font-size:12px;color:#9ca3af;">완료됨</span></c:if>
 </td></tr>
 </c:forEach></tbody></table></div><!-- 페이지네이션 --><c:if test="${totalPages != null and totalPages > 1}"><div class="pagination"><a href="/purchase-orders?page=${currentPage - 1}&q=${q}" class="${currentPage == 1 ? 'disabled' : ''}">&laquo;</a><c:forEach begin="${pageStart}" end="${pageEnd}" var="i">
 <a href="/purchase-orders?page=${i}&q=${q}" class="${i == currentPage ? 'active' : ''}">${i}</a>
 </c:forEach><a href="/purchase-orders?page=${currentPage + 1}&q=${q}" class="${currentPage == totalPages ? 'disabled' : ''}">&raquo;</a></div></c:if></main>
-</div><!-- 발주 등록 모달 -->
+</div><!-- 발주 상세 모달 -->
+<div class="modal-overlay" id="poDetailModal">
+<div class="modal" style="max-width:620px;">
+  <h3 id="detailTitle">발주 상세</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin-bottom:16px;font-size:13px;" id="detailMeta"></div>
+  <div style="margin-bottom:8px;font-weight:600;font-size:13px;">📦 발주 품목</div>
+  <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px;">
+    <thead><tr style="background:#f3f4f6;"><th style="padding:6px 8px;text-align:left;border-bottom:1px solid #e5e7eb;">품목명</th><th style="padding:6px 8px;text-align:right;border-bottom:1px solid #e5e7eb;">수량</th><th style="padding:6px 8px;text-align:right;border-bottom:1px solid #e5e7eb;">단가 (수정 가능)</th><th style="padding:6px 8px;text-align:right;border-bottom:1px solid #e5e7eb;">금액</th></tr></thead>
+    <tbody id="detailItems"></tbody>
+  </table>
+  <div style="text-align:right;margin-bottom:16px;"><button onclick="saveItemPrices()" style="background:#6366f1;color:#fff;border:none;border-radius:6px;padding:6px 16px;font-size:12px;cursor:pointer;">단가 저장</button></div>
+  <div style="margin-bottom:8px;font-weight:600;font-size:13px;">✅ 입고 내역</div>
+  <table style="width:100%;border-collapse:collapse;font-size:12px;">
+    <thead><tr style="background:#f3f4f6;"><th style="padding:6px 8px;text-align:left;border-bottom:1px solid #e5e7eb;">품목명</th><th style="padding:6px 8px;text-align:right;border-bottom:1px solid #e5e7eb;">입고 수량</th><th style="padding:6px 8px;text-align:right;border-bottom:1px solid #e5e7eb;">입고일</th></tr></thead>
+    <tbody id="detailReceipts"></tbody>
+  </table>
+  <div class="modal-footer"><button class="btn-cancel-modal" onclick="closeDetailModal()">닫기</button></div>
+</div>
+</div>
+
+<!-- 발주 등록 모달 -->
 <div class="modal-overlay" id="poModal">
 <div class="modal" style="max-width:560px;">
 <h3>발주 등록</h3>
@@ -181,6 +179,72 @@ function savePo() {
         })
         .catch(e => alert('네트워크 오류: ' + e));
 }
+function openDetail(id, poCode) {
+    fetch('/api/purchase-orders/' + id + '/detail')
+        .then(r => r.json())
+        .then(data => {
+            const po = data.po || {};
+            document.getElementById('detailTitle').textContent = '발주 상세 — ' + poCode;
+            document.getElementById('detailMeta').innerHTML =
+                '<div><span style="color:#6b7280;">발주일</span><br><b>' + (po.orderDateStr || '-') + '</b></div>' +
+                '<div><span style="color:#6b7280;">상태</span><br><b>' + (po.status || '-') + '</b></div>';
+
+            const items = data.items || [];
+            const itBody = document.getElementById('detailItems');
+            if (items.length === 0) {
+                itBody.innerHTML = '<tr><td colspan="4" style="padding:10px;color:#9ca3af;text-align:center;">품목 없음</td></tr>';
+            } else {
+                itBody.innerHTML = items.map(i => {
+                    const amt = (i.unitPrice || 0) * (i.quantity || 0);
+                    return '<tr>' +
+                        '<td style="padding:6px 8px;border-bottom:1px solid #f3f4f6;">' + (i.productName || i.productId) + '</td>' +
+                        '<td style="padding:6px 8px;text-align:right;border-bottom:1px solid #f3f4f6;">' + (i.quantity || 0).toLocaleString() + '</td>' +
+                        '<td style="padding:6px 8px;text-align:right;border-bottom:1px solid #f3f4f6;">' +
+                          '<input type="number" class="item-price-input" data-item-id="' + i.poItemId + '" data-qty="' + i.quantity + '" value="' + (i.unitPrice || 0) + '" min="0" style="width:90px;text-align:right;border:1px solid #d1d5db;border-radius:4px;padding:2px 6px;font-size:12px;" oninput="updateAmtCell(this)">' +
+                        '</td>' +
+                        '<td class="amt-cell" style="padding:6px 8px;text-align:right;border-bottom:1px solid #f3f4f6;">' + amt.toLocaleString() + '원</td>' +
+                        '</tr>';
+                }).join('');
+            }
+
+            const receipts = data.receipts || [];
+            const rcBody = document.getElementById('detailReceipts');
+            if (receipts.length === 0) {
+                rcBody.innerHTML = '<tr><td colspan="3" style="padding:10px;color:#9ca3af;text-align:center;">입고 내역 없음</td></tr>';
+            } else {
+                rcBody.innerHTML = receipts.map(r =>
+                    '<tr><td style="padding:6px 8px;border-bottom:1px solid #f3f4f6;">' + (r.productName || r.productId) + '</td>' +
+                    '<td style="padding:6px 8px;text-align:right;border-bottom:1px solid #f3f4f6;">' + (r.quantity || 0).toLocaleString() + '</td>' +
+                    '<td style="padding:6px 8px;text-align:right;border-bottom:1px solid #f3f4f6;">' + (r.receiptDate || '-') + '</td></tr>'
+                ).join('');
+            }
+            document.getElementById('poDetailModal').classList.add('open');
+        });
+}
+function closeDetailModal() { document.getElementById('poDetailModal').classList.remove('open'); }
+
+function updateAmtCell(input) {
+    const qty = parseFloat(input.dataset.qty) || 0;
+    const price = parseFloat(input.value) || 0;
+    const cell = input.closest('td').nextElementSibling;
+    if (cell) cell.textContent = (qty * price).toLocaleString() + '원';
+}
+
+function saveItemPrices() {
+    const inputs = document.querySelectorAll('.item-price-input');
+    if (inputs.length === 0) return;
+    const promises = Array.from(inputs).map(input => {
+        const poItemId = input.dataset.itemId;
+        const unitPrice = parseFloat(input.value) || 0;
+        return fetch('/api/purchase-orders/items/' + poItemId + '/price', {
+            method: 'PATCH',
+            headers: {'Content-Type': 'application/json', [csrfHeader]: csrf},
+            body: JSON.stringify({ unitPrice })
+        });
+    });
+    Promise.all(promises).then(() => alert('단가가 저장되었습니다.'));
+}
+
 function assignSupplier(id) {
     const sel = document.getElementById('sup_' + id);
     const supplierId = sel ? sel.value : '';
@@ -194,7 +258,11 @@ function assignSupplier(id) {
 function changePoStatus(id, status) {
     if (!confirm('상태를 변경하시겠습니까?')) return;
     fetch('/api/purchase-orders/' + id + '/status', { method:'PATCH', headers:{'Content-Type':'application/json',[csrfHeader]:csrf}, body:JSON.stringify({status}) })
-        .then(() => location.reload());
+        .then(r => {
+            if (r.ok) { location.reload(); }
+            else { r.text().then(t => alert('승인 실패: ' + r.status + '\n' + t)); }
+        })
+        .catch(e => alert('네트워크 오류: ' + e));
 }
 </script>
 </body>

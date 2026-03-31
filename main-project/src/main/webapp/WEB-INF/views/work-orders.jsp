@@ -11,7 +11,7 @@
 <div class="layout"><jsp:include page="/WEB-INF/views/fragments/sidebar.jsp">
   <jsp:param name="current" value="work-orders"/>
 </jsp:include><main class="main"><div class="page-header"><div class="page-title"><h2>작업지시 관리</h2><p>환풍기 생산 작업지시를 조회하고 관리합니다.</p></div><button onclick="openCreate()" class="btn btn-primary">+ 작업지시 등록</button></div><div class="search-bar"><input type="text" id="searchInput" placeholder="제품명, 상태 검색..." oninput="filterTable()" class="search-input"></div><div class="card"><table><thead><tr><th class="sort-th" onclick="sortTable(this,0,'str')">제품명<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,1,'num')">생산 수량<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,2,'str')">시작일<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,3,'str')">상태<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th>액션</th></tr></thead><tbody><c:if test="${empty workOrderList}"><tr><td colspan="5" class="empty-state">등록된 작업지시가 없습니다.</td></tr></c:if><c:forEach var="w" items="${workOrderList}">
-<tr><td>${w.productName != null ? w.productName : w.productId}</td><td class="qty">${w.quantity}</td><td>${w.startDate}</td><td><c:if test="${w.status == 'PENDING'}"><span class="badge badge-pending">대기</span></c:if><c:if test="${w.status == 'IN_PROGRESS'}"><span class="badge badge-inprogress">진행중</span></c:if><c:if test="${w.status == 'COMPLETED'}"><span class="badge badge-completed">완료</span></c:if><c:if test="${w.status == 'CANCELLED'}"><span class="badge badge-cancelled">취소</span></c:if></td><td><c:if test="${w.status == 'PENDING'}"><button class="btn-action btn-start" onclick="changeStatus(${w.workOrderId}, 'IN_PROGRESS')">시작</button></c:if><c:if test="${w.status == 'IN_PROGRESS'}"><button class="btn-action btn-complete" onclick="changeStatus(${w.workOrderId}, 'COMPLETED')">완료</button></c:if><c:if test="${w.status == 'IN_PROGRESS'}"><button class="btn-action btn-receive" onclick="openProdReceipt(${w.workOrderId},${w.productId})">생산입고</button></c:if><c:if test="${w.status == 'PENDING' or w.status == 'IN_PROGRESS'}"><button class="btn-action btn-cancel-w" onclick="changeStatus(${w.workOrderId}, 'CANCELLED')">취소</button></c:if></td></tr>
+<tr><td>${w.productName != null ? w.productName : w.productId}</td><td class="qty">${w.quantity}</td><td>${w.startDate}</td><td><c:if test="${w.status == 'PENDING'}"><span class="badge badge-pending">대기</span></c:if><c:if test="${w.status == 'IN_PROGRESS'}"><span class="badge badge-inprogress">진행중</span></c:if><c:if test="${w.status == 'COMPLETED'}"><span class="badge badge-completed">완료</span></c:if><c:if test="${w.status == 'CANCELLED'}"><span class="badge badge-cancelled">취소</span></c:if></td><td><c:if test="${w.status == 'PENDING'}"><button class="btn-action btn-start" onclick="changeStatus(${w.workOrderId}, 'IN_PROGRESS')">시작</button><button class="btn-action" style="background:#f59e0b;color:#fff;" onclick="autoOrderParts(${w.workOrderId})">부품 자동발주</button></c:if><c:if test="${w.status == 'IN_PROGRESS'}"><button class="btn-action btn-complete" onclick="changeStatus(${w.workOrderId}, 'COMPLETED')">완료</button></c:if><c:if test="${w.status == 'IN_PROGRESS'}"><button class="btn-action btn-receive" onclick="openProdReceipt(${w.workOrderId},${w.productId})">생산입고</button></c:if><c:if test="${w.status == 'PENDING' or w.status == 'IN_PROGRESS'}"><button class="btn-action btn-cancel-w" onclick="changeStatus(${w.workOrderId}, 'CANCELLED')">취소</button></c:if></td></tr>
 </c:forEach></tbody></table></div><!-- 페이지네이션 --><c:if test="${totalPages != null and totalPages > 1}"><div class="pagination"><a href="/work-orders?page=${currentPage - 1}" class="${currentPage == 1 ? 'disabled' : ''}">&laquo;</a><c:forEach begin="${pageStart}" end="${pageEnd}" var="i">
 <a href="/work-orders?page=${i}" class="${i == currentPage ? 'active' : ''}">${i}</a>
 </c:forEach><a href="/work-orders?page=${currentPage + 1}" class="${currentPage == totalPages ? 'disabled' : ''}">&raquo;</a></div></c:if></main>
@@ -94,6 +94,22 @@ function saveWorkOrder() {
         headers: {'Content-Type':'application/json', [csrfHeader]: csrf},
         body: JSON.stringify(data)
     }).then(() => location.reload());
+}
+function autoOrderParts(id) {
+    if (!confirm('부족한 부품을 자동으로 발주하시겠습니까?\n발주 관리에서 거래처를 지정해주세요.')) return;
+    const csrf = document.querySelector('meta[name="_csrf"]').content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+    fetch('/api/work-orders/' + id + '/auto-order-parts', {
+        method: 'POST',
+        headers: {[csrfHeader]: csrf}
+    }).then(r => r.json()).then(data => {
+        if (data.created > 0) {
+            alert(data.created + '건의 발주가 생성되었습니다.\n발주 관리에서 거래처를 지정해주세요.');
+        } else {
+            alert('부족한 부품이 없습니다.');
+        }
+        location.reload();
+    });
 }
 function changeStatus(id, status) {
     const csrf = document.querySelector('meta[name="_csrf"]').content;

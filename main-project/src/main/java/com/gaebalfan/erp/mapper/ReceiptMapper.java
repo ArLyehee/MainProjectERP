@@ -10,5 +10,6 @@ public interface ReceiptMapper {
     List<Receipt> findAll();
     List<Receipt> findAllPaged(@Param("offset") int offset, @Param("size") int size);
     int count();
+    List<Receipt> findByPoId(@Param("poId") String poId);
     void insert(Receipt receipt);
 }

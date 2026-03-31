@@ -13,6 +13,7 @@ public interface OrderMapper {
     int count();
     CustomerOrder findById(@Param("orderId") Long orderId);
     CustomerOrder findByPurchaseOrderId(@Param("purchaseOrderId") Integer purchaseOrderId);
+    CustomerOrder findByWorkOrderId(@Param("workOrderId") Long workOrderId);
     void insert(CustomerOrder order);
     void updateStatus(@Param("orderId") Long orderId, @Param("status") String status);
     void updateAfterApprove(@Param("orderId") Long orderId,

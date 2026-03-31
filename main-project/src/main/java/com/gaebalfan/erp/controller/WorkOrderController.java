@@ -45,4 +45,10 @@ public class WorkOrderController {
         service.updateStatus(id, body.get("status"));
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{id}/auto-order-parts")
+    public ResponseEntity<Map<String, Object>> autoOrderParts(@PathVariable Long id) {
+        int count = service.autoOrderShortages(id);
+        return ResponseEntity.ok(Map.of("created", count));
+    }
 }

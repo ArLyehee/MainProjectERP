@@ -47,6 +47,13 @@
         WHERE o.order_id = #{orderId}
     </select>
 
+    <select id="findByWorkOrderId" resultMap="OrderResultMap">
+        SELECT o.*, p.product_name
+        FROM customer_orders o
+        LEFT JOIN products p ON o.product_id = p.product_id
+        WHERE o.work_order_id = #{workOrderId}
+    </select>
+
     <select id="findByPurchaseOrderId" resultMap="OrderResultMap">
         SELECT o.*, p.product_name
         FROM customer_orders o

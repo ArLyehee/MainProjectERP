@@ -32,6 +32,14 @@
         SELECT COUNT(*) FROM receipts
     </select>
 
+    <select id="findByPoId" resultMap="ReceiptResultMap">
+        SELECT r.*, p.product_name
+        FROM receipts r
+        LEFT JOIN products p ON r.product_id = p.product_id
+        WHERE r.po_id = #{poId}
+        ORDER BY r.receipt_date DESC
+    </select>
+
     <insert id="insert" parameterType="com.gaebalfan.erp.domain.Receipt"
             useGeneratedKeys="true" keyProperty="receiptId">
         INSERT INTO receipts (po_id, product_id, quantity, receipt_date)
