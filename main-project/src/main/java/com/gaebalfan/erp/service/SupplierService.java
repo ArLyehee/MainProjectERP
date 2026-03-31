@@ -4,6 +4,7 @@ import com.gaebalfan.erp.domain.Supplier;
 import com.gaebalfan.erp.mapper.SupplierMapper;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class SupplierService {
@@ -40,5 +41,22 @@ public class SupplierService {
 
     public void delete(Long id) {
         mapper.delete(id);
+    }
+
+    public List<Map<String, Object>> findProductsBySupplier(Long supplierId) {
+        return mapper.findProductsBySupplier(supplierId);
+    }
+
+    public void addProduct(Long supplierId, Long productId) {
+        mapper.addProduct(supplierId, productId);
+    }
+
+    public void removeProduct(Long supplierId, Long productId) {
+        mapper.removeProduct(supplierId, productId);
+    }
+
+    public void setPrimary(Long supplierId, Long productId, boolean isPrimary) {
+        if (isPrimary) mapper.setPrimary(supplierId, productId);
+        else mapper.clearPrimary(supplierId, productId);
     }
 }

@@ -70,9 +70,9 @@ public class WorkOrderService {
         List<BomItem> items = bomMapper.findItemsByBomId(bom.getBomId());
         int count = 0;
         for (BomItem item : items) {
-            int needed    = item.getQuantity().multiply(BigDecimal.valueOf(wo.getQuantity())).intValue();
+            // 작업지시 등록 시 이미 재고가 차감되므로, 현재 재고가 음수인 만큼만 발주
             int available = inventoryMapper.findTotalQuantityByProduct(item.getComponentProductId());
-            int shortage  = needed - available;
+            int shortage  = -available; // 재고가 음수(부족)인 경우에만 발주
             if (shortage <= 0) continue;
 
             Long supplierId = purchaseOrderMapper.findSupplierIdByProduct(item.getComponentProductId());
@@ -123,20 +123,30 @@ public class WorkOrderService {
     }
 
     /**
-     * 작업지시 등록: BOM 자재를 재고에서 차감
+     * 작업지시 등록: BOM 자재를 재고에서 차감.
+     * 차감 후 모든 자재 재고가 0 이상이면 부족 없음 → 자동으로 IN_PROGRESS로 전환.
      */
     @Transactional
     public void insert(WorkOrder obj) {
         mapper.insert(obj);
 
-        // BOM 기반 자재 재고 차감
+        boolean hasShortage = false;
         Bom bom = bomMapper.findByProductId(obj.getProductId());
         if (bom != null) {
             List<BomItem> items = bomMapper.findItemsByBomId(bom.getBomId());
             for (BomItem item : items) {
                 int deductQty = item.getQuantity().multiply(BigDecimal.valueOf(obj.getQuantity())).intValue();
                 inventoryMapper.updateQuantity(item.getComponentProductId(), DEFAULT_WAREHOUSE_ID, -deductQty);
+                if (inventoryMapper.findTotalQuantityByProduct(item.getComponentProductId()) < 0) {
+                    hasShortage = true;
+                }
             }
+        }
+
+        // 부족 부품 없으면 자동으로 생산 시작
+        if (!hasShortage) {
+            mapper.updateStatus(obj.getWorkOrderId(), "IN_PROGRESS");
+            obj.setStatus("IN_PROGRESS");
         }
     }
 

@@ -169,15 +169,17 @@ public class WebPageController {
 
     // ── 기준정보 페이지 ────────────────────────────
     @GetMapping("/products")
-    public String products(@RequestParam(defaultValue = "1") int page, Model model) {
+    public String products(@RequestParam(defaultValue = "1") int page,
+                           @RequestParam(defaultValue = "") String q, Model model) {
         int size = 20;
-        int total = productService.count();
+        int total = productService.count(q);
         int totalPages = (int) Math.ceil((double) total / size);
-        model.addAttribute("productList", productService.findAllPaged(page, size));
+        model.addAttribute("productList", productService.findAllPaged(page, size, q));
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("pageStart", Math.max(1, page - 5));
         model.addAttribute("pageEnd", Math.min(totalPages, page + 5));
+        model.addAttribute("q", q);
         return "products";
     }
 
@@ -189,6 +191,7 @@ public class WebPageController {
         int total = supplierService.count(q);
         int totalPages = Math.max(1, (int) Math.ceil((double) total / size));
         model.addAttribute("supplierList", supplierService.findAllPaged(page, size, q));
+        model.addAttribute("productList", productService.findAll());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("pageStart", Math.max(1, page - 5));

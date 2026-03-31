@@ -6,8 +6,8 @@ import java.util.List;
 @Mapper
 public interface ProductMapper {
     List<Product> findAll();
-    List<Product> findAllPaged(@Param("offset") int offset, @Param("size") int size);
-    int count();
+    List<Product> findAllPaged(@Param("offset") int offset, @Param("size") int size, @Param("q") String q);
+    int count(@Param("q") String q);
     Product findById(@Param("productId") Long productId);
     void insert(Product product);
     void update(Product product);

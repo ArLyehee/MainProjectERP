@@ -10,7 +10,7 @@
 <body>
 <div class="layout"><jsp:include page="/WEB-INF/views/fragments/sidebar.jsp">
   <jsp:param name="current" value="expenses"/>
-</jsp:include><main class="main"><div class="page-header"><div class="page-title"><h2>비용 관리</h2><p>운영비용 현황을 관리합니다.</p></div><button onclick="openCreate()" class="btn btn-primary">+ 비용 등록</button></div><div class="search-bar"><input type="text" id="searchInput" value="${q}" placeholder="비용유형, 날짜 검색..." class="search-input" oninput="doSearch(this.value)"></div><div class="card"><table><thead><tr><th class="sort-th" onclick="sortTable(this,0,'str')">비용유형<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,1,'num')">금액 (원)<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,2,'str')">날짜<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th></tr></thead><tbody><c:if test="${empty expenseList}"><tr><td colspan="3" class="empty-state">등록된 비용이 없습니다.</td></tr></c:if><c:forEach var="e" items="${expenseList}">
+</jsp:include><main class="main"><div class="page-header"><div class="page-title"><h2>비용 관리</h2><p>운영비용 현황을 관리합니다.</p></div><button onclick="openCreate()" class="btn btn-primary">+ 비용 등록</button></div><div class="search-bar"><input type="text" id="searchInput" value="${q}" placeholder="비용유형, 날짜 검색..." class="search-input" onkeydown="if(event.key==='Enter'){location.href='/expenses?q='+encodeURIComponent(this.value)+'&page=1';}"><button onclick="location.href='/expenses?q='+encodeURIComponent(document.getElementById('searchInput').value)+'&page=1'" class="btn btn-secondary" style="margin-left:6px;">검색</button></div><div class="card"><table><thead><tr><th class="sort-th" onclick="sortTable(this,0,'str')">비용유형<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,1,'num')">금액 (원)<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,2,'str')">날짜<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th></tr></thead><tbody><c:if test="${empty expenseList}"><tr><td colspan="3" class="empty-state">등록된 비용이 없습니다.</td></tr></c:if><c:forEach var="e" items="${expenseList}">
 <tr><td>${e.expenseType}</td><td class="amount"><fmt:formatNumber value="${e.amount}" type="number" groupingUsed="true"/></td><td>${e.expenseDate}</td></tr>
 </c:forEach></tbody></table></div><c:if test="${totalPages != null and totalPages > 1}"><div class="pagination"><a href="/expenses?page=${currentPage - 1}&q=${q}" class="${currentPage == 1 ? 'disabled' : ''}">&laquo;</a><c:forEach begin="${pageStart}" end="${pageEnd}" var="i">
 <a href="/expenses?page=${i}&q=${q}" class="${i == currentPage ? 'active' : ''}">${i}</a>
@@ -20,12 +20,6 @@
 const csrf = document.querySelector('meta[name="_csrf"]').content;
 const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
-function doSearch(val) {
-    const q = val.toLowerCase();
-    document.querySelectorAll('tbody tr').forEach(tr => {
-        tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
-    });
-}
 
 function openCreate() {
     document.getElementById('expenseType').value = '';

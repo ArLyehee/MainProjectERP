@@ -15,30 +15,23 @@ import java.util.List;
 public class OrderService {
 
     private static final long DEFAULT_WAREHOUSE_ID = 1L;
-    private static final int  LOW_STOCK_THRESHOLD  = 50;
 
     private final OrderMapper       orderMapper;
     private final InventoryMapper   inventoryMapper;
-    private final WorkOrderMapper   workOrderMapper;
-    private final BomMapper         bomMapper;
-    private final PurchaseOrderMapper purchaseOrderMapper;
+    private final WorkOrderService  workOrderService;
     private final ShipmentMapper    shipmentMapper;
     private final SaleMapper        saleMapper;
     private final ProductMapper     productMapper;
 
     public OrderService(OrderMapper orderMapper,
                         InventoryMapper inventoryMapper,
-                        WorkOrderMapper workOrderMapper,
-                        BomMapper bomMapper,
-                        PurchaseOrderMapper purchaseOrderMapper,
+                        WorkOrderService workOrderService,
                         ShipmentMapper shipmentMapper,
                         SaleMapper saleMapper,
                         ProductMapper productMapper) {
         this.orderMapper          = orderMapper;
         this.inventoryMapper      = inventoryMapper;
-        this.workOrderMapper      = workOrderMapper;
-        this.bomMapper            = bomMapper;
-        this.purchaseOrderMapper  = purchaseOrderMapper;
+        this.workOrderService     = workOrderService;
         this.shipmentMapper       = shipmentMapper;
         this.saleMapper           = saleMapper;
         this.productMapper        = productMapper;
@@ -93,21 +86,10 @@ public class OrderService {
             return "SHIPPED";
         }
 
-        // ③ 재고 부족 → 부품 재고 확인
-        Bom bom = bomMapper.findByProductId(order.getProductId());
-        boolean partsOk = checkPartsStock(bom, order.getQuantity());
-
-        if (partsOk) {
-            // ④ 부품 있음 → 작업지시 생성
-            Long workOrderId = createWorkOrder(order);
-            orderMapper.updateAfterApprove(orderId, "IN_PRODUCTION", workOrderId, null, null);
-            return "IN_PRODUCTION";
-        } else {
-            // ⑤ 부품 부족 → 발주 처리
-            Integer poId = createPurchaseOrder(order);
-            orderMapper.updateAfterApprove(orderId, "ORDERED", null, poId, null);
-            return "ORDERED";
-        }
+        // ③ 재고 부족 → 작업지시 생성 (부품 재고 차감 포함)
+        Long workOrderId = createWorkOrder(order);
+        orderMapper.updateAfterApprove(orderId, "IN_PRODUCTION", workOrderId, null, null);
+        return "IN_PRODUCTION";
     }
 
     /**
@@ -153,44 +135,14 @@ public class OrderService {
         return shipment.getShipmentId();
     }
 
-    private boolean checkPartsStock(Bom bom, int qty) {
-        if (bom == null) return true; // BOM 없으면 그냥 작업지시
-        List<BomItem> items = bomMapper.findItemsByBomId(bom.getBomId());
-        for (BomItem item : items) {
-            int needed = item.getQuantity().intValue() * qty;
-            int have   = inventoryMapper.findTotalQuantityByProduct(item.getComponentProductId());
-            if (have < needed) return false;
-        }
-        return true;
-    }
-
     private Long createWorkOrder(CustomerOrder order) {
         WorkOrder wo = new WorkOrder();
         wo.setProductId(order.getProductId());
         wo.setQuantity(order.getQuantity());
         wo.setStartDate(LocalDateTime.now());
         wo.setStatus("PENDING");
-        workOrderMapper.insert(wo);
+        workOrderService.insert(wo); // 재고 차감 + 부족 없으면 자동 IN_PROGRESS 처리
+
         return wo.getWorkOrderId();
-    }
-
-    private Integer createPurchaseOrder(CustomerOrder order) {
-        PurchaseOrder po = new PurchaseOrder();
-        po.setPoCode("PO-" + order.getOrderNo());
-        po.setSupplierId(null); // 담당자가 나중에 지정
-        po.setOrderDate(LocalDateTime.now());
-        po.setStatus("PENDING");
-        po.setItem(1);
-        purchaseOrderMapper.insert(po);
-
-        // purchase_order_items 생성 (트리거 동작에 필요)
-        PurchaseOrderItem item = new PurchaseOrderItem();
-        item.setPoId(po.getPoCode());
-        item.setProductId(order.getProductId());
-        item.setQuantity(order.getQuantity());
-        item.setUnitPrice(order.getUnitPrice() != null ? order.getUnitPrice() : java.math.BigDecimal.ZERO);
-        purchaseOrderMapper.insertItem(item);
-
-        return po.getPoId();
     }
 }

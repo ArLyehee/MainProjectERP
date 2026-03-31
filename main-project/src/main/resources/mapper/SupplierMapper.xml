@@ -61,4 +61,33 @@
         DELETE FROM suppliers WHERE supplier_id = #{supplierId}
     </delete>
 
+    <select id="findProductsBySupplier" resultType="map">
+        SELECT p.product_id AS productId, p.product_name AS productName,
+               p.model, p.cost_price AS costPrice,
+               sp.is_primary AS isPrimary, sp.last_unit_price AS lastUnitPrice
+        FROM supplier_products sp
+        JOIN products p ON sp.product_id = p.product_id
+        WHERE sp.supplier_id = #{supplierId}
+        ORDER BY sp.is_primary DESC, p.product_name ASC
+    </select>
+
+    <insert id="addProduct">
+        INSERT IGNORE INTO supplier_products (supplier_id, product_id, is_primary, last_unit_price)
+        VALUES (#{supplierId}, #{productId}, 0, 0)
+    </insert>
+
+    <delete id="removeProduct">
+        DELETE FROM supplier_products WHERE supplier_id = #{supplierId} AND product_id = #{productId}
+    </delete>
+
+    <update id="clearPrimary">
+        UPDATE supplier_products SET is_primary = 0
+        WHERE supplier_id = #{supplierId} AND product_id = #{productId}
+    </update>
+
+    <update id="setPrimary">
+        UPDATE supplier_products SET is_primary = 1
+        WHERE supplier_id = #{supplierId} AND product_id = #{productId}
+    </update>
+
 </mapper>

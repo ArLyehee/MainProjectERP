@@ -117,6 +117,7 @@
     <select id="findSupplierIdByProduct" resultType="java.lang.Long">
         SELECT supplier_id FROM supplier_products
         WHERE product_id = #{productId}
+        ORDER BY is_primary DESC, supplier_id ASC
         LIMIT 1
     </select>
 

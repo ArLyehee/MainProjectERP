@@ -323,15 +323,14 @@ function saveOrder() {
 
 // ── 주문 액션 ─────────────────────────────────────
 function approveOrder(id) {
-    if (!confirm('주문을 수락하고 처리하시겠습니까?\n재고 상황에 따라 자동으로 출고/작업지시/발주가 생성됩니다.')) return;
+    if (!confirm('주문을 수락하고 처리하시겠습니까?\n재고가 충분하면 즉시 출고, 부족하면 작업지시가 생성됩니다.')) return;
     fetch('/api/orders/' + id + '/approve', {
         method: 'PATCH',
         headers: {[csrfHeader()]: csrf()}
     }).then(r => r.json()).then(data => {
         const msgMap = {
             SHIPPED:       '재고 충분 → 즉시 출고 처리 완료! 매출이 자동 등록되었습니다.',
-            IN_PRODUCTION: '부품 재고 확인 → 작업지시가 생성되었습니다.',
-            ORDERED:       '부품 재고 부족 → 발주가 자동 생성되었습니다.'
+            IN_PRODUCTION: '재고 부족 → 작업지시가 생성되었습니다. 부족 부품은 작업지시에서 자동 발주하세요.'
         };
         showToast(msgMap[data.status] || '처리 완료', 'success');
         setTimeout(() => location.reload(), 1500);

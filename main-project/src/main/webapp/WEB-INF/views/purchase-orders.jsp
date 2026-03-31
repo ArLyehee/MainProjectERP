@@ -12,9 +12,10 @@
   <jsp:param name="current" value="purchase-orders"/>
 </jsp:include><main class="main"><div class="page-header"><div class="page-title"><h2>발주 관리</h2><p>공급업체 발주 현황을 관리합니다.</p></div><button onclick="openCreate()" class="btn btn-primary">+ 발주 등록</button></div><div class="search-bar"><input type="text" id="searchInput" value="${q}" placeholder="공급업체, 상태 검색..." class="search-input" onkeydown="if(event.key==='Enter'){location.href='/purchase-orders?q='+encodeURIComponent(this.value)+'&page=1';}"><button onclick="location.href='/purchase-orders?q='+encodeURIComponent(document.getElementById('searchInput').value)+'&page=1'" class="btn btn-secondary" style="margin-left:6px;">검색</button></div><div class="card"><table id="poTable"><thead><tr><th class="sort-th" onclick="sortTable(this,0,'str')">공급업체<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,1,'str')">발주일<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,2,'num')">품목 수<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,3,'str')">상태<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th>액션</th></tr></thead><tbody><c:if test="${empty purchaseOrderList}"><tr><td colspan="5" class="empty-state">등록된 발주가 없습니다.</td></tr></c:if><c:forEach var="po" items="${purchaseOrderList}">
 <tr style="cursor:pointer;" onclick="openDetail(${po.poId}, '${po.poCode}')"><td><div>${po.supplierName != null ? po.supplierName : (po.customerName != null ? po.customerName : '거래처 미지정')}</div><div class="sub-text">${po.poCode}</div></td><td>${po.orderDateStr}</td><td>${po.totalQuantity != null ? po.totalQuantity : (po.item != null ? po.item : '-')}</td><td><span class="badge badge-${fn:toLowerCase(po.status)}">${po.status == 'PENDING' ? '대기' : po.status == 'APPROVED' ? '승인' : po.status == 'RECEIVED' ? '입고완료' : po.status == 'COMPLETED' ? '완료' : '취소'}</span></td><td>
-  <c:if test="${po.status == 'PENDING'}"><button class="btn-action btn-approve" onclick="event.stopPropagation();changePoStatus(${po.poId},'COMPLETED')">승인</button></c:if>
-  <c:if test="${po.status == 'APPROVED'}"><span style="font-size:12px;color:#6b7280;">입고 대기중</span></c:if>
+  <c:if test="${po.status == 'PENDING'}"><button class="btn-action btn-approve" onclick="event.stopPropagation();changePoStatus(${po.poId},'COMPLETED')">승인</button><button class="btn-action btn-del" style="margin-left:4px;" onclick="event.stopPropagation();cancelPo(${po.poId})">취소</button></c:if>
+  <c:if test="${po.status == 'APPROVED'}"><span style="font-size:12px;color:#6b7280;">입고 대기중</span><button class="btn-action btn-del" style="margin-left:8px;" onclick="event.stopPropagation();cancelPo(${po.poId})">취소</button></c:if>
   <c:if test="${po.status == 'COMPLETED'}"><span style="font-size:12px;color:#9ca3af;">완료됨</span></c:if>
+  <c:if test="${po.status == 'CANCELLED'}"><span style="font-size:12px;color:#ef4444;">취소됨</span></c:if>
 </td></tr>
 </c:forEach></tbody></table></div><!-- 페이지네이션 --><c:if test="${totalPages != null and totalPages > 1}"><div class="pagination"><a href="/purchase-orders?page=${currentPage - 1}&q=${q}" class="${currentPage == 1 ? 'disabled' : ''}">&laquo;</a><c:forEach begin="${pageStart}" end="${pageEnd}" var="i">
 <a href="/purchase-orders?page=${i}&q=${q}" class="${i == currentPage ? 'active' : ''}">${i}</a>
@@ -261,6 +262,15 @@ function changePoStatus(id, status) {
         .then(r => {
             if (r.ok) { location.reload(); }
             else { r.text().then(t => alert('승인 실패: ' + r.status + '\n' + t)); }
+        })
+        .catch(e => alert('네트워크 오류: ' + e));
+}
+function cancelPo(id) {
+    if (!confirm('이 발주를 취소하시겠습니까?')) return;
+    fetch('/api/purchase-orders/' + id + '/status', { method:'PATCH', headers:{'Content-Type':'application/json',[csrfHeader]:csrf}, body:JSON.stringify({status:'CANCELLED'}) })
+        .then(r => {
+            if (r.ok) { location.reload(); }
+            else { r.text().then(t => alert('취소 실패: ' + r.status + '\n' + t)); }
         })
         .catch(e => alert('네트워크 오류: ' + e));
 }

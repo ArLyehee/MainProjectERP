@@ -15,10 +15,21 @@
 
     <select id="count" resultType="int">
         SELECT COUNT(*) FROM products
+        <where>
+            <if test="q != null and q != ''">
+                (product_name LIKE CONCAT('%', #{q}, '%') OR model LIKE CONCAT('%', #{q}, '%'))
+            </if>
+        </where>
     </select>
 
     <select id="findAllPaged" resultMap="ProductResultMap">
-        SELECT * FROM products ORDER BY product_id
+        SELECT * FROM products
+        <where>
+            <if test="q != null and q != ''">
+                (product_name LIKE CONCAT('%', #{q}, '%') OR model LIKE CONCAT('%', #{q}, '%'))
+            </if>
+        </where>
+        ORDER BY product_id
         LIMIT #{size} OFFSET #{offset}
     </select>
 
