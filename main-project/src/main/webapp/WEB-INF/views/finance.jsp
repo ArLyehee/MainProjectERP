@@ -85,7 +85,7 @@ function loadSaved() {
                 const op  = parseFloat(s.operatingProfit || 0);
                 const margin = rev ? (op/rev*100).toFixed(1) : '0.0';
                 const opSign = op >= 0 ? 'positive' : 'negative';
-                return `<tr><td>${s.month}</td><td>${fmtShort(s.revenue)}</td><td>${fmtShort(s.cogs)}</td><td>${fmtShort(s.grossProfit)}</td><td>${fmtShort(s.expenses)}</td><td class="${opSign}">${fmtShort(s.operatingProfit)}</td><td class="${opSign}">${margin}%</td></tr>`;
+                return `<tr><td>\${s.month}</td><td>\${fmtShort(s.revenue)}</td><td>\${fmtShort(s.cogs)}</td><td>\${fmtShort(s.grossProfit)}</td><td>\${fmtShort(s.expenses)}</td><td class="\${opSign}">\${fmtShort(s.operatingProfit)}</td><td class="\${opSign}">\${margin}%</td></tr>`;
             }).join('');
         });
 }
@@ -159,7 +159,7 @@ function renderDonut(expByType) {
         }
     });
     const total = values.reduce((a, b) => a + b, 0);
-    document.getElementById('donutLegend').innerHTML = labels.map((l, i) =>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #2a2d3a"><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${colors[i]};margin-right:6px;vertical-align:middle"></span>${l}</span><span style="font-family:monospace;color:#9ca3af">${(values[i]/total*100).toFixed(1)}%</span></div>`
+    document.getElementById('donutLegend').innerHTML = labels.map((l, i) =>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #2a2d3a"><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:\${colors[i]};margin-right:6px;vertical-align:middle"></span>\${l}</span><span style="font-family:monospace;color:#9ca3af">\${(values[i]/total*100).toFixed(1)}%</span></div>`
     ).join('');
 }
 
@@ -174,12 +174,12 @@ function renderTable(monthly, totalRevenue) {
         totalRev += rev; totalCogs += cg; totalGp += gp; totalExp += exp; totalOp += op;
         const opSign = op >= 0 ? 'positive' : 'negative';
         const margin = rev ? (op/rev*100).toFixed(1) : '0.0';
-        return `<tr><td>${m.month}월</td><td>${fmtShort(rev)}</td><td>${fmtShort(cg)}</td><td>${fmtShort(gp)}</td><td>${fmtShort(exp)}</td><td class="${opSign}">${fmtShort(op)}</td><td class="${opSign}">${margin}%</td></tr>`;
+        return `<tr><td>\${m.month}월</td><td>\${fmtShort(rev)}</td><td>\${fmtShort(cg)}</td><td>\${fmtShort(gp)}</td><td>\${fmtShort(exp)}</td><td class="\${opSign}">\${fmtShort(op)}</td><td class="\${opSign}">\${margin}%</td></tr>`;
     }).join('');
 
     const opTotalSign = totalOp >= 0 ? 'positive' : 'negative';
     const totalMargin = totalRev ? (totalOp/totalRev*100).toFixed(1) : '0.0';
-    const totalRow = `<tr class="total-row"><td>합계</td><td>${fmtShort(totalRev)}</td><td>${fmtShort(totalCogs)}</td><td>${fmtShort(totalGp)}</td><td>${fmtShort(totalExp)}</td><td class="${opTotalSign}">${fmtShort(totalOp)}</td><td class="${opTotalSign}">${totalMargin}%</td></tr>`;
+    const totalRow = `<tr class="total-row"><td>합계</td><td>\${fmtShort(totalRev)}</td><td>\${fmtShort(totalCogs)}</td><td>\${fmtShort(totalGp)}</td><td>\${fmtShort(totalExp)}</td><td class="\${opTotalSign}">\${fmtShort(totalOp)}</td><td class="\${opTotalSign}">\${totalMargin}%</td></tr>`;
 
     document.getElementById('monthlyTable').innerHTML = rows + totalRow;
 }

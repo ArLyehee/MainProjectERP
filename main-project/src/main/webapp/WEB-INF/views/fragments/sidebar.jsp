@@ -122,6 +122,34 @@
     function toggleNav(header) {
         const cat = header.closest('.nav-category');
         cat.classList.toggle('open');
+        saveNavState();
     }
+
+    function saveNavState() {
+        const state = {};
+        document.querySelectorAll('.nav-category').forEach(cat => {
+            const key = cat.querySelector('.nav-category-header span').textContent.trim();
+            state[key] = cat.classList.contains('open');
+        });
+        localStorage.setItem('sidebarNavState', JSON.stringify(state));
+    }
+
+    (function restoreNavState() {
+        const saved = localStorage.getItem('sidebarNavState');
+        if (!saved) return;
+        try {
+            const state = JSON.parse(saved);
+            document.querySelectorAll('.nav-category').forEach(cat => {
+                const key = cat.querySelector('.nav-category-header span').textContent.trim();
+                // 현재 페이지가 포함된 카테고리는 항상 열려있어야 함
+                const hasActive = cat.querySelector('.nav-item.active') !== null;
+                if (hasActive) {
+                    cat.classList.add('open');
+                } else if (key in state) {
+                    cat.classList.toggle('open', state[key]);
+                }
+            });
+        } catch(e) {}
+    })();
     </script>
 </aside>

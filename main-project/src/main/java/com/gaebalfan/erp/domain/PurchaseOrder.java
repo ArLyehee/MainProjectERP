@@ -13,6 +13,9 @@ public class PurchaseOrder {
 
     // 조인용
     private String        supplierName;
+    private String        customerName;
+
+    private Integer       totalQuantity; // 실제 주문 수량 합계
 
     // 발주 항목 (purchase_order_items)
     private List<PurchaseOrderItem> items;
@@ -24,6 +27,8 @@ public class PurchaseOrder {
     public String        getStatus()       { return status; }
     public Integer       getItem()         { return item; }
     public String        getSupplierName() { return supplierName; }
+    public String        getCustomerName() { return customerName; }
+    public Integer       getTotalQuantity() { return totalQuantity; }
 
     public void setPoId(Integer poId)                     { this.poId = poId; }
     public void setPoCode(String poCode)                  { this.poCode = poCode; }
@@ -32,6 +37,12 @@ public class PurchaseOrder {
     public void setStatus(String status)                  { this.status = status; }
     public void setItem(Integer item)                     { this.item = item; }
     public void setSupplierName(String supplierName)      { this.supplierName = supplierName; }
+    public void setCustomerName(String customerName)      { this.customerName = customerName; }
+    public void setTotalQuantity(Integer totalQuantity)    { this.totalQuantity = totalQuantity; }
+
+    public String getOrderDateStr() {
+        return orderDate != null ? orderDate.toString().substring(0, 10) : "";
+    }
 
     public List<PurchaseOrderItem> getItems() { return items; }
     public void setItems(List<PurchaseOrderItem> items) { this.items = items; }

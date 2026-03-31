@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions"%>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -80,8 +81,8 @@
                 <td class="text-right"><fmt:formatNumber value="${item.amount}" type="number" groupingUsed="true"/></td>
             </tr>
             </c:forEach>
-            <c:if test="${statement.items.size() < 10}">
-            <c:forEach begin="${statement.items.size() + 1}" end="10" var="i">
+            <c:if test="${fn:length(statement.items) < 10}">
+            <c:forEach begin="${fn:length(statement.items) + 1}" end="10" var="i">
             <tr style="height:28px;"><td></td><td></td><td></td><td></td><td></td></tr>
             </c:forEach>
             </c:if>

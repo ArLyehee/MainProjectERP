@@ -40,6 +40,12 @@ public class PurchaseOrderController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/{id}/supplier")
+    public ResponseEntity<Void> updateSupplier(@PathVariable Long id, @RequestBody Map<String, Long> body) {
+        service.updateSupplier(id, body.get("supplierId"));
+        return ResponseEntity.ok().build();
+    }
+
     // 작업2: 거래처별 취급 부품 조회
     @GetMapping("/supplier/{supplierId}/products")
     public ResponseEntity<List<Product>> findProductsBySupplier(@PathVariable Long supplierId) {

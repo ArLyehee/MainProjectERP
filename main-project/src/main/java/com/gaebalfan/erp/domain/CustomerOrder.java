@@ -39,6 +39,12 @@ public class CustomerOrder {
     public LocalDateTime getCreatedAt()      { return createdAt; }
     public LocalDateTime getUpdatedAt()      { return updatedAt; }
     public String        getProductName()    { return productName; }
+    public String        getCreatedAtStr() {
+        return createdAt != null ? createdAt.toString().substring(0, 10) : "";
+    }
+    public String        getUpdatedAtStr() {
+        return updatedAt != null ? updatedAt.toString().substring(0, 10) : "";
+    }
     public String        getStatusLabel() {
         if (status == null) return "";
         return switch (status) {

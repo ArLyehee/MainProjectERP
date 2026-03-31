@@ -63,7 +63,7 @@ function doStockCheck() {
             document.getElementById('stockTableBody').innerHTML = list.map(item => {
                 const short = item.shortage > 0;
                 if (short) hasShortage = true;
-                return `<tr style="${short ? 'background:rgba(231,76,60,0.08);' : ''}"><td style="padding:4px 8px;">${item.componentName}</td><td style="padding:4px 8px;text-align:right;">${item.needed}</td><td style="padding:4px 8px;text-align:right;">${item.available}</td><td style="padding:4px 8px;text-align:right;color:${short ? '#e74c3c' : '#27ae60'};font-weight:600;">${short ? '-' + item.shortage : '충족'}</td></tr>`;
+                return `<tr style="\${short ? 'background:rgba(231,76,60,0.08);' : ''}"><td style="padding:4px 8px;">\${item.componentName}</td><td style="padding:4px 8px;text-align:right;">\${item.needed}</td><td style="padding:4px 8px;text-align:right;">\${item.available}</td><td style="padding:4px 8px;text-align:right;color:\${short ? '#e74c3c' : '#27ae60'};font-weight:600;">\${short ? '-' + item.shortage : '충족'}</td></tr>`;
             }).join('');
             warning.style.display = hasShortage ? 'block' : 'none';
         });

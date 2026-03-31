@@ -11,7 +11,33 @@
 <div class="layout"><jsp:include page="/WEB-INF/views/fragments/sidebar.jsp">
   <jsp:param name="current" value="purchase-orders"/>
 </jsp:include><main class="main"><div class="page-header"><div class="page-title"><h2>발주 관리</h2><p>공급업체 발주 현황을 관리합니다.</p></div><button onclick="openCreate()" class="btn btn-primary">+ 발주 등록</button></div><div class="search-bar"><input type="text" id="searchInput" value="${q}" placeholder="공급업체, 상태 검색..." class="search-input" onkeydown="if(event.key==='Enter'){location.href='/purchase-orders?q='+encodeURIComponent(this.value)+'&page=1';}"><button onclick="location.href='/purchase-orders?q='+encodeURIComponent(document.getElementById('searchInput').value)+'&page=1'" class="btn btn-secondary" style="margin-left:6px;">검색</button></div><div class="card"><table id="poTable"><thead><tr><th class="sort-th" onclick="sortTable(this,0,'str')">공급업체<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,1,'str')">발주일<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,2,'num')">품목 수<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,3,'str')">상태<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th>액션</th></tr></thead><tbody><c:if test="${empty purchaseOrderList}"><tr><td colspan="5" class="empty-state">등록된 발주가 없습니다.</td></tr></c:if><c:forEach var="po" items="${purchaseOrderList}">
-<tr><td><div>${po.supplierName != null ? po.supplierName : po.supplierId}</div><c:if test="${po.poCode != null}"><div class="sub-text">${po.poCode}</div></c:if></td><td>${po.orderDate != null ? fn:substring(po.orderDate.toString(), 0, 10) : '-'}</td><td>${po.item != null ? po.item : '-'}</td><td><span class="badge badge-${fn:toLowerCase(po.status)}">${po.status == 'PENDING' ? '대기' : po.status == 'APPROVED' ? '승인' : po.status == 'RECEIVED' ? '입고완료' : po.status == 'COMPLETED' ? '완료' : '취소'}</span></td><td><c:if test="${po.status == 'PENDING'}"><span><button class="btn-action btn-approve" onclick="changePoStatus(${po.poId},'COMPLETED')">승인</button></span></c:if><c:if test="${po.status == 'APPROVED'}"><span><span style="font-size:12px;color:#6b7280;">입고 대기중</span></span></c:if><c:if test="${po.status == 'COMPLETED'}"><span><span style="font-size:12px;color:#9ca3af;">완료됨</span></span></c:if></td></tr>
+<tr><td><div>${po.supplierName != null ? po.supplierName : (po.customerName != null ? po.customerName : '거래처 미지정')}</div><div class="sub-text">${po.poCode}</div></td><td>${po.orderDateStr}</td><td>${po.totalQuantity != null ? po.totalQuantity : (po.item != null ? po.item : '-')}</td><td><span class="badge badge-${fn:toLowerCase(po.status)}">${po.status == 'PENDING' ? '대기' : po.status == 'APPROVED' ? '승인' : po.status == 'RECEIVED' ? '입고완료' : po.status == 'COMPLETED' ? '완료' : '취소'}</span></td><td>
+  <c:choose>
+    <c:when test="${po.supplierId == null and po.customerName == null}">
+      <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
+        <select id="sup_${po.poId}" style="font-size:11px;padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;">
+          <option value="">거래처 선택</option>
+          <c:forEach var="s" items="${supplierList}"><option value="${s.supplierId}">${s.supplierName}</option></c:forEach>
+        </select>
+        <button class="btn-action" style="background:#6366f1;color:#fff;font-size:11px;padding:3px 8px;" onclick="assignSupplier(${po.poId})">배정</button>
+      </div>
+    </c:when>
+    <c:otherwise>
+      <c:if test="${po.status == 'PENDING'}"><button class="btn-action btn-approve" onclick="changePoStatus(${po.poId},'COMPLETED')">승인</button></c:if>
+      <c:if test="${po.status == 'APPROVED'}"><span style="font-size:12px;color:#6b7280;">입고 대기중</span></c:if>
+      <c:if test="${po.status == 'COMPLETED'}"><span style="font-size:12px;color:#9ca3af;">완료됨</span></c:if>
+      <c:if test="${po.status == 'PENDING' and po.supplierId == null}">
+        <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-top:4px;">
+          <select id="sup_${po.poId}" style="font-size:11px;padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;">
+            <option value="">거래처 선택</option>
+            <c:forEach var="s" items="${supplierList}"><option value="${s.supplierId}">${s.supplierName}</option></c:forEach>
+          </select>
+          <button class="btn-action" style="background:#6366f1;color:#fff;font-size:11px;padding:3px 8px;" onclick="assignSupplier(${po.poId})">배정</button>
+        </div>
+      </c:if>
+    </c:otherwise>
+  </c:choose>
+</td></tr>
 </c:forEach></tbody></table></div><!-- 페이지네이션 --><c:if test="${totalPages != null and totalPages > 1}"><div class="pagination"><a href="/purchase-orders?page=${currentPage - 1}&q=${q}" class="${currentPage == 1 ? 'disabled' : ''}">&laquo;</a><c:forEach begin="${pageStart}" end="${pageEnd}" var="i">
 <a href="/purchase-orders?page=${i}&q=${q}" class="${i == currentPage ? 'active' : ''}">${i}</a>
 </c:forEach><a href="/purchase-orders?page=${currentPage + 1}&q=${q}" class="${currentPage == totalPages ? 'disabled' : ''}">&raquo;</a></div></c:if></main>
@@ -154,6 +180,16 @@ function savePo() {
             else { r.json().then(j => alert('발주 등록 실패: ' + (j.error || r.status))).catch(() => alert('발주 등록 실패: ' + r.status)); }
         })
         .catch(e => alert('네트워크 오류: ' + e));
+}
+function assignSupplier(id) {
+    const sel = document.getElementById('sup_' + id);
+    const supplierId = sel ? sel.value : '';
+    if (!supplierId) { alert('거래처를 선택하세요.'); return; }
+    fetch('/api/purchase-orders/' + id + '/supplier', {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json', [csrfHeader]: csrf},
+        body: JSON.stringify({ supplierId: parseInt(supplierId) })
+    }).then(r => { if (r.ok) location.reload(); else alert('배정 실패'); });
 }
 function changePoStatus(id, status) {
     if (!confirm('상태를 변경하시겠습니까?')) return;

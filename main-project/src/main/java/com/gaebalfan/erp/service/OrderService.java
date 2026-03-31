@@ -176,12 +176,21 @@ public class OrderService {
 
     private Integer createPurchaseOrder(CustomerOrder order) {
         PurchaseOrder po = new PurchaseOrder();
-        po.setPoCode("PO-ORD-" + order.getOrderNo());
+        po.setPoCode("PO-" + order.getOrderNo());
         po.setSupplierId(null); // 담당자가 나중에 지정
         po.setOrderDate(LocalDateTime.now());
         po.setStatus("PENDING");
-        po.setItem(order.getQuantity());
+        po.setItem(1);
         purchaseOrderMapper.insert(po);
+
+        // purchase_order_items 생성 (트리거 동작에 필요)
+        PurchaseOrderItem item = new PurchaseOrderItem();
+        item.setPoId(po.getPoCode());
+        item.setProductId(order.getProductId());
+        item.setQuantity(order.getQuantity());
+        item.setUnitPrice(order.getUnitPrice() != null ? order.getUnitPrice() : java.math.BigDecimal.ZERO);
+        purchaseOrderMapper.insertItem(item);
+
         return po.getPoId();
     }
 }

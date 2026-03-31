@@ -11,12 +11,19 @@
 <div class="layout"><jsp:include page="/WEB-INF/views/fragments/sidebar.jsp">
   <jsp:param name="current" value="shipments"/>
 </jsp:include><main class="main"><div class="page-header"><div class="page-title"><h2>출고 관리</h2><p>창고별 출고 현황을 관리합니다.</p></div><button onclick="openCreate()" class="btn btn-primary">+ 출고 등록</button></div><div class="search-bar"><input type="text" id="searchInput" placeholder="제품명, 창고, 목적지 검색..." oninput="filterTable()" class="search-input"></div><div class="card"><table><thead><tr><th class="sort-th" onclick="sortTable(this,0,'str')">출고 번호<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,1,'str')">제품명<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,2,'str')">창고<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,3,'num')">수량<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,4,'str')">목적지<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,5,'str')">출고일<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th></tr></thead><tbody><c:if test="${empty shipmentList}"><tr><td colspan="6" class="empty-state">등록된 출고 내역이 없습니다.</td></tr></c:if><c:forEach var="s" items="${shipmentList}">
-<tr><td>SHP-${s.shipmentId}</td><td>${s.productName != null ? s.productName : s.productId}</td><td>${s.warehouseName != null ? s.warehouseName : s.warehouseId}</td><td class="qty">${s.quantity}</td><td>${s.destination}</td><td>${s.shipmentDate != null ? fn:substring(s.shipmentDate.toString(), 0, 10) : '-'}</td></tr>
+<tr><td>SHP-${s.shipmentId}</td><td>${s.productName != null ? s.productName : s.productId}</td><td>${s.warehouseName != null ? s.warehouseName : s.warehouseId}</td><td class="qty">${s.quantity}</td><td>${s.destination}</td><td>${s.shipmentDateStr}</td></tr>
 </c:forEach></tbody></table></div><!-- 페이지네이션 --><c:if test="${totalPages != null and totalPages > 1}"><div class="pagination"><a href="/shipments?page=${currentPage - 1}" class="${currentPage == 1 ? 'disabled' : ''}">&laquo;</a><c:forEach begin="${pageStart}" end="${pageEnd}" var="i">
 <a href="/shipments?page=${i}" class="${i == currentPage ? 'active' : ''}">${i}</a>
 </c:forEach><a href="/shipments?page=${currentPage + 1}" class="${currentPage == totalPages ? 'disabled' : ''}">&raquo;</a></div></c:if></main>
 </div><!-- 출고 등록 모달 -->
-<div class="modal-overlay" id="shipmentModal"><div class="modal"><h3>출고 등록</h3><div class="form-group"><label>제품 *</label><select id="sProductId"><option value="">선택</option><c:forEach var="p" items="${productList}"><option value="${p.productId}">${p.productName}</option></c:forEach></select></div><div class="form-group"><label>출고 창고 *</label><select id="sWarehouseId"><option value="">선택</option><c:forEach var="w" items="${warehouseList}"><option value="${w.warehouseId}">${w.warehouseName}</option></c:forEach></select></div><div class="form-group"><label>수량 *</label><input type="number" id="sQuantity" placeholder="0" min="1"></div><div class="form-group"><label>목적지</label><input type="text" id="sDestination" placeholder="목적지 입력"></div><div class="form-group"><label>출고일</label><input type="date" id="sShipmentDate"></div><div class="modal-footer"><button class="btn-cancel-modal" onclick="closeModal()">취소</button><button class="btn-save" onclick="saveShipment()">저장</button></div></div>
+<div class="modal-overlay" id="shipmentModal"><div class="modal"><h3>출고 등록</h3>
+<div class="form-group"><label>제품 *</label><select id="sProductId" onchange="updateStock()"><option value="">선택</option><c:forEach var="p" items="${productList}"><option value="${p.productId}">${p.productName}</option></c:forEach></select></div>
+<div class="form-group"><label>출고 창고 *</label><select id="sWarehouseId" onchange="updateStock()"><option value="">선택</option><c:forEach var="w" items="${warehouseList}"><option value="${w.warehouseId}">${w.warehouseName}</option></c:forEach></select></div>
+<div id="stockInfo" style="display:none;margin-bottom:12px;padding:8px 12px;border-radius:6px;font-size:13px;font-weight:600;"></div>
+<div class="form-group"><label>수량 *</label><input type="number" id="sQuantity" placeholder="0" min="1"></div>
+<div class="form-group"><label>목적지</label><input type="text" id="sDestination" placeholder="목적지 입력"></div>
+<div class="form-group"><label>출고일</label><input type="date" id="sShipmentDate"></div>
+<div class="modal-footer"><button class="btn-cancel-modal" onclick="closeModal()">취소</button><button class="btn-save" onclick="saveShipment()">저장</button></div></div>
 </div><script>
 const csrf = document.querySelector('meta[name="_csrf"]').content;
 const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
@@ -44,7 +51,45 @@ function filterTable() {
         tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
     });
 }
-function openCreate() { document.getElementById('shipmentModal').classList.add('open'); }
+let _inventory = [];
+fetch('/api/inventory').then(r => r.json()).then(data => { _inventory = data; });
+
+function updateStock() {
+    const productId   = document.getElementById('sProductId').value;
+    const warehouseId = document.getElementById('sWarehouseId').value;
+    const box = document.getElementById('stockInfo');
+    if (!productId) { box.style.display = 'none'; return; }
+
+    let matched;
+    if (warehouseId) {
+        matched = _inventory.filter(i => String(i.productId) === productId && String(i.warehouseId) === warehouseId);
+    } else {
+        matched = _inventory.filter(i => String(i.productId) === productId);
+    }
+    const total = matched.reduce((sum, i) => sum + (i.quantity || 0), 0);
+
+    box.style.display = 'block';
+    if (total <= 0) {
+        box.style.background = '#fee2e2'; box.style.color = '#991b1b';
+        box.textContent = '⚠ 재고 없음 (0개)';
+    } else if (total <= 10) {
+        box.style.background = '#fef3c7'; box.style.color = '#92400e';
+        box.textContent = '⚠ 재고 부족: ' + total.toLocaleString() + '개';
+    } else {
+        box.style.background = '#d1fae5'; box.style.color = '#065f46';
+        box.textContent = '✓ 재고: ' + total.toLocaleString() + '개';
+    }
+}
+
+function openCreate() {
+    document.getElementById('sProductId').value = '';
+    document.getElementById('sWarehouseId').value = '';
+    document.getElementById('sQuantity').value = '';
+    document.getElementById('sDestination').value = '';
+    document.getElementById('sShipmentDate').value = '';
+    document.getElementById('stockInfo').style.display = 'none';
+    document.getElementById('shipmentModal').classList.add('open');
+}
 function closeModal() { document.getElementById('shipmentModal').classList.remove('open'); }
 function saveShipment() {
     const data = {

@@ -47,6 +47,13 @@
         WHERE o.order_id = #{orderId}
     </select>
 
+    <select id="findByPurchaseOrderId" resultMap="OrderResultMap">
+        SELECT o.*, p.product_name
+        FROM customer_orders o
+        LEFT JOIN products p ON o.product_id = p.product_id
+        WHERE o.purchase_order_id = #{purchaseOrderId}
+    </select>
+
     <insert id="insert" parameterType="com.gaebalfan.erp.domain.CustomerOrder"
             useGeneratedKeys="true" keyProperty="orderId">
         INSERT INTO customer_orders

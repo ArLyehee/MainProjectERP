@@ -12,6 +12,7 @@ public interface OrderMapper {
     List<CustomerOrder> findAllPaged(@Param("offset") int offset, @Param("size") int size);
     int count();
     CustomerOrder findById(@Param("orderId") Long orderId);
+    CustomerOrder findByPurchaseOrderId(@Param("purchaseOrderId") Integer purchaseOrderId);
     void insert(CustomerOrder order);
     void updateStatus(@Param("orderId") Long orderId, @Param("status") String status);
     void updateAfterApprove(@Param("orderId") Long orderId,

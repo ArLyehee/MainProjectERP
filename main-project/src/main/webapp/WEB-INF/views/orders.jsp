@@ -150,7 +150,7 @@
                         <c:if test="${o.status == 'READY'}"><span class="badge badge-ready">출고 준비</span></c:if>
                         <c:if test="${o.status == 'SHIPPED'}"><span class="badge badge-shipped">출고 완료</span></c:if>
                     </td>
-                    <td>${o.createdAt != null ? fn:substring(o.createdAt.toString(), 0, 10) : ''}</td>
+                    <td>${o.createdAtStr}</td>
                     <td>
                         <!-- PENDING: 수락 / 보류 -->
                         <c:if test="${o.status == 'PENDING'}">

@@ -13,6 +13,7 @@ public interface PurchaseOrderMapper {
     PurchaseOrder findById(@Param("poId") Long poId);
     void insert(PurchaseOrder po);
     void updateStatus(@Param("poId") Long poId, @Param("status") String status);
+    void updateSupplier(@Param("poId") Long poId, @Param("supplierId") Long supplierId);
     void insertItem(PurchaseOrderItem item);
     List<Product> findProductsBySupplier(@Param("supplierId") Long supplierId);
 }

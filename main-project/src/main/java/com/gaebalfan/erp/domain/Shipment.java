@@ -21,6 +21,10 @@ public class Shipment {
     public String        getProductName()   { return productName; }
     public String        getWarehouseName() { return warehouseName; }
 
+    public String getShipmentDateStr() {
+        return shipmentDate != null ? shipmentDate.toString().substring(0, 10) : "";
+    }
+
     public void setShipmentId(Long shipmentId)              { this.shipmentId = shipmentId; }
     public void setProductId(Long productId)                { this.productId = productId; }
     public void setWarehouseId(Long warehouseId)            { this.warehouseId = warehouseId; }
