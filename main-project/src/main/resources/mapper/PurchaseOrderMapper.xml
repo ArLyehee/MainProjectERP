@@ -81,6 +81,16 @@
         AND status = 'PENDING'
     </update>
 
+    <select id="findByWorkOrderId" resultMap="PurchaseOrderResultMap">
+        SELECT po.id, po.po_id, po.supplier_id, po.order_date, po.status, po.item,
+               s.supplier_name,
+               (SELECT SUM(poi.quantity) FROM purchase_order_items poi WHERE poi.po_id = po.po_id) AS total_quantity
+        FROM purchase_orders po
+        LEFT JOIN suppliers s ON po.supplier_id = s.supplier_id
+        WHERE po.po_id LIKE CONCAT('PO-PARTS-', #{workOrderId}, '-%')
+        ORDER BY po.order_date DESC
+    </select>
+
     <update id="updateSupplier">
         UPDATE purchase_orders SET supplier_id = #{supplierId}
         WHERE id = #{poId}

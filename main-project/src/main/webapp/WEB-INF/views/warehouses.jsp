@@ -5,7 +5,7 @@
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
 <!DOCTYPE html>
 <html lang="ko">
-<head><meta charset="UTF-8"><meta name="_csrf" content="${_csrf.token}"><meta name="_csrf_header" content="${_csrf.headerName}"><title>창고 관리 | 개발팬 ERP</title><link rel="stylesheet" href="/css/erp.css?v=15">
+<head><meta charset="UTF-8"><meta name="_csrf" content="${_csrf.token}"><meta name="_csrf_header" content="${_csrf.headerName}"><title>창고 관리 | 개발팬 ERP</title><link rel="stylesheet" href="/css/erp.css?v=18">
 </head>
 <body>
 <div class="layout"><jsp:include page="/WEB-INF/views/fragments/sidebar.jsp">

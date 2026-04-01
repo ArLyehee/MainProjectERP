@@ -4,6 +4,7 @@ import com.gaebalfan.erp.domain.*;
 import com.gaebalfan.erp.mapper.OrderMapper;
 import com.gaebalfan.erp.mapper.PurchaseOrderMapper;
 import com.gaebalfan.erp.mapper.ReceiptMapper;
+import com.gaebalfan.erp.mapper.TransactionStatementMapper;
 import com.gaebalfan.erp.mapper.WorkOrderMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,19 +16,22 @@ import java.util.Map;
 @Service
 public class PurchaseOrderService {
 
-    private final PurchaseOrderMapper mapper;
-    private final OrderMapper         orderMapper;
-    private final WorkOrderMapper     workOrderMapper;
-    private final ReceiptMapper       receiptMapper;
+    private final PurchaseOrderMapper        mapper;
+    private final OrderMapper                orderMapper;
+    private final WorkOrderMapper            workOrderMapper;
+    private final ReceiptMapper              receiptMapper;
+    private final TransactionStatementMapper statementMapper;
 
     public PurchaseOrderService(PurchaseOrderMapper mapper,
                                 OrderMapper orderMapper,
                                 WorkOrderMapper workOrderMapper,
-                                ReceiptMapper receiptMapper) {
+                                ReceiptMapper receiptMapper,
+                                TransactionStatementMapper statementMapper) {
         this.mapper          = mapper;
         this.orderMapper     = orderMapper;
         this.workOrderMapper = workOrderMapper;
         this.receiptMapper   = receiptMapper;
+        this.statementMapper = statementMapper;
     }
 
     public List<PurchaseOrder> findAll() {
@@ -63,6 +67,14 @@ public class PurchaseOrderService {
     @Transactional
     public void updateStatus(Long id, String status) {
         mapper.updateStatus(id, status);
+
+        // COMPLETED 시 거래명세서 담당자명 업데이트
+        if ("COMPLETED".equals(status)) {
+            PurchaseOrder po = mapper.findById(id);
+            if (po != null && po.getCustomerName() != null && !po.getCustomerName().isBlank()) {
+                statementMapper.updateManagerNameByPoCode(po.getPoCode(), po.getCustomerName());
+            }
+        }
 
         // 발주 승인(COMPLETED) 시 연결된 고객주문 → 작업지시 자동 생성
         if ("COMPLETED".equals(status)) {

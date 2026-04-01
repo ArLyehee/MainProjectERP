@@ -34,6 +34,11 @@ public class WorkOrderController {
         return ResponseEntity.ok(service.findById(id));
     }
 
+    @GetMapping("/{id}/detail")
+    public ResponseEntity<Map<String, Object>> getDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getDetail(id));
+    }
+
     @PostMapping
     public ResponseEntity<Void> insert(@RequestBody WorkOrder obj) {
         service.insert(obj);
@@ -47,8 +52,11 @@ public class WorkOrderController {
     }
 
     @PostMapping("/{id}/auto-order-parts")
-    public ResponseEntity<Map<String, Object>> autoOrderParts(@PathVariable Long id) {
-        int count = service.autoOrderShortages(id);
+    public ResponseEntity<Map<String, Object>> autoOrderParts(
+            @PathVariable Long id,
+            @RequestBody(required = false) Map<String, String> body) {
+        String managerName = body != null ? body.get("managerName") : null;
+        int count = service.autoOrderShortages(id, managerName);
         return ResponseEntity.ok(Map.of("created", count));
     }
 }

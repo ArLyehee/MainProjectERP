@@ -68,6 +68,16 @@ public class OrderService {
         orderMapper.updateStatus(orderId, "PENDING");
     }
 
+    @Transactional
+    public void markReady(Long orderId) {
+        orderMapper.updateStatus(orderId, "READY");
+    }
+
+    @Transactional
+    public void cancel(Long orderId) {
+        orderMapper.updateStatus(orderId, "HOLD");
+    }
+
     /**
      * 주문 수락: 재고 확인 → 즉시 출고 or 작업지시 or 발주 처리
      */
@@ -103,20 +113,34 @@ public class OrderService {
         orderMapper.updateAfterApprove(orderId, "SHIPPED", order.getWorkOrderId(), order.getPurchaseOrderId(), shipmentId);
     }
 
+    @Transactional
+    public boolean shipByWorkOrder(Long workOrderId, Long warehouseId) {
+        CustomerOrder order = orderMapper.findByWorkOrderId(workOrderId);
+        if (order == null || !"READY".equals(order.getStatus())) return false;
+        long wh = warehouseId != null ? warehouseId : DEFAULT_WAREHOUSE_ID;
+        Long shipmentId = doShipAndSale(order, wh);
+        orderMapper.updateAfterApprove(order.getOrderId(), "SHIPPED", workOrderId, order.getPurchaseOrderId(), shipmentId);
+        return true;
+    }
+
     // ─── 내부 헬퍼 ──────────────────────────────────────────────────────────
 
     private Long doShipAndSale(CustomerOrder order) {
+        return doShipAndSale(order, DEFAULT_WAREHOUSE_ID);
+    }
+
+    private Long doShipAndSale(CustomerOrder order, long warehouseId) {
         // 출고 등록
         Shipment shipment = new Shipment();
         shipment.setProductId(order.getProductId());
-        shipment.setWarehouseId(DEFAULT_WAREHOUSE_ID);
+        shipment.setWarehouseId(warehouseId);
         shipment.setQuantity(order.getQuantity());
         shipment.setShipmentDate(LocalDateTime.now());
         shipment.setDestination(order.getCustomerName());
         shipmentMapper.insert(shipment);
 
         // 재고 차감
-        inventoryMapper.updateQuantity(order.getProductId(), DEFAULT_WAREHOUSE_ID, -order.getQuantity());
+        inventoryMapper.updateQuantity(order.getProductId(), warehouseId, -order.getQuantity());
 
         // 매출 자동 등록
         Product product = productMapper.findById(order.getProductId());

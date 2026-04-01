@@ -16,6 +16,7 @@ public interface PurchaseOrderMapper {
     void updateStatus(@Param("poId") Long poId, @Param("status") String status);
     void updateSupplier(@Param("poId") Long poId, @Param("supplierId") Long supplierId);
     void cancelByWorkOrderId(@Param("workOrderId") Long workOrderId);
+    List<PurchaseOrder> findByWorkOrderId(@Param("workOrderId") Long workOrderId);
     void insertItem(PurchaseOrderItem item);
     void updateItemPrice(@Param("poItemId") Long poItemId, @Param("unitPrice") java.math.BigDecimal unitPrice);
     List<PurchaseOrderItem> findItemsByPoCode(@Param("poCode") String poCode);

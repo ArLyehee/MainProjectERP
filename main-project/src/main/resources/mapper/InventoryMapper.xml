@@ -17,6 +17,7 @@
         FROM inventory i
         LEFT JOIN products p ON i.product_id = p.product_id
         LEFT JOIN warehouses w ON i.warehouse_id = w.warehouse_id
+        WHERE i.quantity > 0
         ORDER BY i.last_update DESC
     </select>
 
@@ -26,8 +27,9 @@
         LEFT JOIN products p ON i.product_id = p.product_id
         LEFT JOIN warehouses w ON i.warehouse_id = w.warehouse_id
         <where>
+            i.quantity > 0
             <if test="q != null and q != ''">
-                (p.product_name LIKE CONCAT('%', #{q}, '%')
+                AND (p.product_name LIKE CONCAT('%', #{q}, '%')
                 OR w.warehouse_name LIKE CONCAT('%', #{q}, '%'))
             </if>
         </where>
@@ -40,8 +42,9 @@
         LEFT JOIN products p ON i.product_id = p.product_id
         LEFT JOIN warehouses w ON i.warehouse_id = w.warehouse_id
         <where>
+            i.quantity > 0
             <if test="q != null and q != ''">
-                (p.product_name LIKE CONCAT('%', #{q}, '%')
+                AND (p.product_name LIKE CONCAT('%', #{q}, '%')
                 OR w.warehouse_name LIKE CONCAT('%', #{q}, '%'))
             </if>
         </where>
@@ -72,9 +75,11 @@
     </update>
 
     <update id="updateQuantity">
-        UPDATE inventory
-        SET quantity = quantity + #{quantity}, last_update = NOW()
-        WHERE product_id = #{productId} AND warehouse_id = #{warehouseId}
+        INSERT INTO inventory (product_id, warehouse_id, quantity, last_update)
+        VALUES (#{productId}, #{warehouseId}, #{quantity}, NOW())
+        ON DUPLICATE KEY UPDATE
+            quantity = quantity + #{quantity},
+            last_update = NOW()
     </update>
 
     <delete id="delete">

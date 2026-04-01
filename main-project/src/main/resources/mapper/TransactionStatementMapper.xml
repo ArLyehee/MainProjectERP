@@ -94,6 +94,11 @@
         WHERE statement_id = #{statementId}
     </update>
 
+    <update id="updateManagerNameByPoCode">
+        UPDATE transaction_statements SET manager_name = #{managerName}
+        WHERE statement_no = #{poCode}
+    </update>
+
     <delete id="deleteItemsByStatementId">
         DELETE FROM transaction_statement_items WHERE statement_id = #{statementId}
     </delete>

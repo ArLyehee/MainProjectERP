@@ -35,6 +35,18 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/{id}/ready")
+    public ResponseEntity<Void> ready(@PathVariable Long id) {
+        service.markReady(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<Void> cancel(@PathVariable Long id) {
+        service.cancel(id);
+        return ResponseEntity.ok().build();
+    }
+
     @PatchMapping("/{id}/reopen")
     public ResponseEntity<Void> reopen(@PathVariable Long id) {
         service.reopen(id);
@@ -45,5 +57,15 @@ public class OrderController {
     public ResponseEntity<Void> ship(@PathVariable Long id) {
         service.ship(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/ship-by-work-order/{workOrderId}")
+    public ResponseEntity<Map<String, Object>> shipByWorkOrder(
+            @PathVariable Long workOrderId,
+            @RequestBody(required = false) Map<String, Object> body) {
+        Long warehouseId = body != null && body.get("warehouseId") != null
+                ? Long.valueOf(body.get("warehouseId").toString()) : null;
+        boolean shipped = service.shipByWorkOrder(workOrderId, warehouseId);
+        return ResponseEntity.ok(Map.of("shipped", shipped));
     }
 }

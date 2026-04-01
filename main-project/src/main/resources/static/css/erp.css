@@ -380,6 +380,7 @@ body {
 .btn-primary:active { background: oklch(0.3 0 0); }
 
 .btn-action {
+    display: inline-block;
     padding: 4px 10px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
@@ -390,8 +391,18 @@ body {
     color: var(--text);
     transition: background .12s, border-color .12s;
     box-shadow: var(--shadow-sm);
+    text-decoration: none;
 }
 .btn-action:hover { background: var(--accent); }
+/* 색상 버튼은 btn-action hover 무시하고 자체 hover 사용 */
+.btn-action.btn-start:hover,
+.btn-action.btn-complete:hover,
+.btn-action.btn-auto-order:hover,
+.btn-action.btn-cancel-w:hover,
+.btn-action.btn-approve:hover,
+.btn-action.btn-hold:hover,
+.btn-action.btn-reopen:hover,
+.btn-action.btn-ship:hover { background: inherit; }
 
 .btn-edit { color: var(--blue); border-color: transparent; background: transparent; box-shadow: none; }
 .btn-edit:hover { background: var(--blue-light); border-color: transparent; }
@@ -402,8 +413,8 @@ body {
 .btn-status { color: var(--warning); margin-left: 4px; border-color: transparent; background: transparent; box-shadow: none; }
 .btn-status:hover { background: var(--warning-bg); border-color: transparent; }
 
-.btn-approve   { color: var(--success); border-color: transparent; background: transparent; box-shadow: none; }
-.btn-approve:hover { background: var(--success-bg); border-color: transparent; }
+.btn-approve   { color: #fff; background: var(--success); border-color: var(--success); }
+.btn-approve:hover { background: #15803d; border-color: #15803d; }
 
 .btn-receive   { color: var(--teal); border-color: transparent; background: transparent; box-shadow: none; }
 .btn-receive:hover { background: var(--teal-bg); border-color: transparent; }
@@ -430,11 +441,27 @@ body {
 .btn-checkout  { color: var(--warning); border-color: transparent; background: transparent; box-shadow: none; }
 .btn-checkout:hover { background: var(--warning-bg); border-color: transparent; }
 
-.btn-start     { color: var(--blue); border-color: transparent; background: transparent; box-shadow: none; }
-.btn-start:hover { background: var(--blue-light); border-color: transparent; }
+/* 작업지시 / 주문 공통 액션 버튼 */
+.btn-start     { color: #fff; background: var(--blue); border-color: var(--blue); }
+.btn-start:hover { background: #1d4ed8; border-color: #1d4ed8; }
 
-.btn-complete  { color: var(--success); border-color: transparent; background: transparent; box-shadow: none; }
-.btn-complete:hover { background: var(--success-bg); border-color: transparent; }
+.btn-complete  { color: #fff; background: var(--success); border-color: var(--success); }
+.btn-complete:hover { background: #15803d; border-color: #15803d; }
+
+.btn-auto-order { color: #fff; background: var(--warning); border-color: var(--warning); }
+.btn-auto-order:hover { background: #b45309; border-color: #b45309; }
+
+.btn-cancel-w  { color: #fff; background: var(--danger); border-color: var(--danger); }
+.btn-cancel-w:hover { background: #be123c; border-color: #be123c; }
+
+.btn-hold      { color: #fff; background: var(--warning); border-color: var(--warning); }
+.btn-hold:hover { background: #b45309; border-color: #b45309; }
+
+.btn-reopen    { color: #fff; background: #6366f1; border-color: #6366f1; }
+.btn-reopen:hover { background: #4f46e5; border-color: #4f46e5; }
+
+.btn-ship      { color: #fff; background: var(--teal); border-color: var(--teal); }
+.btn-ship:hover { background: #0f766e; border-color: #0f766e; }
 
 /* ============================================================
    CARD / TABLE

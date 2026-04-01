@@ -60,7 +60,7 @@ public class WorkOrderService {
      * 부족 부품 자동 발주: 작업지시 기준으로 부족한 부품마다 PO 생성
      */
     @Transactional
-    public int autoOrderShortages(Long workOrderId) {
+    public int autoOrderShortages(Long workOrderId, String managerName) {
         WorkOrder wo = mapper.findById(workOrderId);
         if (wo == null) return 0;
 
@@ -83,6 +83,7 @@ public class WorkOrderService {
             po.setOrderDate(LocalDateTime.now());
             po.setStatus("PENDING");
             po.setItem(1);
+            po.setCustomerName(managerName);
             purchaseOrderMapper.insert(po);
 
             PurchaseOrderItem poItem = new PurchaseOrderItem();
@@ -98,6 +99,20 @@ public class WorkOrderService {
             count++;
         }
         return count;
+    }
+
+    /**
+     * 작업지시 상세: 기본 정보 + 자재 현황 + 연관 발주
+     */
+    public Map<String, Object> getDetail(Long id) {
+        WorkOrder wo = mapper.findById(id);
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("wo", wo);
+        if (wo != null) {
+            result.put("materials", checkStock(wo.getProductId(), wo.getQuantity()));
+            result.put("orders", purchaseOrderMapper.findByWorkOrderId(id));
+        }
+        return result;
     }
 
     /**
@@ -136,10 +151,11 @@ public class WorkOrderService {
             List<BomItem> items = bomMapper.findItemsByBomId(bom.getBomId());
             for (BomItem item : items) {
                 int deductQty = item.getQuantity().multiply(BigDecimal.valueOf(obj.getQuantity())).intValue();
-                inventoryMapper.updateQuantity(item.getComponentProductId(), DEFAULT_WAREHOUSE_ID, -deductQty);
-                if (inventoryMapper.findTotalQuantityByProduct(item.getComponentProductId()) < 0) {
+                int available = inventoryMapper.findTotalQuantityByProduct(item.getComponentProductId());
+                if (available < deductQty) {
                     hasShortage = true;
                 }
+                inventoryMapper.updateQuantity(item.getComponentProductId(), DEFAULT_WAREHOUSE_ID, -deductQty);
             }
         }
 
@@ -155,10 +171,32 @@ public class WorkOrderService {
      */
     @Transactional
     public void updateStatus(Long id, String status) {
+        if ("IN_PROGRESS".equals(status) || "COMPLETED".equals(status)) {
+            WorkOrder wo = mapper.findById(id);
+            if (wo != null) {
+                Bom bom = bomMapper.findByProductId(wo.getProductId());
+                if (bom != null) {
+                    List<BomItem> items = bomMapper.findItemsByBomId(bom.getBomId());
+                    for (BomItem item : items) {
+                        int available = inventoryMapper.findTotalQuantityByProduct(item.getComponentProductId());
+                        if (available < 0) {
+                            throw new IllegalStateException(
+                                "부품 재고가 부족합니다: " + item.getComponentProductName()
+                                + " (현재: " + available + "개). 발주 후 입고 처리를 완료해주세요.");
+                        }
+                    }
+                }
+            }
+        }
         mapper.updateStatus(id, status);
 
         if ("CANCELLED".equals(status)) {
             purchaseOrderMapper.cancelByWorkOrderId(id);
+            // 연결된 고객주문도 HOLD(보류)로 전환
+            CustomerOrder order = orderMapper.findByWorkOrderId(id);
+            if (order != null && "IN_PRODUCTION".equals(order.getStatus())) {
+                orderMapper.updateStatus(order.getOrderId(), "HOLD");
+            }
         }
 
         if ("COMPLETED".equals(status)) {

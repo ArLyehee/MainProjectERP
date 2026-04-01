@@ -7,7 +7,7 @@
 <meta name="_csrf" content="${_csrf.token}">
 <meta name="_csrf_header" content="${_csrf.headerName}">
 <title>거래명세서 | 개발팬 ERP</title>
-<link rel="stylesheet" href="/css/erp.css?v=15">
+<link rel="stylesheet" href="/css/erp.css?v=18">
 <style>.items-table{width:100%;border-collapse:collapse;margin:12px 0;}.items-table th,.items-table td{border:1px solid #d1d5db;padding:6px 8px;font-size:13px;}.items-table th{background:#f3f4f6;text-align:center;}.items-table td input{width:100%;border:none;background:transparent;font-size:13px;padding:2px;}.items-table td input:focus{outline:1px solid var(--accent);border-radius:3px;}.btn-add-row{font-size:12px;padding:4px 10px;background:#e5e7eb;border:none;border-radius:4px;cursor:pointer;margin-bottom:8px;}.btn-add-row:hover{background:#d1d5db;}.btn-del-row{background:#fee2e2;border:none;border-radius:4px;padding:3px 7px;cursor:pointer;color:#dc2626;font-size:12px;}.total-row{font-weight:600;background:#f9fafb;}.action-btns{display:flex;gap:6px;}.btn-print{background:#2563eb;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:13px;}.btn-print:hover{background:#1d4ed8;}.badge-no{font-family:monospace;font-size:12px;background:#eff6ff;color:#1e40af;padding:2px 8px;border-radius:10px;}.btn-edit{background:#059669;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:13px;}.btn-edit:hover{background:#047857;}</style>
 </head>
 <body>

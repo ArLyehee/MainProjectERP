@@ -10,7 +10,7 @@
 <meta name="_csrf" content="${_csrf.token}">
 <meta name="_csrf_header" content="${_csrf.headerName}">
 <title>주문 처리 현황 | 개발팬 ERP</title>
-<link rel="stylesheet" href="/css/erp.css?v=15">
+<link rel="stylesheet" href="/css/erp.css?v=18">
 <style>
 /* ── 주문 상태 배지 ── */
 .badge-pending       { background:#fef3c7; color:#92400e; border:1px solid #f59e0b; }
@@ -50,15 +50,6 @@
     line-height: 1.2;
 }
 
-/* ── 액션 버튼 ── */
-.btn-approve  { background:#16a34a; color:#fff; border:none; padding:4px 10px; border-radius:5px; cursor:pointer; font-size:12px; }
-.btn-hold     { background:#f59e0b; color:#fff; border:none; padding:4px 10px; border-radius:5px; cursor:pointer; font-size:12px; }
-.btn-reopen   { background:#6366f1; color:#fff; border:none; padding:4px 10px; border-radius:5px; cursor:pointer; font-size:12px; }
-.btn-ship     { background:#0ea5e9; color:#fff; border:none; padding:4px 10px; border-radius:5px; cursor:pointer; font-size:12px; }
-.btn-approve:hover { background:#15803d; }
-.btn-hold:hover    { background:#d97706; }
-.btn-reopen:hover  { background:#4f46e5; }
-.btn-ship:hover    { background:#0284c7; }
 
 /* ── 결과 토스트 ── */
 #toast {
@@ -154,29 +145,39 @@
                     <td>
                         <!-- PENDING: 수락 / 보류 -->
                         <c:if test="${o.status == 'PENDING'}">
-                        <button class="btn-approve" onclick="approveOrder(${o.orderId})">수락</button>
-                        <button class="btn-hold" onclick="holdOrder(${o.orderId})">보류</button>
+                        <button class="btn-action btn-approve" onclick="approveOrder(${o.orderId})">수락</button>
+                        <button class="btn-action btn-hold" onclick="holdOrder(${o.orderId})">보류</button>
                         </c:if>
 
                         <!-- HOLD: 재검토 -->
                         <c:if test="${o.status == 'HOLD'}">
-                        <button class="btn-reopen" onclick="reopenOrder(${o.orderId})">재검토</button>
+                        <button class="btn-action btn-reopen" onclick="reopenOrder(${o.orderId})">재검토</button>
+                        </c:if>
+
+                        <!-- IN_PRODUCTION: 취소만 가능 (출고 준비는 작업지시 완료 시 자동) -->
+                        <c:if test="${o.status == 'IN_PRODUCTION'}">
+                        <button class="btn-action btn-cancel-w" onclick="cancelOrder(${o.orderId})">취소</button>
+                        </c:if>
+
+                        <!-- ORDERED: 취소 -->
+                        <c:if test="${o.status == 'ORDERED'}">
+                        <button class="btn-action btn-cancel-w" onclick="cancelOrder(${o.orderId})">취소</button>
                         </c:if>
 
                         <!-- READY: 출고 처리 -->
                         <c:if test="${o.status == 'READY'}">
-                        <button class="btn-ship" onclick="shipOrder(${o.orderId})">출고 처리</button>
+                        <button class="btn-action btn-ship" onclick="shipOrder(${o.orderId})">출고 처리</button>
                         </c:if>
 
                         <!-- 연계 정보 링크 -->
                         <c:if test="${o.workOrderId != null}">
-                        <a href="/work-orders" style="font-size:11px;color:#6366f1;margin-left:4px;">작업지시↗</a>
+                        <a href="/work-orders" class="btn-action btn-reopen">작업지시↗</a>
                         </c:if>
                         <c:if test="${o.purchaseOrderId != null}">
-                        <a href="/purchase-orders" style="font-size:11px;color:#f59e0b;margin-left:4px;">발주↗</a>
+                        <a href="/purchase-orders" class="btn-action btn-auto-order">발주↗</a>
                         </c:if>
                         <c:if test="${o.shipmentId != null}">
-                        <a href="/shipments" style="font-size:11px;color:#16a34a;margin-left:4px;">출고↗</a>
+                        <a href="/shipments" class="btn-action btn-ship">출고↗</a>
                         </c:if>
                     </td>
                 </tr>
@@ -351,6 +352,28 @@ function reopenOrder(id) {
     }).then(r => { if (r.ok) location.reload(); });
 }
 
+function markReady(id) {
+    if (!confirm('출고 준비 상태로 전환하시겠습니까?')) return;
+    fetch('/api/orders/' + id + '/ready', {
+        method: 'PATCH',
+        headers: {[csrfHeader()]: csrf()}
+    }).then(r => {
+        if (r.ok) { showToast('출고 준비 상태로 전환되었습니다.', 'success'); setTimeout(() => location.reload(), 1500); }
+        else showToast('처리 오류', 'warn');
+    });
+}
+
+function cancelOrder(id) {
+    if (!confirm('주문을 취소하시겠습니까?')) return;
+    fetch('/api/orders/' + id + '/cancel', {
+        method: 'PATCH',
+        headers: {[csrfHeader()]: csrf()}
+    }).then(r => {
+        if (r.ok) { showToast('주문이 취소되었습니다.', 'info'); setTimeout(() => location.reload(), 1500); }
+        else showToast('처리 오류', 'warn');
+    });
+}
+
 function shipOrder(id) {
     if (!confirm('출고 처리하시겠습니까? 매출이 자동 등록됩니다.')) return;
     fetch('/api/orders/' + id + '/ship', {
@@ -358,7 +381,8 @@ function shipOrder(id) {
         headers: {[csrfHeader()]: csrf()}
     }).then(r => {
         if (r.ok) { showToast('출고 완료! 매출 자동 등록됨.', 'success'); setTimeout(() => location.reload(), 1500); }
-        else showToast('재고 부족 또는 처리 오류', 'warn');
+        else r.json().then(err => showToast('오류: ' + (err.error || '처리 실패'), 'warn'))
+                     .catch(() => showToast('처리 오류 (HTTP ' + r.status + ')', 'warn'));
     });
 }
 </script>

@@ -19,4 +19,5 @@ public interface TransactionStatementMapper {
     void deleteItemsByStatementId(@Param("statementId") Long statementId);
     void delete(@Param("statementId") Long statementId);
     String findMaxStatementNo(@Param("prefix") String prefix);
+    void updateManagerNameByPoCode(@Param("poCode") String poCode, @Param("managerName") String managerName);
 }
