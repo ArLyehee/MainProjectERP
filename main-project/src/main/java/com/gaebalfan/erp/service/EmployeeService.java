@@ -20,8 +20,8 @@ public class EmployeeService {
         return mapper.findAll();
     }
 
-    public List<Employee> findAllPaged(int page, int size, String q) {
-        return mapper.findAllPaged((page - 1) * size, size, q);
+    public List<Employee> findAllPaged(int page, int size, String q, String sort, String dir) {
+        return mapper.findAllPaged((page - 1) * size, size, q, sort, dir);
     }
 
     public int count(String q) {

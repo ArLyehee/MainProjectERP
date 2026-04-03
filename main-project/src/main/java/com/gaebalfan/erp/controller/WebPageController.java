@@ -210,11 +210,13 @@ public class WebPageController {
     @GetMapping("/employees")
     public String employees(@RequestParam(defaultValue = "1") int page,
                             @RequestParam(defaultValue = "") String q,
+                            @RequestParam(defaultValue = "") String sort,
+                            @RequestParam(defaultValue = "asc") String dir,
                             Model model) {
         int size = 20;
         int total = employeeService.count(q);
         int totalPages = Math.max(1, (int) Math.ceil((double) total / size));
-        model.addAttribute("employeeList", employeeService.findAllPaged(page, size, q));
+        model.addAttribute("employeeList", employeeService.findAllPaged(page, size, q, sort, dir));
         model.addAttribute("departmentList", employeeService.findAllDepartments());
         model.addAttribute("positionList", employeeService.findAllPositions());
         model.addAttribute("currentPage", page);
@@ -222,6 +224,8 @@ public class WebPageController {
         model.addAttribute("pageStart", Math.max(1, page - 5));
         model.addAttribute("pageEnd", Math.min(totalPages, page + 5));
         model.addAttribute("q", q);
+        model.addAttribute("sort", sort);
+        model.addAttribute("dir", dir);
         return "employees";
     }
 

@@ -10,6 +10,7 @@ public interface BomMapper {
     Bom findById(@Param("bomId") Long bomId);
     Bom findByProductId(@Param("productId") Long productId);
     List<BomItem> findItemsByBomId(@Param("bomId") Long bomId);
+    List<Bom> findBomsByComponentProductId(@Param("componentProductId") Long componentProductId);
     void insertBom(Bom bom);
     void insertBomItem(BomItem item);
     void deleteBomItem(@Param("bomItemId") Long bomItemId);

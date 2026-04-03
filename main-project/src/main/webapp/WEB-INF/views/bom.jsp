@@ -56,7 +56,7 @@ function loadItems() {
         .then(items => {
             const ul = document.getElementById('itemList');
             ul.innerHTML = items.length === 0 ? '<li style="color:#6b7280;padding:8px 0">등록된 부품이 없습니다.</li>' :
-                items.map(i => `<li style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2a2d3a"><span>${i.componentProductName || i.componentProductId} &times; ${i.quantity}</span><button class="btn-action btn-del" onclick="deleteItem(${i.bomItemId})">삭제</button></li>`).join('');
+                items.map(i => '<li style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2a2d3a"><span>' + (i.componentProductName || i.componentProductId) + ' &times; ' + i.quantity + '</span><button class="btn-action btn-del" onclick="deleteItem(' + i.bomItemId + ')">삭제</button></li>').join('');
         });
 }
 

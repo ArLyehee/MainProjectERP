@@ -57,6 +57,10 @@
         WHERE product_id = #{productId}
     </update>
 
+    <update id="updateCostPrice">
+        UPDATE products SET cost_price = #{costPrice} WHERE product_id = #{productId}
+    </update>
+
     <delete id="delete">
         DELETE FROM products WHERE product_id = #{productId}
     </delete>

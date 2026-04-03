@@ -52,6 +52,14 @@
         ORDER BY bi.bom_item_id
     </select>
 
+    <select id="findBomsByComponentProductId" resultMap="BomResultMap">
+        SELECT DISTINCT b.*, p.product_name
+        FROM bom b
+        JOIN bom_item bi ON b.bom_id = bi.bom_id
+        LEFT JOIN products p ON b.product_id = p.product_id
+        WHERE bi.component_product_id = #{componentProductId}
+    </select>
+
     <insert id="insertBom" parameterType="com.gaebalfan.erp.domain.Bom"
             useGeneratedKeys="true" keyProperty="bomId">
         INSERT INTO bom (product_id, bom_name, version, created_at)

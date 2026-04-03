@@ -11,5 +11,6 @@ public interface ProductMapper {
     Product findById(@Param("productId") Long productId);
     void insert(Product product);
     void update(Product product);
+    void updateCostPrice(@Param("productId") Long productId, @Param("costPrice") java.math.BigDecimal costPrice);
     void delete(@Param("productId") Long productId);
 }

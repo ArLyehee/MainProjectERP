@@ -10,11 +10,11 @@
 <body>
 <div class="layout"><jsp:include page="/WEB-INF/views/fragments/sidebar.jsp">
   <jsp:param name="current" value="employees"/>
-</jsp:include><main class="main"><div class="page-header"><div class="page-title"><h2>직원 관리</h2><p>임직원 정보를 조회하고 관리합니다.</p></div><button onclick="openCreate()" class="btn btn-primary">+ 직원 등록</button></div><div class="search-bar"><input type="text" id="searchInput" value="${q}" placeholder="이름, 부서, 직급, 이메일 검색..." class="search-input" oninput="doSearch(this.value)"></div><div class="card"><table><thead><tr><th class="sort-th" onclick="sortTable(this,0,'num')">#<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,1,'str')">이름<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,2,'str')">부서 / 직급<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,3,'str')">이메일<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,4,'str')">연락처<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,5,'str')">입사일<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,6,'str')">상태<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th>연차 잔여</th><th>액션</th></tr></thead><tbody><c:if test="${empty employeeList}"><tr><td colspan="8" class="empty-state">등록된 직원이 없습니다.</td></tr></c:if><c:forEach var="e" items="${employeeList}">
+</jsp:include><main class="main"><div class="page-header"><div class="page-title"><h2>직원 관리</h2><p>임직원 정보를 조회하고 관리합니다.</p></div><button onclick="openCreate()" class="btn btn-primary">+ 직원 등록</button></div><div class="search-bar"><input type="text" id="searchInput" value="${q}" placeholder="이름, 부서, 직급, 이메일 검색..." class="search-input" onkeydown="if(event.key==='Enter'){location.href='/employees?page=1&q='+encodeURIComponent(this.value)+'&sort=${sort}&dir=${dir}';}"><button onclick="location.href='/employees?page=1&q='+encodeURIComponent(document.getElementById('searchInput').value)+'&sort=${sort}&dir=${dir}'" class="btn btn-secondary" style="margin-left:6px;">검색</button></div><div class="card"><table><thead><tr><th class="sort-th" onclick="sortTable(this,0,'num')">#<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,1,'str')">이름<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,2,'str')">부서 / 직급<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,3,'str')">이메일<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,4,'str')">연락처<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,5,'str')">입사일<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,6,'str')">상태<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th>연차 잔여</th><th>액션</th></tr></thead><tbody><c:if test="${empty employeeList}"><tr><td colspan="8" class="empty-state">등록된 직원이 없습니다.</td></tr></c:if><c:forEach var="e" items="${employeeList}">
 <tr style="cursor:pointer;" onclick="openDetail(${e.employeeId})"><td>${e.employeeId}</td><td>${e.name}</td><td><div>${e.departmentName}</div><div class="sub-text">${e.positionName}</div></td><td class="sub-text">${e.email}</td><td class="sub-text">${e.phone}</td><td class="sub-text">${e.hireDate}</td><td><c:if test="${e.status == 'ACTIVE'}"><span class="badge badge-active">재직</span></c:if><c:if test="${e.status == 'RESIGNED'}"><span class="badge badge-resigned">퇴직</span></c:if><c:if test="${e.status == 'INACTIVE'}"><span class="badge badge-resigned">비활성</span></c:if></td><td class="sub-text">${e.remaining != null ? '잔여 '.concat(e.remaining).concat('일 (사용 ').concat(e.annualLeave).concat('일)') : '-'}</td><td onclick="event.stopPropagation()"><button class="btn-action btn-edit" onclick="openEdit(${e.employeeId})">수정</button><c:if test="${e.status == 'ACTIVE'}"><button class="btn-action btn-status" onclick="updateStatus(${e.employeeId}, 'INACTIVE')">비활성화</button></c:if><c:if test="${e.status != 'ACTIVE'}"><button class="btn-action btn-edit" onclick="updateStatus(${e.employeeId}, 'ACTIVE')">활성화</button></c:if></td></tr>
-</c:forEach></tbody></table></div><!-- 페이지네이션 --><c:if test="${totalPages != null and totalPages > 1}"><div class="pagination"><a href="/employees?page=${currentPage - 1}&q=${q}" class="${currentPage == 1 ? 'disabled' : ''}">&laquo;</a><c:forEach begin="${pageStart}" end="${pageEnd}" var="i">
-<a href="/employees?page=${i}&q=${q}" class="${i == currentPage ? 'active' : ''}">${i}</a>
-</c:forEach><a href="/employees?page=${currentPage + 1}&q=${q}" class="${currentPage == totalPages ? 'disabled' : ''}">&raquo;</a></div></c:if></main>
+</c:forEach></tbody></table></div><!-- 페이지네이션 --><c:if test="${totalPages != null and totalPages > 1}"><div class="pagination"><a href="/employees?page=${currentPage - 1}&q=${q}&sort=${sort}&dir=${dir}" class="${currentPage == 1 ? 'disabled' : ''}">&laquo;</a><c:forEach begin="${pageStart}" end="${pageEnd}" var="i">
+<a href="/employees?page=${i}&q=${q}&sort=${sort}&dir=${dir}" class="${i == currentPage ? 'active' : ''}">${i}</a>
+</c:forEach><a href="/employees?page=${currentPage + 1}&q=${q}&sort=${sort}&dir=${dir}" class="${currentPage == totalPages ? 'disabled' : ''}">&raquo;</a></div></c:if></main>
 </div><!-- Hidden Thymeleaf-rendered selects for JS to read -->
 <select id="deptSourceSelect" style="display:none"><option value="">부서 선택</option><c:forEach var="d" items="${departmentList}"><option value="${d.departmentId}">${d.departmentName}</option></c:forEach>
 </select>
@@ -90,27 +90,19 @@ function uploadPhoto() {
         document.getElementById('detailPhoto').src = data.photoPath + '?t=' + Date.now();
     });
 }
-function doSearch(val) {
-    const q = val.toLowerCase();
-    document.querySelectorAll('tbody tr').forEach(tr => {
-        tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
-    });
-}
-const _sort = {col:-1, asc:true};
+const _sortCols = ['id','name','dept','email','phone','hireDate','status'];
+const _urlParams = new URLSearchParams(window.location.search);
+const _curSort = _urlParams.get('sort') || '';
+const _curDir  = _urlParams.get('dir')  || 'asc';
+document.querySelectorAll('.sort-th').forEach((th, idx) => {
+    const col = _sortCols[idx];
+    if (col === _curSort) th.classList.add(_curDir === 'asc' ? 'sort-asc' : 'sort-desc');
+});
 function sortTable(th, col, type) {
-    document.querySelectorAll('.sort-th').forEach(t => t.classList.remove('sort-asc','sort-desc'));
-    _sort.asc = _sort.col === col ? !_sort.asc : true;
-    _sort.col = col;
-    th.classList.add(_sort.asc ? 'sort-asc' : 'sort-desc');
-    const tbody = document.querySelector('tbody');
-    const rows = Array.from(tbody.querySelectorAll('tr')).filter(tr => tr.querySelectorAll('td').length > 1);
-    rows.sort((a, b) => {
-        const va = a.querySelectorAll('td')[col].textContent.trim();
-        const vb = b.querySelectorAll('td')[col].textContent.trim();
-        const cmp = type === 'num' ? (parseFloat(va.replace(/,/g,''))||0) - (parseFloat(vb.replace(/,/g,''))||0) : va.localeCompare(vb, 'ko');
-        return _sort.asc ? cmp : -cmp;
-    });
-    rows.forEach(r => tbody.appendChild(r));
+    const colKey = _sortCols[col];
+    const newDir = (_curSort === colKey && _curDir === 'asc') ? 'desc' : 'asc';
+    const q = _urlParams.get('q') || '';
+    location.href = '/employees?page=1&sort=' + colKey + '&dir=' + newDir + (q ? '&q=' + encodeURIComponent(q) : '');
 }
 function populateSelects() {
     const deptSrc = document.getElementById('deptSourceSelect');

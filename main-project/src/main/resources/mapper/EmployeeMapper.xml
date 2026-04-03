@@ -61,7 +61,20 @@
                  OR e.phone           LIKE CONCAT('%',#{q},'%'))
             </if>
         </where>
-        ORDER BY e.employee_id
+        ORDER BY
+        <choose>
+            <when test="sort == 'name'">e.name</when>
+            <when test="sort == 'dept'">d.department_name</when>
+            <when test="sort == 'email'">e.email</when>
+            <when test="sort == 'phone'">e.phone</when>
+            <when test="sort == 'hireDate'">e.hire_date</when>
+            <when test="sort == 'status'">e.status</when>
+            <otherwise>e.employee_id</otherwise>
+        </choose>
+        <choose>
+            <when test="dir == 'desc'">DESC</when>
+            <otherwise>ASC</otherwise>
+        </choose>
         LIMIT #{size} OFFSET #{offset}
     </select>
 
