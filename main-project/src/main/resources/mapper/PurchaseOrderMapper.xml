@@ -18,21 +18,29 @@
 
     <select id="findAll" resultMap="PurchaseOrderResultMap">
         SELECT po.id, po.po_id, po.supplier_id, po.order_date, po.status, po.item,
-               s.supplier_name, co.customer_name,
-               (SELECT SUM(poi.quantity) FROM purchase_order_items poi WHERE poi.po_id = po.po_id) AS total_quantity
+               s.supplier_name, po.customer_name,
+               COALESCE(poi_sum.total_quantity, 0) AS total_quantity
         FROM purchase_orders po
         LEFT JOIN suppliers s ON po.supplier_id = s.supplier_id
-        LEFT JOIN customer_orders co ON po.po_id LIKE CONCAT('%', co.order_no)
+        LEFT JOIN (
+            SELECT po_id, SUM(quantity) AS total_quantity
+            FROM purchase_order_items
+            GROUP BY po_id
+        ) poi_sum ON poi_sum.po_id = po.po_id
         ORDER BY po.order_date DESC
     </select>
 
     <select id="findAllPaged" resultMap="PurchaseOrderResultMap">
         SELECT po.id, po.po_id, po.supplier_id, po.order_date, po.status, po.item,
-               s.supplier_name, co.customer_name,
-               (SELECT SUM(poi.quantity) FROM purchase_order_items poi WHERE poi.po_id = po.po_id) AS total_quantity
+               s.supplier_name, po.customer_name,
+               COALESCE(poi_sum.total_quantity, 0) AS total_quantity
         FROM purchase_orders po
         LEFT JOIN suppliers s ON po.supplier_id = s.supplier_id
-        LEFT JOIN customer_orders co ON po.po_id LIKE CONCAT('%', co.order_no)
+        LEFT JOIN (
+            SELECT po_id, SUM(quantity) AS total_quantity
+            FROM purchase_order_items
+            GROUP BY po_id
+        ) poi_sum ON poi_sum.po_id = po.po_id
         <where>
             <if test="q != null and q != ''">
                 (s.supplier_name LIKE CONCAT('%', #{q}, '%')
