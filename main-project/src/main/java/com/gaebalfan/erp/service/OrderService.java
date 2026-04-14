@@ -60,22 +60,22 @@ public class OrderService {
 
     @Transactional
     public void hold(Long orderId) {
-        orderMapper.updateStatus(orderId, "HOLD");
+        orderMapper.updateStatus(orderId, "보류");
     }
 
     @Transactional
     public void reopen(Long orderId) {
-        orderMapper.updateStatus(orderId, "PENDING");
+        orderMapper.updateStatus(orderId, "대기");
     }
 
     @Transactional
     public void markReady(Long orderId) {
-        orderMapper.updateStatus(orderId, "READY");
+        orderMapper.updateStatus(orderId, "출고준비");
     }
 
     @Transactional
     public void cancel(Long orderId) {
-        orderMapper.updateStatus(orderId, "HOLD");
+        orderMapper.updateStatus(orderId, "보류");
     }
 
     /**
@@ -92,14 +92,14 @@ public class OrderService {
         if (stock >= order.getQuantity()) {
             // ② 재고 충분 → 즉시 출고 + 매출 자동 등록
             Long shipmentId = doShipAndSale(order);
-            orderMapper.updateAfterApprove(orderId, "SHIPPED", null, null, shipmentId);
-            return "SHIPPED";
+            orderMapper.updateAfterApprove(orderId, "COMPLETED", null, null, shipmentId);
+            return "COMPLETED";
         }
 
         // ③ 재고 부족 → 작업지시 생성 (부품 재고 차감 포함)
         Long workOrderId = createWorkOrder(order);
-        orderMapper.updateAfterApprove(orderId, "IN_PRODUCTION", workOrderId, null, null);
-        return "IN_PRODUCTION";
+        orderMapper.updateAfterApprove(orderId, "ACCEPTED", workOrderId, null, null);
+        return "ACCEPTED";
     }
 
     /**
@@ -110,16 +110,16 @@ public class OrderService {
         CustomerOrder order = orderMapper.findById(orderId);
         if (order == null) throw new IllegalArgumentException("주문을 찾을 수 없습니다: " + orderId);
         Long shipmentId = doShipAndSale(order);
-        orderMapper.updateAfterApprove(orderId, "SHIPPED", order.getWorkOrderId(), order.getPurchaseOrderId(), shipmentId);
+        orderMapper.updateAfterApprove(orderId, "COMPLETED", order.getWorkOrderId(), order.getPurchaseOrderId(), shipmentId);
     }
 
     @Transactional
     public boolean shipByWorkOrder(Long workOrderId, Long warehouseId) {
         CustomerOrder order = orderMapper.findByWorkOrderId(workOrderId);
-        if (order == null || !"READY".equals(order.getStatus())) return false;
+        if (order == null || !"출고준비".equals(order.getStatus())) return false;
         long wh = warehouseId != null ? warehouseId : DEFAULT_WAREHOUSE_ID;
         Long shipmentId = doShipAndSale(order, wh);
-        orderMapper.updateAfterApprove(order.getOrderId(), "SHIPPED", workOrderId, order.getPurchaseOrderId(), shipmentId);
+        orderMapper.updateAfterApprove(order.getOrderId(), "COMPLETED", workOrderId, order.getPurchaseOrderId(), shipmentId);
         return true;
     }
 
@@ -164,8 +164,8 @@ public class OrderService {
         wo.setProductId(order.getProductId());
         wo.setQuantity(order.getQuantity());
         wo.setStartDate(LocalDateTime.now());
-        wo.setStatus("PENDING");
-        workOrderService.insert(wo); // 재고 차감 + 부족 없으면 자동 IN_PROGRESS 처리
+        wo.setStatus("대기");
+        workOrderService.insert(wo); // 재고 차감 + 부족 없으면 자동 진행중 처리
 
         return wo.getWorkOrderId();
     }

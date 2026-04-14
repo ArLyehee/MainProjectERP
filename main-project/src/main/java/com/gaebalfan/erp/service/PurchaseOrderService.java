@@ -79,16 +79,16 @@ public class PurchaseOrderService {
         // 발주 승인(COMPLETED) 시 연결된 고객주문 → 작업지시 자동 생성
         if ("COMPLETED".equals(status)) {
             CustomerOrder order = orderMapper.findByPurchaseOrderId(id.intValue());
-            if (order != null && "ORDERED".equals(order.getStatus())) {
+            if (order != null && "발주".equals(order.getStatus())) {
                 WorkOrder wo = new WorkOrder();
                 wo.setProductId(order.getProductId());
                 wo.setQuantity(order.getQuantity());
                 wo.setStartDate(LocalDateTime.now());
-                wo.setStatus("PENDING");
+                wo.setStatus("대기");
                 workOrderMapper.insert(wo);
 
                 orderMapper.updateAfterApprove(
-                    order.getOrderId(), "IN_PRODUCTION",
+                    order.getOrderId(), "ACCEPTED",
                     wo.getWorkOrderId(), order.getPurchaseOrderId(), null
                 );
             }

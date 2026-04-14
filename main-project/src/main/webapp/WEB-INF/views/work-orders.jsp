@@ -15,11 +15,11 @@
   <td>${w.productName != null ? w.productName : w.productId}</td>
   <td class="qty">${w.quantity}</td>
   <td>${w.startDate}</td>
-  <td><c:if test="${w.status == 'PENDING'}"><span class="badge badge-pending">대기</span></c:if><c:if test="${w.status == 'IN_PROGRESS'}"><span class="badge badge-inprogress">진행중</span></c:if><c:if test="${w.status == 'COMPLETED'}"><span class="badge badge-completed">완료</span></c:if><c:if test="${w.status == 'CANCELLED'}"><span class="badge badge-cancelled">취소</span></c:if></td>
+  <td><c:if test="${w.status == '대기'}"><span class="badge badge-pending">대기</span></c:if><c:if test="${w.status == '진행중'}"><span class="badge badge-inprogress">진행중</span></c:if><c:if test="${w.status == '완료'}"><span class="badge badge-completed">완료</span></c:if><c:if test="${w.status == '취소'}"><span class="badge badge-cancelled">취소</span></c:if></td>
   <td onclick="event.stopPropagation()">
-    <c:if test="${w.status == 'PENDING'}"><button class="btn-action btn-start" onclick="changeStatus(${w.workOrderId}, 'IN_PROGRESS')">시작</button><button class="btn-action btn-auto-order" onclick="autoOrderParts(${w.workOrderId})">부품 자동발주</button></c:if>
-    <c:if test="${w.status == 'IN_PROGRESS'}"><button class="btn-action btn-complete" onclick="changeStatus(${w.workOrderId}, 'COMPLETED')">생산완료</button></c:if>
-    <c:if test="${w.status == 'PENDING' or w.status == 'IN_PROGRESS'}"><button class="btn-action btn-cancel-w" onclick="changeStatus(${w.workOrderId}, 'CANCELLED')">취소</button></c:if>
+    <c:if test="${w.status == '대기'}"><button class="btn-action btn-start" data-id="${w.workOrderId}" data-s="진행중" onclick="changeStatus(this.dataset.id, this.dataset.s)">시작</button><button class="btn-action btn-auto-order" onclick="autoOrderParts(${w.workOrderId})">부품 자동발주</button></c:if>
+    <c:if test="${w.status == '진행중'}"><button class="btn-action btn-complete" data-id="${w.workOrderId}" data-s="완료" onclick="changeStatus(this.dataset.id, this.dataset.s)">생산완료</button></c:if>
+    <c:if test="${w.status == '대기' or w.status == '진행중'}"><button class="btn-action btn-cancel-w" data-id="${w.workOrderId}" data-s="취소" onclick="changeStatus(this.dataset.id, this.dataset.s)">취소</button></c:if>
   </td>
 </tr>
 </c:forEach></tbody></table></div><!-- 페이지네이션 --><c:if test="${totalPages != null and totalPages > 1}"><div class="pagination"><a href="/work-orders?page=${currentPage - 1}" class="${currentPage == 1 ? 'disabled' : ''}">&laquo;</a><c:forEach begin="${pageStart}" end="${pageEnd}" var="i">
@@ -96,7 +96,7 @@
 <select id="productSourceSelect" style="display:none"><option value="">제품 선택</option><c:forEach var="p" items="${productList}"><option value="${p.productId}">${p.productName}</option></c:forEach>
 </select><!-- 생산 입고 처리 모달 -->
 <div class="modal-overlay" id="prodReceiptModal"><div class="modal"><h3>생산 입고 처리</h3><input type="hidden" id="prWorkOrderId"><input type="hidden" id="prProductId"><div class="form-group"><label>수량 *</label><input type="number" id="prQuantity" placeholder="0"></div><div class="form-group"><label>입고 창고 *</label><select id="prWarehouseId"><option value="">선택</option><c:forEach var="w" items="${warehouseList}"><option value="${w.warehouseId}">${w.warehouseName}</option></c:forEach></select></div><div class="form-group"><label>입고일시</label><input type="datetime-local" id="prReceiptDate"></div><div class="modal-footer"><button class="btn-cancel" onclick="closePrModal()">취소</button><button class="btn-save" onclick="saveProdReceipt()">입고 처리</button></div></div>
-</div><div class="modal-overlay" id="modalOverlay"><div class="modal"><h3>작업지시 등록</h3><div class="form-group"><label>제품 *</label><select id="productId" onchange="onProductOrQtyChange()"></select></div><div class="form-group"><label>생산 수량 *</label><input type="number" id="quantity" placeholder="0" min="1" oninput="onProductOrQtyChange()"></div><div id="stockCheckArea" style="margin:8px 0;display:none;"><div style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--text-muted);"> 자재 재고 현황</div><table style="width:100%;font-size:12px;border-collapse:collapse;" id="stockTable"><thead><tr style="background:var(--surface);"><th style="padding:4px 8px;text-align:left;">자재명</th><th style="padding:4px 8px;text-align:right;">필요</th><th style="padding:4px 8px;text-align:right;">보유</th><th style="padding:4px 8px;text-align:right;">부족</th></tr></thead><tbody id="stockTableBody"></tbody></table></div><div id="stockWarning" style="font-size:12px;color:#e74c3c;margin:4px 0 8px;display:none;"> 재고가 부족한 자재가 있습니다. 등록 시 재고가 음수가 될 수 있습니다.</div><div class="form-group"><label>시작일</label><input type="datetime-local" id="startDate"></div><div class="form-group"><label>상태</label><select id="status"><option value="PENDING">대기 (PENDING)</option><option value="IN_PROGRESS">진행중 (IN_PROGRESS)</option></select></div><div class="modal-footer"><button class="btn-cancel" onclick="closeModal()">취소</button><button class="btn-save" onclick="saveWorkOrder()">저장</button></div></div>
+</div><div class="modal-overlay" id="modalOverlay"><div class="modal"><h3>작업지시 등록</h3><div class="form-group"><label>제품 *</label><select id="productId" onchange="onProductOrQtyChange()"></select></div><div class="form-group"><label>생산 수량 *</label><input type="number" id="quantity" placeholder="0" min="1" oninput="onProductOrQtyChange()"></div><div id="stockCheckArea" style="margin:8px 0;display:none;"><div style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--text-muted);"> 자재 재고 현황</div><table style="width:100%;font-size:12px;border-collapse:collapse;" id="stockTable"><thead><tr style="background:var(--surface);"><th style="padding:4px 8px;text-align:left;">자재명</th><th style="padding:4px 8px;text-align:right;">필요</th><th style="padding:4px 8px;text-align:right;">보유</th><th style="padding:4px 8px;text-align:right;">부족</th></tr></thead><tbody id="stockTableBody"></tbody></table></div><div id="stockWarning" style="font-size:12px;color:#e74c3c;margin:4px 0 8px;display:none;"> 재고가 부족한 자재가 있습니다. 등록 시 재고가 음수가 될 수 있습니다.</div><div class="form-group"><label>시작일</label><input type="datetime-local" id="startDate"></div><div class="form-group"><label>상태</label><select id="status"><option value="대기">대기</option><option value="진행중">진행중</option></select></div><div class="modal-footer"><button class="btn-cancel" onclick="closeModal()">취소</button><button class="btn-save" onclick="saveWorkOrder()">저장</button></div></div>
 </div><script>
 let _pendingShipWorkOrderId = null;
 function closeShipModal() {
@@ -175,7 +175,7 @@ function openCreate() {
     dst.innerHTML = src.innerHTML;
     document.getElementById('quantity').value = '';
     document.getElementById('startDate').value = '';
-    document.getElementById('status').value = 'PENDING';
+    document.getElementById('status').value = '대기';
     document.getElementById('stockCheckArea').style.display = 'none';
     document.getElementById('stockWarning').style.display = 'none';
     document.getElementById('modalOverlay').classList.add('open');
@@ -229,7 +229,7 @@ function openDetail(id) {
         .then(r => r.json())
         .then(data => {
             const wo = data.wo || {};
-            const statusLabel = {PENDING:'대기', IN_PROGRESS:'진행중', COMPLETED:'완료', CANCELLED:'취소'};
+            const statusLabel = {'대기':'대기', '진행중':'진행중', '완료':'완료', '취소':'취소'};
             document.getElementById('woDetailTitle').textContent = (wo.productName || wo.productId) + ' — 작업지시 상세';
             document.getElementById('woDetailMeta').innerHTML =
                 '<div><span style="color:#6b7280;font-size:11px;">제품</span><br><b>' + (wo.productName || '-') + '</b></div>' +
@@ -274,9 +274,9 @@ function closeDetailModal() { document.getElementById('woDetailModal').classList
 
 function changeStatus(id, status) {
     const msgMap = {
-        IN_PROGRESS: '생산을 시작하시겠습니까?',
-        COMPLETED:   '생산완료 처리하시겠습니까?\n완성품이 재고에 자동 등록됩니다.',
-        CANCELLED:   '작업지시를 취소하시겠습니까?'
+        '진행중': '생산을 시작하시겠습니까?',
+        '완료':   '생산완료 처리하시겠습니까?\n완성품이 재고에 자동 등록됩니다.',
+        '취소':   '작업지시를 취소하시겠습니까?'
     };
     if (!confirm(msgMap[status] || '상태를 변경하시겠습니까?')) return;
     const csrf = document.querySelector('meta[name="_csrf"]').content;
@@ -287,7 +287,7 @@ function changeStatus(id, status) {
         body: JSON.stringify({status: status})
     }).then(r => {
         if (r.ok) {
-            if (status === 'COMPLETED') {
+            if (status === '완료') {
                 alert('생산완료 처리되었습니다. 완성품이 재고에 등록되었습니다.');
                 _pendingShipWorkOrderId = id;
                 document.getElementById('shipWarehouseId').value = '';

@@ -161,8 +161,8 @@ public class WorkOrderService {
 
         // 부족 부품 없으면 자동으로 생산 시작
         if (!hasShortage) {
-            mapper.updateStatus(obj.getWorkOrderId(), "IN_PROGRESS");
-            obj.setStatus("IN_PROGRESS");
+            mapper.updateStatus(obj.getWorkOrderId(), "진행중");
+            obj.setStatus("진행중");
         }
     }
 
@@ -171,7 +171,7 @@ public class WorkOrderService {
      */
     @Transactional
     public void updateStatus(Long id, String status) {
-        if ("IN_PROGRESS".equals(status) || "COMPLETED".equals(status)) {
+        if ("진행중".equals(status) || "완료".equals(status)) {
             WorkOrder wo = mapper.findById(id);
             if (wo != null) {
                 Bom bom = bomMapper.findByProductId(wo.getProductId());
@@ -190,16 +190,16 @@ public class WorkOrderService {
         }
         mapper.updateStatus(id, status);
 
-        if ("CANCELLED".equals(status)) {
+        if ("취소".equals(status)) {
             purchaseOrderMapper.cancelByWorkOrderId(id);
             // 연결된 고객주문도 HOLD(보류)로 전환
             CustomerOrder order = orderMapper.findByWorkOrderId(id);
-            if (order != null && "IN_PRODUCTION".equals(order.getStatus())) {
-                orderMapper.updateStatus(order.getOrderId(), "HOLD");
+            if (order != null && "ACCEPTED".equals(order.getStatus())) {
+                orderMapper.updateStatus(order.getOrderId(), "보류");
             }
         }
 
-        if ("COMPLETED".equals(status)) {
+        if ("완료".equals(status)) {
             WorkOrder wo = mapper.findById(id);
             if (wo == null) return;
 
@@ -210,10 +210,10 @@ public class WorkOrderService {
             finished.setQuantity(wo.getQuantity());
             inventoryMapper.insert(finished);
 
-            // 연결된 고객주문 → READY (출고 대기)
+            // 연결된 고객주문 → 출고준비 (출고 대기)
             CustomerOrder order = orderMapper.findByWorkOrderId(id);
-            if (order != null && "IN_PRODUCTION".equals(order.getStatus())) {
-                orderMapper.updateStatus(order.getOrderId(), "READY");
+            if (order != null && "ACCEPTED".equals(order.getStatus())) {
+                orderMapper.updateStatus(order.getOrderId(), "출고준비");
             }
         }
     }
