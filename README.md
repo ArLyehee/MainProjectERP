@@ -12,7 +12,7 @@
 </p>
 
 <p>
-  <img src="https://img.shields.io/badge/프로젝트%20기간-2026.03.11 ~ 04.02-blue?style=flat-square"/>
+  <img src="https://img.shields.io/badge/프로젝트%20기간-2026.03.11 ~ 04.30-blue?style=flat-square"/>
   <img src="https://img.shields.io/badge/팀원-3인-green?style=flat-square"/>
   <img src="https://img.shields.io/badge/DB 테이블-23개-orange?style=flat-square"/>
   <img src="https://img.shields.io/badge/자동화 로직-20개-red?style=flat-square"/>
