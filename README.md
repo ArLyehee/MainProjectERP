@@ -294,7 +294,7 @@ main-project/
 │       │   │   └── ...
 │       │   └── application.yml         # DB 연결, 포트, 스키마 설정
 │       └── webapp/
-│           ├── WEB-INF/views/          # JSP / Thymeleaf 템플릿
+│           ├── WEB-INF/views/          # JSP
 │           │   ├── dashboard.jsp
 │           │   ├── employees.html
 │           │   ├── work-orders.jsp
