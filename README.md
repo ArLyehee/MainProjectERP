@@ -1,5 +1,3 @@
-<img width="1920" height="1031" alt="직원 관리" src="https://github.com/user-attachments/assets/7bcf31b6-d959-4ed7-87ac-ee2705fce7f8" /><div align="center">
-
 <!-- 프로젝트 로고/배너 영역 -->
 <h1>개발환기좀해 ERP</h1>
 <p><b>중소 제조기업을 위한 통합 기업자원관리 시스템</b></p>
@@ -203,6 +201,18 @@ CSS        ███░░░░░░░░░░░░░░░░░░░░
 <img width="1920" height="1032" alt="작업 지시" src="https://github.com/user-attachments/assets/0d5eaf0c-32eb-4a8c-b71c-184cf812b90e" />
 <img width="1919" height="1033" alt="BOM" src="https://github.com/user-attachments/assets/87e1a2c4-fb59-4c6e-9da3-42c2e2017c84" />
 
+---
+
+## 테스트 도구
+
+<img width="1157" height="747" alt="테스트 도구(근태 생성)" src="https://github.com/user-attachments/assets/5a7976c8-b1f8-4f5b-8c4d-96d851f7d560" />
+<img width="1154" height="749" alt="테스트 도구(주문생성)" src="https://github.com/user-attachments/assets/9d91be56-882e-4990-a6e2-3544cd7b6f60" />
+<img width="1157" height="743" alt="테스트 도구(데이터 삭제)" src="https://github.com/user-attachments/assets/5c0bb4dc-a396-4b15-a161-900ada3fb8b8" />
+<img width="1161" height="748" alt="테스트 도구(직원 데이터 생성)" src="https://github.com/user-attachments/assets/67e74551-65be-4715-84ac-828dee8934eb" />
+<img width="1324" height="749" alt="테스트 도구(생산 자제 재고보충)" src="https://github.com/user-attachments/assets/246bb83f-1f86-40a5-bdf5-e2bdddd5ed9a" />
+<img width="1315" height="745" alt="테스트 도구(판관비 생성)" src="https://github.com/user-attachments/assets/351fc6e5-153a-446c-afb0-e94c89d8a607" />
+
+---
 
 ## 주요 기능
 
