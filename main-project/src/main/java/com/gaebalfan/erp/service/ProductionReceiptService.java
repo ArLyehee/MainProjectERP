@@ -36,7 +36,7 @@ public class ProductionReceiptService {
         inv.setWarehouseId(warehouseId);
         inv.setQuantity(pr.getQuantity());
         inventoryMapper.insert(inv);
-        // 3. 작업지시 상태 → COMPLETED
-        workOrderMapper.updateStatus(pr.getWorkOrderId(), "COMPLETED");
+        // 3. 작업지시 상태 → 완료
+        workOrderMapper.updateStatus(pr.getWorkOrderId(), "완료");
     }
 }

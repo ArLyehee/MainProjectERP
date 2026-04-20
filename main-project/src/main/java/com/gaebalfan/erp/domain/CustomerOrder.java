@@ -11,7 +11,7 @@ public class CustomerOrder {
     private int           quantity;
     private BigDecimal    unitPrice;
     private String        status;
-    // PENDING, HOLD, IN_PRODUCTION, ORDERED, READY, SHIPPED
+    // 대기, 보류, ACCEPTED(생산중), 발주, 출고준비, COMPLETED(출고완료)
 
     private Long          workOrderId;    // 생성된 작업지시 ID
     private Integer       purchaseOrderId; // 생성된 발주 ID
@@ -46,16 +46,7 @@ public class CustomerOrder {
         return updatedAt != null ? updatedAt.toString().substring(0, 10) : "";
     }
     public String        getStatusLabel() {
-        if (status == null) return "";
-        return switch (status) {
-            case "PENDING"       -> "검토 대기";
-            case "HOLD"          -> "보류";
-            case "IN_PRODUCTION" -> "생산 중";
-            case "ORDERED"       -> "발주 처리";
-            case "READY"         -> "출고 준비";
-            case "SHIPPED"       -> "출고 완료";
-            default -> status;
-        };
+        return status != null ? status : "";
     }
 
     public void setOrderId(Long orderId)               { this.orderId = orderId; }

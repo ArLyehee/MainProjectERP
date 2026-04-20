@@ -82,23 +82,23 @@
 
     <!-- 진행 현황 요약 -->
     <div class="flow-bar" id="flowBar">
-        <div class="flow-step" id="fs-PENDING">
-            <span class="count" id="cnt-PENDING">-</span>검토 대기
+        <div class="flow-step" id="fs-대기">
+            <span class="count" id="cnt-대기">-</span>검토 대기
         </div>
-        <div class="flow-step" id="fs-HOLD">
-            <span class="count" id="cnt-HOLD">-</span>보류
+        <div class="flow-step" id="fs-보류">
+            <span class="count" id="cnt-보류">-</span>보류
         </div>
-        <div class="flow-step" id="fs-IN_PRODUCTION">
-            <span class="count" id="cnt-IN_PRODUCTION">-</span>생산 중
+        <div class="flow-step" id="fs-ACCEPTED">
+            <span class="count" id="cnt-ACCEPTED">-</span>생산 중
         </div>
-        <div class="flow-step" id="fs-ORDERED">
-            <span class="count" id="cnt-ORDERED">-</span>발주 처리
+        <div class="flow-step" id="fs-발주">
+            <span class="count" id="cnt-발주">-</span>발주 처리
         </div>
-        <div class="flow-step" id="fs-READY">
-            <span class="count" id="cnt-READY">-</span>출고 준비
+        <div class="flow-step" id="fs-출고준비">
+            <span class="count" id="cnt-출고준비">-</span>출고 준비
         </div>
-        <div class="flow-step" id="fs-SHIPPED">
-            <span class="count" id="cnt-SHIPPED">-</span>출고 완료
+        <div class="flow-step" id="fs-COMPLETED">
+            <span class="count" id="cnt-COMPLETED">-</span>출고 완료
         </div>
     </div>
 
@@ -134,38 +134,38 @@
                     <td>${o.productName != null ? o.productName : o.productId}</td>
                     <td class="qty">${o.quantity}</td>
                     <td>
-                        <c:if test="${o.status == 'PENDING'}"><span class="badge badge-pending">검토 대기</span></c:if>
-                        <c:if test="${o.status == 'HOLD'}"><span class="badge badge-hold">보류</span></c:if>
-                        <c:if test="${o.status == 'IN_PRODUCTION'}"><span class="badge badge-in-production">생산 중</span></c:if>
-                        <c:if test="${o.status == 'ORDERED'}"><span class="badge badge-ordered">발주 처리</span></c:if>
-                        <c:if test="${o.status == 'READY'}"><span class="badge badge-ready">출고 준비</span></c:if>
-                        <c:if test="${o.status == 'SHIPPED'}"><span class="badge badge-shipped">출고 완료</span></c:if>
+                        <c:if test="${o.status == '대기'}"><span class="badge badge-pending">검토 대기</span></c:if>
+                        <c:if test="${o.status == '보류'}"><span class="badge badge-hold">보류</span></c:if>
+                        <c:if test="${o.status == 'ACCEPTED'}"><span class="badge badge-in-production">생산 중</span></c:if>
+                        <c:if test="${o.status == '발주'}"><span class="badge badge-ordered">발주 처리</span></c:if>
+                        <c:if test="${o.status == '출고준비'}"><span class="badge badge-ready">출고 준비</span></c:if>
+                        <c:if test="${o.status == 'COMPLETED'}"><span class="badge badge-shipped">출고 완료</span></c:if>
                     </td>
                     <td>${o.createdAtStr}</td>
                     <td>
-                        <!-- PENDING: 수락 / 보류 -->
-                        <c:if test="${o.status == 'PENDING'}">
+                        <!-- 대기: 수락 / 보류 -->
+                        <c:if test="${o.status == '대기'}">
                         <button class="btn-action btn-approve" onclick="approveOrder(${o.orderId})">수락</button>
                         <button class="btn-action btn-hold" onclick="holdOrder(${o.orderId})">보류</button>
                         </c:if>
 
-                        <!-- HOLD: 재검토 -->
-                        <c:if test="${o.status == 'HOLD'}">
+                        <!-- 보류: 재검토 -->
+                        <c:if test="${o.status == '보류'}">
                         <button class="btn-action btn-reopen" onclick="reopenOrder(${o.orderId})">재검토</button>
                         </c:if>
 
-                        <!-- IN_PRODUCTION: 취소만 가능 (출고 준비는 작업지시 완료 시 자동) -->
-                        <c:if test="${o.status == 'IN_PRODUCTION'}">
+                        <!-- ACCEPTED: 취소만 가능 (출고 준비는 작업지시 완료 시 자동) -->
+                        <c:if test="${o.status == 'ACCEPTED'}">
                         <button class="btn-action btn-cancel-w" onclick="cancelOrder(${o.orderId})">취소</button>
                         </c:if>
 
-                        <!-- ORDERED: 취소 -->
-                        <c:if test="${o.status == 'ORDERED'}">
+                        <!-- 발주: 취소 -->
+                        <c:if test="${o.status == '발주'}">
                         <button class="btn-action btn-cancel-w" onclick="cancelOrder(${o.orderId})">취소</button>
                         </c:if>
 
-                        <!-- READY: 출고 처리 -->
-                        <c:if test="${o.status == 'READY'}">
+                        <!-- 출고준비: 출고 처리 -->
+                        <c:if test="${o.status == '출고준비'}">
                         <button class="btn-action btn-ship" onclick="shipOrder(${o.orderId})">출고 처리</button>
                         </c:if>
 
@@ -257,12 +257,12 @@ function showToast(msg, type='success') {
         const s = tr.dataset.status;
         counts[s] = (counts[s] || 0) + 1;
     });
-    ['PENDING','HOLD','IN_PRODUCTION','ORDERED','READY','SHIPPED'].forEach(s => {
+    ['대기','보류','ACCEPTED','발주','출고준비','COMPLETED'].forEach(s => {
         const el = document.getElementById('cnt-' + s);
         if (el) el.textContent = counts[s] || 0;
     });
     // 활성 단계 강조
-    const activeMap = {PENDING:'active', HOLD:'hold-s', IN_PRODUCTION:'active', ORDERED:'active', READY:'active', SHIPPED:'done'};
+    const activeMap = {'대기':'active', '보류':'hold-s', 'ACCEPTED':'active', '발주':'active', '출고준비':'active', 'COMPLETED':'done'};
     Object.keys(counts).forEach(s => {
         const el = document.getElementById('fs-' + s);
         if (el && counts[s] > 0) el.classList.add(activeMap[s] || 'active');
@@ -330,8 +330,8 @@ function approveOrder(id) {
         headers: {[csrfHeader()]: csrf()}
     }).then(r => r.json()).then(data => {
         const msgMap = {
-            SHIPPED:       '재고 충분 → 즉시 출고 처리 완료! 매출이 자동 등록되었습니다.',
-            IN_PRODUCTION: '재고 부족 → 작업지시가 생성되었습니다. 부족 부품은 작업지시에서 자동 발주하세요.'
+            'COMPLETED': '재고 충분 → 즉시 출고 처리 완료! 매출이 자동 등록되었습니다.',
+            'ACCEPTED':  '재고 부족 → 작업지시가 생성되었습니다. 부족 부품은 작업지시에서 자동 발주하세요.'
         };
         showToast(msgMap[data.status] || '처리 완료', 'success');
         setTimeout(() => location.reload(), 1500);

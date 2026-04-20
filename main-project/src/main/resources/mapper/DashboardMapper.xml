@@ -22,7 +22,7 @@
 
     <select id="countMonthlyWorkOrders" resultType="int">
         SELECT COUNT(*) FROM work_orders
-        WHERE status = 'COMPLETED'
+        WHERE status = '완료'
           AND YEAR(start_date) = YEAR(NOW())
           AND MONTH(start_date) = MONTH(NOW())
     </select>
