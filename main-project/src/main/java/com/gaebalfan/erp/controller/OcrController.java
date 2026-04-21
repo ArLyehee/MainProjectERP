@@ -44,10 +44,15 @@ public class OcrController {
         try {
             // 1. 파일을 OCR input 폴더에 임시 저장
             File inputDir = new File(ocrProjectPath, "input");
-            inputDir.mkdirs();
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            if (!inputDir.exists() && !inputDir.mkdirs()) {
+                return ResponseEntity.status(500).body(Map.of("success", false, "message", "OCR input 디렉토리 생성 실패: " + inputDir.getAbsolutePath()));
+            }
+            String ext = "";
+            String orig = file.getOriginalFilename();
+            if (orig != null && orig.contains(".")) ext = orig.substring(orig.lastIndexOf("."));
+            String fileName = System.currentTimeMillis() + ext;
             tempFile = new File(inputDir, fileName);
-            file.transferTo(tempFile);
+            file.transferTo(tempFile.toPath());
 
             // 2. Python OCR 실행
             String mainPy = new File(ocrProjectPath, "src/main.py").getAbsolutePath();
