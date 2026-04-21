@@ -32,12 +32,6 @@ public class OcrController {
     @Value("${ocr.project.path}")
     private String ocrProjectPath;
 
-    @Value("${ocr.gemini.api-key:}")
-    private String geminiApiKey;
-
-    @Value("${ocr.groq.api-key:}")
-    private String groqApiKey;
-
     public OcrController(TransactionStatementService statementService) {
         this.statementService = statementService;
     }
@@ -60,12 +54,6 @@ public class OcrController {
             ProcessBuilder pb = new ProcessBuilder(pythonCmd, mainPy, "--erp-mode", tempFile.getAbsolutePath());
             pb.directory(new File(ocrProjectPath));
             pb.redirectErrorStream(false);
-            if (geminiApiKey != null && !geminiApiKey.isBlank()) {
-                pb.environment().put("GEMINI_API_KEY", geminiApiKey);
-            }
-            if (groqApiKey != null && !groqApiKey.isBlank()) {
-                pb.environment().put("GROQ_API_KEY", groqApiKey);
-            }
             Process process = pb.start();
             String stdout = new String(process.getInputStream().readAllBytes(), "UTF-8").trim();
             String stderr = new String(process.getErrorStream().readAllBytes(), "UTF-8").trim();

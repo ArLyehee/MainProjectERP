@@ -26,10 +26,6 @@ ocr:
     cmd: python
   project:
     path: C:/Users/3class_013/Desktop/main_project/MainProjectOCR
-  gemini:
-    api-key:
-  groq:
-    api-key:
 
 logging:
   level:

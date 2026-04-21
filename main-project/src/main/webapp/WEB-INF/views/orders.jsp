@@ -43,6 +43,7 @@
 .flow-step.active  { background: #3b82f6; color: #fff; }
 .flow-step.done    { background: #d1fae5; color: #065f46; }
 .flow-step.hold-s  { background: #fee2e2; color: #991b1b; }
+.flow-step.filter-selected { outline: 3px solid #1d4ed8; outline-offset: -3px; opacity: 1; font-weight: bold; }
 .flow-step span.count {
     display: block;
     font-size: 18px;
@@ -82,22 +83,22 @@
 
     <!-- 진행 현황 요약 -->
     <div class="flow-bar" id="flowBar">
-        <div class="flow-step" id="fs-대기">
+        <div class="flow-step" id="fs-대기" onclick="filterByStatus('대기')" style="cursor:pointer">
             <span class="count" id="cnt-대기">-</span>검토 대기
         </div>
-        <div class="flow-step" id="fs-보류">
+        <div class="flow-step" id="fs-보류" onclick="filterByStatus('보류')" style="cursor:pointer">
             <span class="count" id="cnt-보류">-</span>보류
         </div>
-        <div class="flow-step" id="fs-ACCEPTED">
+        <div class="flow-step" id="fs-ACCEPTED" onclick="filterByStatus('ACCEPTED')" style="cursor:pointer">
             <span class="count" id="cnt-ACCEPTED">-</span>생산 중
         </div>
-        <div class="flow-step" id="fs-발주">
+        <div class="flow-step" id="fs-발주" onclick="filterByStatus('발주')" style="cursor:pointer">
             <span class="count" id="cnt-발주">-</span>발주 처리
         </div>
-        <div class="flow-step" id="fs-출고준비">
+        <div class="flow-step" id="fs-출고준비" onclick="filterByStatus('출고준비')" style="cursor:pointer">
             <span class="count" id="cnt-출고준비">-</span>출고 준비
         </div>
-        <div class="flow-step" id="fs-COMPLETED">
+        <div class="flow-step" id="fs-COMPLETED" onclick="filterByStatus('COMPLETED')" style="cursor:pointer">
             <span class="count" id="cnt-COMPLETED">-</span>출고 완료
         </div>
     </div>
@@ -269,10 +270,29 @@ function showToast(msg, type='success') {
     });
 })();
 
+// ── 상태 필터 ─────────────────────────────────────
+let _activeFilter = null;
+function filterByStatus(status) {
+    if (_activeFilter === status) {
+        _activeFilter = null;
+        document.querySelectorAll('.flow-step').forEach(el => el.classList.remove('filter-selected'));
+        document.querySelectorAll('tbody tr[data-status]').forEach(tr => tr.style.display = '');
+    } else {
+        _activeFilter = status;
+        document.querySelectorAll('.flow-step').forEach(el => el.classList.remove('filter-selected'));
+        const sel = document.getElementById('fs-' + status);
+        if (sel) sel.classList.add('filter-selected');
+        document.querySelectorAll('tbody tr[data-status]').forEach(tr => {
+            tr.style.display = tr.dataset.status === status ? '' : 'none';
+        });
+    }
+}
+
 // ── 검색 ──────────────────────────────────────────
 function filterTable() {
     const q = document.getElementById('searchInput').value.toLowerCase();
     document.querySelectorAll('tbody tr').forEach(tr => {
+        if (_activeFilter && tr.dataset.status !== _activeFilter) { tr.style.display = 'none'; return; }
         tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
     });
 }

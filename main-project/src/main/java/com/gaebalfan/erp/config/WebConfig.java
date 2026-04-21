@@ -17,6 +17,7 @@ public class WebConfig implements WebMvcConfigurer {
     public WebServerFactoryCustomizer<TomcatServletWebServerFactory> jspDocumentRootCustomizer() {
         return factory -> {
             String[] candidates = {
+                "main-project/src/main/webapp",
                 "src/main/webapp",
                 "MainProjectERP/main-project/src/main/webapp"
             };
