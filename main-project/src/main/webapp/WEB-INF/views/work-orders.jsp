@@ -174,7 +174,11 @@ function openCreate() {
     const dst = document.getElementById('productId');
     dst.innerHTML = src.innerHTML;
     document.getElementById('quantity').value = '';
-    document.getElementById('startDate').value = '';
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    document.getElementById('startDate').value =
+        now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate()) +
+        'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
     document.getElementById('status').value = '대기';
     document.getElementById('stockCheckArea').style.display = 'none';
     document.getElementById('stockWarning').style.display = 'none';
@@ -182,11 +186,15 @@ function openCreate() {
 }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 function saveWorkOrder() {
+    const productId = document.getElementById('productId').value;
+    const quantity  = document.getElementById('quantity').value;
+    if (!productId) { alert('제품을 선택하세요.'); return; }
+    if (!quantity || parseInt(quantity) < 1) { alert('수량을 입력하세요.'); return; }
     const data = {
-        productId: document.getElementById('productId').value || null,
-        quantity: document.getElementById('quantity').value || null,
+        productId: parseInt(productId),
+        quantity:  parseInt(quantity),
         startDate: document.getElementById('startDate').value || null,
-        status: document.getElementById('status').value
+        status:    document.getElementById('status').value
     };
     const csrf = document.querySelector('meta[name="_csrf"]').content;
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
@@ -194,7 +202,10 @@ function saveWorkOrder() {
         method: 'POST',
         headers: {'Content-Type':'application/json', [csrfHeader]: csrf},
         body: JSON.stringify(data)
-    }).then(() => location.reload());
+    }).then(r => {
+        if (r.ok) { location.href = '/work-orders?page=1'; }
+        else { r.text().then(t => alert('등록 실패: ' + r.status + '\n' + t)); }
+    }).catch(e => alert('네트워크 오류: ' + e));
 }
 let _pendingAutoOrderId = null;
 function autoOrderParts(id) {
