@@ -12,5 +12,4 @@ public interface SaleMapper {
     void insert(Sale sale);
     List<Map<String, Object>> findMonthlySummary(@Param("year") int year);
     Map<String, Object> findYearlySummary(@Param("year") int year);
-    void refreshFinancial(@Param("month") String month);
 }

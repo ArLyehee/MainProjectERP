@@ -53,10 +53,6 @@
         ORDER BY MONTH(sale_date)
     </select>
 
-    <select id="refreshFinancial" statementType="CALLABLE">
-        {CALL sp_refresh_financial(#{month})}
-    </select>
-
     <select id="findYearlySummary" resultType="map">
         SELECT
             COALESCE(SUM(total_price), 0)                       AS revenue,

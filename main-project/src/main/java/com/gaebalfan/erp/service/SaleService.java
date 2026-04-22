@@ -11,5 +11,4 @@ public class SaleService {
     public List<Sale> findAllPaged(int page, int size) { return mapper.findAllPaged((page - 1) * size, size); }
     public int count() { return mapper.count(); }
     public void insert(Sale obj) { mapper.insert(obj); }
-    public void refreshFinancial(String month) { mapper.refreshFinancial(month); }
 }
