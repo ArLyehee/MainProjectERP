@@ -55,8 +55,10 @@
     </select>
 
     <select id="findByProductAndWarehouse" resultMap="InventoryResultMap">
-        SELECT * FROM inventory
+        SELECT product_id, warehouse_id, SUM(quantity) AS quantity, MAX(last_update) AS last_update
+        FROM inventory
         WHERE product_id = #{productId} AND warehouse_id = #{warehouseId}
+        GROUP BY product_id, warehouse_id
     </select>
 
     <insert id="insert" parameterType="com.gaebalfan.erp.domain.Inventory"
