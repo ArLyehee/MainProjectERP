@@ -25,7 +25,7 @@ ocr:
   python:
     cmd: python
   project:
-    path: C:/Users/3class_013/Desktop/main_project/MainProjectOCR
+    path: ${OCR_PROJECT_PATH:../MainProjectOCR}
 
 logging:
   level:
