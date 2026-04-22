@@ -90,10 +90,9 @@ public class OrderService {
         int stock = inventoryMapper.findTotalQuantityByProduct(order.getProductId());
 
         if (stock >= order.getQuantity()) {
-            // ② 재고 충분 → 즉시 출고 + 매출 자동 등록
-            Long shipmentId = doShipAndSale(order);
-            orderMapper.updateAfterApprove(orderId, "COMPLETED", null, null, shipmentId);
-            return "COMPLETED";
+            // ② 재고 충분 → 즉시 출고준비 (출고는 주문처리현황에서 수동 처리)
+            orderMapper.updateAfterApprove(orderId, "출고준비", null, null, null);
+            return "출고준비";
         }
 
         // ③ 재고 부족 → 작업지시 생성 (부품 재고 차감 포함)
@@ -106,10 +105,17 @@ public class OrderService {
      * 출고 처리 (READY 상태 주문 수동 출고)
      */
     @Transactional
-    public void ship(Long orderId) {
+    public void ship(Long orderId, Long warehouseId) {
         CustomerOrder order = orderMapper.findById(orderId);
         if (order == null) throw new IllegalArgumentException("주문을 찾을 수 없습니다: " + orderId);
-        Long shipmentId = doShipAndSale(order);
+        long wh = warehouseId != null ? warehouseId : DEFAULT_WAREHOUSE_ID;
+        // 선택한 창고 재고 검증
+        com.gaebalfan.erp.domain.Inventory stock = inventoryMapper.findByProductAndWarehouse(order.getProductId(), wh);
+        int currentQty = (stock != null) ? stock.getQuantity() : 0;
+        if (currentQty < order.getQuantity()) {
+            throw new IllegalStateException("선택한 창고에 재고가 부족합니다. 현재 " + currentQty + "개, 필요 " + order.getQuantity() + "개");
+        }
+        Long shipmentId = doShipAndSale(order, wh);
         orderMapper.updateAfterApprove(orderId, "COMPLETED", order.getWorkOrderId(), order.getPurchaseOrderId(), shipmentId);
     }
 
@@ -124,10 +130,6 @@ public class OrderService {
     }
 
     // ─── 내부 헬퍼 ──────────────────────────────────────────────────────────
-
-    private Long doShipAndSale(CustomerOrder order) {
-        return doShipAndSale(order, DEFAULT_WAREHOUSE_ID);
-    }
 
     private Long doShipAndSale(CustomerOrder order, long warehouseId) {
         // 출고 등록

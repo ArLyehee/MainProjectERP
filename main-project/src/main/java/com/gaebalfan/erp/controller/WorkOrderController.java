@@ -46,9 +46,16 @@ public class WorkOrderController {
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Void> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        service.updateStatus(id, body.get("status"));
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Map<String, Object>> updateStatus(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        try {
+            String status = (String) body.get("status");
+            Long warehouseId = body.get("warehouseId") != null
+                    ? Long.valueOf(body.get("warehouseId").toString()) : null;
+            service.updateStatus(id, status, warehouseId);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/{id}/auto-order-parts")

@@ -72,12 +72,13 @@
 </div>
 </div>
 
-<!-- 출고 창고 선택 모달 -->
+<!-- 입고 창고 선택 모달 (생산완료 시 완성품 입고창고) -->
 <div class="modal-overlay" id="shipModal">
 <div class="modal" style="max-width:360px;">
-  <h3>출고 창고 선택</h3>
+  <h3>완성품 입고 창고 선택</h3>
+  <p style="font-size:12px;color:#6b7280;margin-bottom:12px;">완성품을 입고할 창고를 선택하세요.</p>
   <div class="form-group">
-    <label>출고 창고 *</label>
+    <label>입고 창고 *</label>
     <select id="shipWarehouseId">
       <option value="">창고 선택</option>
       <c:forEach var="w" items="${warehouseList}">
@@ -87,7 +88,7 @@
   </div>
   <div class="modal-footer">
     <button class="btn-cancel-modal" onclick="closeShipModal()">취소</button>
-    <button class="btn-save" onclick="confirmShip()">출고 처리</button>
+    <button class="btn-save" onclick="confirmShip()">입고 처리</button>
   </div>
 </div>
 </div>
@@ -98,29 +99,28 @@
 <div class="modal-overlay" id="prodReceiptModal"><div class="modal"><h3>생산 입고 처리</h3><input type="hidden" id="prWorkOrderId"><input type="hidden" id="prProductId"><div class="form-group"><label>수량 *</label><input type="number" id="prQuantity" placeholder="0"></div><div class="form-group"><label>입고 창고 *</label><select id="prWarehouseId"><option value="">선택</option><c:forEach var="w" items="${warehouseList}"><option value="${w.warehouseId}">${w.warehouseName}</option></c:forEach></select></div><div class="form-group"><label>입고일시</label><input type="datetime-local" id="prReceiptDate"></div><div class="modal-footer"><button class="btn-cancel" onclick="closePrModal()">취소</button><button class="btn-save" onclick="saveProdReceipt()">입고 처리</button></div></div>
 </div><div class="modal-overlay" id="modalOverlay"><div class="modal"><h3>작업지시 등록</h3><div class="form-group"><label>제품 *</label><select id="productId" onchange="onProductOrQtyChange()"></select></div><div class="form-group"><label>생산 수량 *</label><input type="number" id="quantity" placeholder="0" min="1" oninput="onProductOrQtyChange()"></div><div id="stockCheckArea" style="margin:8px 0;display:none;"><div style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--text-muted);"> 자재 재고 현황</div><table style="width:100%;font-size:12px;border-collapse:collapse;" id="stockTable"><thead><tr style="background:var(--surface);"><th style="padding:4px 8px;text-align:left;">자재명</th><th style="padding:4px 8px;text-align:right;">필요</th><th style="padding:4px 8px;text-align:right;">보유</th><th style="padding:4px 8px;text-align:right;">부족</th></tr></thead><tbody id="stockTableBody"></tbody></table></div><div id="stockWarning" style="font-size:12px;color:#e74c3c;margin:4px 0 8px;display:none;"> 재고가 부족한 자재가 있습니다. 등록 시 재고가 음수가 될 수 있습니다.</div><div class="form-group"><label>시작일</label><input type="datetime-local" id="startDate"></div><div class="form-group"><label>상태</label><select id="status"><option value="대기">대기</option><option value="진행중">진행중</option></select></div><div class="modal-footer"><button class="btn-cancel" onclick="closeModal()">취소</button><button class="btn-save" onclick="saveWorkOrder()">저장</button></div></div>
 </div><script>
-let _pendingShipWorkOrderId = null;
+let _pendingCompleteWorkOrderId = null;
 function closeShipModal() {
     document.getElementById('shipModal').classList.remove('open');
-    location.reload();
 }
 function confirmShip() {
     const warehouseId = document.getElementById('shipWarehouseId').value;
     if (!warehouseId) { alert('창고를 선택해주세요.'); return; }
     const csrf = document.querySelector('meta[name="_csrf"]').content;
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-    fetch('/api/orders/ship-by-work-order/' + _pendingShipWorkOrderId, {
+    fetch('/api/work-orders/' + _pendingCompleteWorkOrderId + '/status', {
         method: 'PATCH',
         headers: {'Content-Type':'application/json', [csrfHeader]: csrf},
-        body: JSON.stringify({warehouseId: parseInt(warehouseId)})
+        body: JSON.stringify({status: '완료', warehouseId: parseInt(warehouseId)})
     }).then(r => r.json()).then(data => {
-        if (data.shipped) {
-            alert('출고 처리 완료! 매출이 자동 등록되었습니다.');
-        } else {
-            alert('연결된 주문이 없거나 이미 처리되었습니다.');
-        }
         document.getElementById('shipModal').classList.remove('open');
+        if (data.success) {
+            alert('생산완료! 완성품이 선택한 창고에 입고되었습니다.\n주문처리현황에서 출고 처리를 진행하세요.');
+        } else {
+            alert('오류: ' + (data.error || '처리 실패'));
+        }
         location.reload();
-    }).catch(() => alert('출고 처리 중 오류가 발생했습니다.'));
+    }).catch(() => alert('처리 중 오류가 발생했습니다.'));
 }
 const _sort = {col:-1, asc:true};
 function sortTable(th, col, type) {
@@ -275,7 +275,7 @@ function closeDetailModal() { document.getElementById('woDetailModal').classList
 function changeStatus(id, status) {
     const msgMap = {
         '진행중': '생산을 시작하시겠습니까?',
-        '완료':   '생산완료 처리하시겠습니까?\n완성품이 재고에 자동 등록됩니다.',
+        '완료':   '생산완료 처리하시겠습니까?\n완성품이 재고현황에 자동 등록됩니다.',
         '취소':   '작업지시를 취소하시겠습니까?'
     };
     if (!confirm(msgMap[status] || '상태를 변경하시겠습니까?')) return;
@@ -285,20 +285,11 @@ function changeStatus(id, status) {
         method: 'PATCH',
         headers: {'Content-Type':'application/json', [csrfHeader]: csrf},
         body: JSON.stringify({status: status})
-    }).then(r => {
-        if (r.ok) {
-            if (status === '완료') {
-                alert('생산완료 처리되었습니다. 완성품이 재고에 등록되었습니다.');
-                _pendingShipWorkOrderId = id;
-                document.getElementById('shipWarehouseId').value = '';
-                document.getElementById('shipModal').classList.add('open');
-            } else {
-                location.reload();
-            }
+    }).then(r => r.json()).then(data => {
+        if (data.success) {
+            location.reload();
         } else {
-            r.json().then(err => {
-                alert('오류: ' + (err.error || '알 수 없는 오류가 발생했습니다.'));
-            }).catch(() => alert('처리 중 오류가 발생했습니다. (HTTP ' + r.status + ')'));
+            alert('오류: ' + (data.error || '알 수 없는 오류가 발생했습니다.'));
         }
     }).catch(() => alert('네트워크 오류가 발생했습니다.'));
 }

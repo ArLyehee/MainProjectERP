@@ -54,9 +54,16 @@ public class OrderController {
     }
 
     @PatchMapping("/{id}/ship")
-    public ResponseEntity<Void> ship(@PathVariable Long id) {
-        service.ship(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Map<String, Object>> ship(@PathVariable Long id,
+            @RequestBody(required = false) Map<String, Object> body) {
+        try {
+            Long warehouseId = body != null && body.get("warehouseId") != null
+                    ? Long.valueOf(body.get("warehouseId").toString()) : null;
+            service.ship(id, warehouseId);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PatchMapping("/ship-by-work-order/{workOrderId}")

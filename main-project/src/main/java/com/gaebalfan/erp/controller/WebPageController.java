@@ -336,6 +336,7 @@ public class WebPageController {
         int totalPages = Math.max(1, (int) Math.ceil((double) total / size));
         model.addAttribute("orderList", orderService.findAllPaged(page, size));
         model.addAttribute("productList", productService.findAll());
+        model.addAttribute("warehouseList", warehouseService.findAll());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("pageStart", Math.max(1, page - 5));

@@ -171,7 +171,7 @@ public class WorkOrderService {
      * 상태 변경: COMPLETED 시 완성품을 재고에 추가
      */
     @Transactional
-    public void updateStatus(Long id, String status) {
+    public void updateStatus(Long id, String status, Long warehouseId) {
         // 진행중 전환 시: 자재 재고 충분한지 확인
         if ("진행중".equals(status)) {
             WorkOrder wo = mapper.findById(id);
@@ -216,7 +216,7 @@ public class WorkOrderService {
 
             Inventory finished = new Inventory();
             finished.setProductId(wo.getProductId());
-            finished.setWarehouseId(DEFAULT_WAREHOUSE_ID);
+            finished.setWarehouseId(warehouseId != null ? warehouseId : DEFAULT_WAREHOUSE_ID);
             finished.setQuantity(wo.getQuantity());
             inventoryMapper.insert(finished);
 

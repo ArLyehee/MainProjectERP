@@ -26,6 +26,10 @@ public class InventoryService {
         return mapper.count(q);
     }
 
+    public List<Inventory> findByProduct(Long productId) {
+        return mapper.findByProduct(productId);
+    }
+
     public Inventory findById(Long id) {
         return mapper.findById(id);
     }

@@ -167,7 +167,7 @@
 
                         <!-- 출고준비: 출고 처리 -->
                         <c:if test="${o.status == '출고준비'}">
-                        <button class="btn-action btn-ship" onclick="shipOrder(${o.orderId})">출고 처리</button>
+                        <button class="btn-action btn-ship" onclick="shipOrder(${o.orderId}, ${o.productId})">출고 처리</button>
                         </c:if>
 
                         <!-- 연계 정보 링크 -->
@@ -233,6 +233,28 @@
             <button class="btn-save" onclick="saveOrder()">저장</button>
         </div>
     </div>
+</div>
+
+<!-- 출고 창고 선택 모달 -->
+<div class="modal-overlay" id="shipModalOverlay">
+<div class="modal" style="max-width:400px;">
+  <h3>출고 처리</h3>
+  <p style="font-size:12px;color:#6b7280;margin-bottom:12px;">출고할 창고를 선택하세요. 해당 창고의 재고에서 차감됩니다.</p>
+  <div class="form-group">
+    <label>출고 창고 *</label>
+    <select id="shipOrderWarehouseId">
+      <option value="">창고 선택</option>
+      <c:forEach var="w" items="${warehouseList}">
+        <option value="${w.warehouseId}">${w.warehouseName}</option>
+      </c:forEach>
+    </select>
+  </div>
+  <div id="warehouseStockInfo" style="font-size:12px;color:#6b7280;margin-top:6px;"></div>
+  <div class="modal-footer">
+    <button class="btn-cancel" onclick="closeShipOrderModal()">취소</button>
+    <button class="btn-save" onclick="confirmShipOrder()">출고 처리</button>
+  </div>
+</div>
 </div>
 
 <!-- 토스트 -->
@@ -350,7 +372,7 @@ function approveOrder(id) {
         headers: {[csrfHeader()]: csrf()}
     }).then(r => r.json()).then(data => {
         const msgMap = {
-            'COMPLETED': '재고 충분 → 즉시 출고 처리 완료! 매출이 자동 등록되었습니다.',
+            '출고준비': '재고 충분 → 출고 준비 완료! 출고 처리 버튼을 눌러 창고를 선택해 출고하세요.',
             'ACCEPTED':  '재고 부족 → 작업지시가 생성되었습니다. 부족 부품은 작업지시에서 자동 발주하세요.'
         };
         showToast(msgMap[data.status] || '처리 완료', 'success');
@@ -394,16 +416,53 @@ function cancelOrder(id) {
     });
 }
 
-function shipOrder(id) {
-    if (!confirm('출고 처리하시겠습니까? 매출이 자동 등록됩니다.')) return;
-    fetch('/api/orders/' + id + '/ship', {
+let _pendingShipOrderId = null;
+let _pendingShipProductId = null;
+
+function shipOrder(id, productId) {
+    _pendingShipOrderId = id;
+    _pendingShipProductId = productId;
+    document.getElementById('shipOrderWarehouseId').value = '';
+    document.getElementById('warehouseStockInfo').textContent = '';
+    document.getElementById('shipModalOverlay').classList.add('open');
+    if (productId) loadWarehouseStock(productId);
+}
+
+function loadWarehouseStock(productId) {
+    fetch('/api/inventory/by-product/' + productId)
+        .then(r => r.json())
+        .then(list => {
+            const info = document.getElementById('warehouseStockInfo');
+            if (!list || list.length === 0) {
+                info.textContent = '재고 있는 창고가 없습니다.';
+                return;
+            }
+            info.innerHTML = '<b>창고별 재고:</b> ' + list.map(i =>
+                (i.warehouseName || i.warehouseId) + ' ' + i.quantity + '개'
+            ).join(', ');
+        });
+}
+
+function closeShipOrderModal() {
+    document.getElementById('shipModalOverlay').classList.remove('open');
+}
+
+function confirmShipOrder() {
+    const warehouseId = document.getElementById('shipOrderWarehouseId').value;
+    if (!warehouseId) { showToast('창고를 선택하세요.', 'warn'); return; }
+    fetch('/api/orders/' + _pendingShipOrderId + '/ship', {
         method: 'PATCH',
-        headers: {[csrfHeader()]: csrf()}
-    }).then(r => {
-        if (r.ok) { showToast('출고 완료! 매출 자동 등록됨.', 'success'); setTimeout(() => location.reload(), 1500); }
-        else r.json().then(err => showToast('오류: ' + (err.error || '처리 실패'), 'warn'))
-                     .catch(() => showToast('처리 오류 (HTTP ' + r.status + ')', 'warn'));
-    });
+        headers: {'Content-Type':'application/json', [csrfHeader()]: csrf()},
+        body: JSON.stringify({warehouseId: parseInt(warehouseId)})
+    }).then(r => r.json()).then(data => {
+        closeShipOrderModal();
+        if (data.success) {
+            showToast('출고 완료! 매출 자동 등록됨.', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast('오류: ' + (data.error || '처리 실패'), 'warn');
+        }
+    }).catch(() => showToast('처리 오류', 'warn'));
 }
 </script>
 </body>

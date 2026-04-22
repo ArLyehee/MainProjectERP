@@ -13,7 +13,7 @@
     </resultMap>
 
     <select id="findAll" resultMap="InventoryResultMap">
-        SELECT i.product_id, i.warehouse_id, SUM(i.quantity) AS quantity, MAX(i.last_update) AS last_update,
+        SELECT MIN(i.inventory_id) AS inventory_id, i.product_id, i.warehouse_id, SUM(i.quantity) AS quantity, MAX(i.last_update) AS last_update,
                p.product_name, w.warehouse_name
         FROM inventory i
         LEFT JOIN products p ON i.product_id = p.product_id
@@ -24,7 +24,7 @@
     </select>
 
     <select id="findAllPaged" resultMap="InventoryResultMap">
-        SELECT i.product_id, i.warehouse_id, SUM(i.quantity) AS quantity, MAX(i.last_update) AS last_update,
+        SELECT MIN(i.inventory_id) AS inventory_id, i.product_id, i.warehouse_id, SUM(i.quantity) AS quantity, MAX(i.last_update) AS last_update,
                p.product_name, w.warehouse_name
         FROM inventory i
         LEFT JOIN products p ON i.product_id = p.product_id
@@ -102,6 +102,17 @@
 
     <select id="findTotalQuantityByProduct" resultType="int">
         SELECT COALESCE(SUM(quantity), 0) FROM inventory WHERE product_id = #{productId}
+    </select>
+
+    <select id="findByProduct" resultMap="InventoryResultMap">
+        SELECT i.product_id, i.warehouse_id, SUM(i.quantity) AS quantity, MAX(i.last_update) AS last_update,
+               p.product_name, w.warehouse_name
+        FROM inventory i
+        LEFT JOIN products p ON i.product_id = p.product_id
+        LEFT JOIN warehouses w ON i.warehouse_id = w.warehouse_id
+        WHERE i.product_id = #{productId}
+        GROUP BY i.product_id, i.warehouse_id, p.product_name, w.warehouse_name
+        HAVING SUM(i.quantity) > 0
     </select>
 
 </mapper>
