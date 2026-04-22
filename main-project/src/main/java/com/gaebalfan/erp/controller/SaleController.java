@@ -28,14 +28,15 @@ public class SaleController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> insert(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<Map<String, Object>> insert(@RequestBody Map<String, Object> body) {
         if (body.get("productId") == null || body.get("productId").toString().isBlank())
-            return ResponseEntity.badRequest().header("X-Error-Message", "제품을 선택하세요.").build();
+            return ResponseEntity.badRequest().body(Map.of("message", "제품을 선택하세요."));
         int qty = body.get("quantity") != null ? Integer.parseInt(body.get("quantity").toString()) : 0;
         if (qty <= 0)
-            return ResponseEntity.badRequest().header("X-Error-Message", "수량은 1 이상이어야 합니다.").build();
-        if (body.get("unitPrice") == null || new BigDecimal(body.get("unitPrice").toString()).compareTo(BigDecimal.ZERO) <= 0)
-            return ResponseEntity.badRequest().header("X-Error-Message", "단가는 0보다 커야 합니다.").build();
+            return ResponseEntity.badRequest().body(Map.of("message", "수량은 1 이상이어야 합니다."));
+        if (body.get("unitPrice") == null || body.get("unitPrice").toString().isBlank() ||
+            new BigDecimal(body.get("unitPrice").toString()).compareTo(BigDecimal.ZERO) <= 0)
+            return ResponseEntity.badRequest().body(Map.of("message", "단가는 0보다 커야 합니다."));
 
         Sale sale = new Sale();
         sale.setProductId(Long.parseLong(body.get("productId").toString()));
@@ -57,14 +58,13 @@ public class SaleController {
             int currentQty = (stock != null) ? stock.getQuantity() : 0;
             if (currentQty < qty)
                 return ResponseEntity.badRequest()
-                        .header("X-Error-Message", "재고 부족: 현재 재고 " + currentQty + "개, 판매 요청 " + qty + "개")
-                        .build();
+                        .body(Map.of("message", "재고 부족: 현재 재고 " + currentQty + "개, 판매 요청 " + qty + "개"));
             service.insert(sale);
             inventoryMapper.updateQuantity(sale.getProductId(), warehouseId, -qty);
         } else {
             service.insert(sale);
         }
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(Map.of("success", true));
     }
 }

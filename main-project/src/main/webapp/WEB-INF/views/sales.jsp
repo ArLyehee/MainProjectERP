@@ -48,10 +48,10 @@ function saveSale() {
         saleDate: document.getElementById('saleDate').value
     };
     fetch('/api/sales', { method:'POST', headers:{'Content-Type':'application/json',[csrfHeader]:csrf}, body:JSON.stringify(data) })
-        .then(res => {
-            if (!res.ok) {
-                const msg = res.headers.get('X-Error-Message') || '판매 등록에 실패했습니다.';
-                alert(msg);
+        .then(res => res.json().then(json => ({ ok: res.ok, json })))
+        .then(({ ok, json }) => {
+            if (!ok) {
+                alert(json.message || '판매 등록에 실패했습니다.');
             } else {
                 location.reload();
             }
