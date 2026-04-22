@@ -70,9 +70,9 @@ public class WorkOrderService {
         List<BomItem> items = bomMapper.findItemsByBomId(bom.getBomId());
         int count = 0;
         for (BomItem item : items) {
-            // 작업지시 등록 시 이미 재고가 차감되므로, 현재 재고가 음수인 만큼만 발주
+            int needed    = item.getQuantity().multiply(BigDecimal.valueOf(wo.getQuantity())).intValue();
             int available = inventoryMapper.findTotalQuantityByProduct(item.getComponentProductId());
-            int shortage  = -available; // 재고가 음수(부족)인 경우에만 발주
+            int shortage  = needed - available;
             if (shortage <= 0) continue;
 
             Long supplierId = purchaseOrderMapper.findSupplierIdByProduct(item.getComponentProductId());
@@ -126,12 +126,13 @@ public class WorkOrderService {
         List<BomItem> items = bomMapper.findItemsByBomId(bom.getBomId());
         for (BomItem item : items) {
             int needed = item.getQuantity().multiply(BigDecimal.valueOf(quantity)).intValue();
-            int available = inventoryMapper.findTotalQuantityByProduct(item.getComponentProductId());
+            int rawAvailable = inventoryMapper.findTotalQuantityByProduct(item.getComponentProductId());
+            int displayAvailable = Math.max(0, rawAvailable);
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("componentName", item.getComponentProductName());
             m.put("needed", needed);
-            m.put("available", available);
-            m.put("shortage", Math.max(0, needed - available));
+            m.put("available", displayAvailable);
+            m.put("shortage", Math.max(0, needed - displayAvailable));
             result.add(m);
         }
         return result;
@@ -145,21 +146,21 @@ public class WorkOrderService {
     public void insert(WorkOrder obj) {
         mapper.insert(obj);
 
+        // 자재 차감은 완료 시점에만 수행 - 등록 시 재고 충분하면 자동 진행중
         boolean hasShortage = false;
         Bom bom = bomMapper.findByProductId(obj.getProductId());
         if (bom != null) {
             List<BomItem> items = bomMapper.findItemsByBomId(bom.getBomId());
             for (BomItem item : items) {
-                int deductQty = item.getQuantity().multiply(BigDecimal.valueOf(obj.getQuantity())).intValue();
+                int needed = item.getQuantity().multiply(BigDecimal.valueOf(obj.getQuantity())).intValue();
                 int available = inventoryMapper.findTotalQuantityByProduct(item.getComponentProductId());
-                if (available < deductQty) {
+                if (available < needed) {
                     hasShortage = true;
+                    break;
                 }
-                inventoryMapper.updateQuantity(item.getComponentProductId(), DEFAULT_WAREHOUSE_ID, -deductQty);
             }
         }
 
-        // 부족 부품 없으면 자동으로 생산 시작
         if (!hasShortage) {
             mapper.updateStatus(obj.getWorkOrderId(), "진행중");
             obj.setStatus("진행중");
@@ -171,49 +172,68 @@ public class WorkOrderService {
      */
     @Transactional
     public void updateStatus(Long id, String status) {
-        if ("진행중".equals(status) || "완료".equals(status)) {
+        // 진행중 전환 시: 자재 재고 충분한지 확인
+        if ("진행중".equals(status)) {
             WorkOrder wo = mapper.findById(id);
             if (wo != null) {
                 Bom bom = bomMapper.findByProductId(wo.getProductId());
                 if (bom != null) {
                     List<BomItem> items = bomMapper.findItemsByBomId(bom.getBomId());
                     for (BomItem item : items) {
+                        int needed = item.getQuantity().multiply(BigDecimal.valueOf(wo.getQuantity())).intValue();
                         int available = inventoryMapper.findTotalQuantityByProduct(item.getComponentProductId());
-                        if (available < 0) {
+                        if (available < needed) {
                             throw new IllegalStateException(
                                 "부품 재고가 부족합니다: " + item.getComponentProductName()
-                                + " (현재: " + available + "개). 발주 후 입고 처리를 완료해주세요.");
+                                + " (현재: " + available + "개, 필요: " + needed + "개). 입고 처리 후 시도해주세요.");
                         }
                     }
                 }
             }
         }
-        mapper.updateStatus(id, status);
 
-        if ("취소".equals(status)) {
-            purchaseOrderMapper.cancelByWorkOrderId(id);
-            // 연결된 고객주문도 HOLD(보류)로 전환
-            CustomerOrder order = orderMapper.findByWorkOrderId(id);
-            if (order != null && "ACCEPTED".equals(order.getStatus())) {
-                orderMapper.updateStatus(order.getOrderId(), "보류");
-            }
-        }
-
+        // 완료 시: 자재 차감 + 완성품 재고 추가
         if ("완료".equals(status)) {
             WorkOrder wo = mapper.findById(id);
             if (wo == null) return;
 
-            // 완성품 재고 증가
+            Bom bom = bomMapper.findByProductId(wo.getProductId());
+            if (bom != null) {
+                List<BomItem> items = bomMapper.findItemsByBomId(bom.getBomId());
+                for (BomItem item : items) {
+                    int deductQty = item.getQuantity().multiply(BigDecimal.valueOf(wo.getQuantity())).intValue();
+                    int available = inventoryMapper.findTotalQuantityByProduct(item.getComponentProductId());
+                    if (available < deductQty) {
+                        throw new IllegalStateException(
+                            "부품 재고가 부족합니다: " + item.getComponentProductName()
+                            + " (현재: " + available + "개, 필요: " + deductQty + "개). 입고 처리 후 시도해주세요.");
+                    }
+                    inventoryMapper.updateQuantity(item.getComponentProductId(), DEFAULT_WAREHOUSE_ID, -deductQty);
+                }
+            }
+
+            mapper.updateStatus(id, status);
+
             Inventory finished = new Inventory();
             finished.setProductId(wo.getProductId());
             finished.setWarehouseId(DEFAULT_WAREHOUSE_ID);
             finished.setQuantity(wo.getQuantity());
             inventoryMapper.insert(finished);
 
-            // 연결된 고객주문 → 출고준비 (출고 대기)
             CustomerOrder order = orderMapper.findByWorkOrderId(id);
             if (order != null && "ACCEPTED".equals(order.getStatus())) {
                 orderMapper.updateStatus(order.getOrderId(), "출고준비");
+            }
+            return;
+        }
+
+        mapper.updateStatus(id, status);
+
+        if ("취소".equals(status)) {
+            purchaseOrderMapper.cancelByWorkOrderId(id);
+            CustomerOrder order = orderMapper.findByWorkOrderId(id);
+            if (order != null && "ACCEPTED".equals(order.getStatus())) {
+                orderMapper.updateStatus(order.getOrderId(), "보류");
             }
         }
     }

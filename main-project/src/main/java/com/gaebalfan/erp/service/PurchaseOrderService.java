@@ -1,6 +1,7 @@
 package com.gaebalfan.erp.service;
 
 import com.gaebalfan.erp.domain.*;
+import com.gaebalfan.erp.mapper.InventoryMapper;
 import com.gaebalfan.erp.mapper.OrderMapper;
 import com.gaebalfan.erp.mapper.PurchaseOrderMapper;
 import com.gaebalfan.erp.mapper.ReceiptMapper;
@@ -16,22 +17,27 @@ import java.util.Map;
 @Service
 public class PurchaseOrderService {
 
+    private static final long DEFAULT_WAREHOUSE_ID = 1L;
+
     private final PurchaseOrderMapper        mapper;
     private final OrderMapper                orderMapper;
     private final WorkOrderMapper            workOrderMapper;
     private final ReceiptMapper              receiptMapper;
     private final TransactionStatementMapper statementMapper;
+    private final InventoryMapper            inventoryMapper;
 
     public PurchaseOrderService(PurchaseOrderMapper mapper,
                                 OrderMapper orderMapper,
                                 WorkOrderMapper workOrderMapper,
                                 ReceiptMapper receiptMapper,
-                                TransactionStatementMapper statementMapper) {
+                                TransactionStatementMapper statementMapper,
+                                InventoryMapper inventoryMapper) {
         this.mapper          = mapper;
         this.orderMapper     = orderMapper;
         this.workOrderMapper = workOrderMapper;
         this.receiptMapper   = receiptMapper;
         this.statementMapper = statementMapper;
+        this.inventoryMapper = inventoryMapper;
     }
 
     public List<PurchaseOrder> findAll() {

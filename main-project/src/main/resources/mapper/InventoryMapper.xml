@@ -13,41 +13,53 @@
     </resultMap>
 
     <select id="findAll" resultMap="InventoryResultMap">
-        SELECT i.*, p.product_name, w.warehouse_name
+        SELECT i.product_id, i.warehouse_id, SUM(i.quantity) AS quantity, MAX(i.last_update) AS last_update,
+               p.product_name, w.warehouse_name
         FROM inventory i
         LEFT JOIN products p ON i.product_id = p.product_id
         LEFT JOIN warehouses w ON i.warehouse_id = w.warehouse_id
-        WHERE i.quantity > 0
-        ORDER BY i.last_update DESC
+        GROUP BY i.product_id, i.warehouse_id, p.product_name, w.warehouse_name
+        HAVING SUM(i.quantity) > 0
+        ORDER BY MAX(i.last_update) DESC
     </select>
 
     <select id="findAllPaged" resultMap="InventoryResultMap">
-        SELECT i.*, p.product_name, w.warehouse_name
+        SELECT i.product_id, i.warehouse_id, SUM(i.quantity) AS quantity, MAX(i.last_update) AS last_update,
+               p.product_name, w.warehouse_name
         FROM inventory i
         LEFT JOIN products p ON i.product_id = p.product_id
         LEFT JOIN warehouses w ON i.warehouse_id = w.warehouse_id
         <where>
-            i.quantity > 0
             <if test="q != null and q != ''">
-                AND (p.product_name LIKE CONCAT('%', #{q}, '%')
+                (p.product_name LIKE CONCAT('%', #{q}, '%')
                 OR w.warehouse_name LIKE CONCAT('%', #{q}, '%'))
             </if>
         </where>
-        ORDER BY i.last_update DESC
+        GROUP BY i.product_id, i.warehouse_id, p.product_name, w.warehouse_name
+        HAVING SUM(i.quantity) > 0
+        <if test="q != null and q != ''">
+            AND (p.product_name LIKE CONCAT('%', #{q}, '%')
+                 OR w.warehouse_name LIKE CONCAT('%', #{q}, '%'))
+        </if>
+        ORDER BY MAX(i.last_update) DESC
         LIMIT #{size} OFFSET #{offset}
     </select>
 
     <select id="count" resultType="int">
-        SELECT COUNT(*) FROM inventory i
-        LEFT JOIN products p ON i.product_id = p.product_id
-        LEFT JOIN warehouses w ON i.warehouse_id = w.warehouse_id
-        <where>
-            i.quantity > 0
-            <if test="q != null and q != ''">
-                AND (p.product_name LIKE CONCAT('%', #{q}, '%')
-                OR w.warehouse_name LIKE CONCAT('%', #{q}, '%'))
-            </if>
-        </where>
+        SELECT COUNT(*) FROM (
+            SELECT i.product_id, i.warehouse_id
+            FROM inventory i
+            LEFT JOIN products p ON i.product_id = p.product_id
+            LEFT JOIN warehouses w ON i.warehouse_id = w.warehouse_id
+            <where>
+                <if test="q != null and q != ''">
+                    (p.product_name LIKE CONCAT('%', #{q}, '%')
+                    OR w.warehouse_name LIKE CONCAT('%', #{q}, '%'))
+                </if>
+            </where>
+            GROUP BY i.product_id, i.warehouse_id
+            HAVING SUM(i.quantity) > 0
+        ) t
     </select>
 
     <select id="findById" resultMap="InventoryResultMap">
