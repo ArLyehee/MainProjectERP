@@ -10,10 +10,13 @@
         <result property="warehouseId" column="warehouse_id"/>
         <result property="quantity"    column="quantity"/>
         <result property="lastUpdate"  column="last_update"/>
+        <result property="createdAt"   column="created_at"/>
+        <result property="productName"   column="product_name"/>
+        <result property="warehouseName" column="warehouse_name"/>
     </resultMap>
 
     <select id="findAll" resultMap="InventoryResultMap">
-        SELECT MIN(i.inventory_id) AS inventory_id, i.product_id, i.warehouse_id, SUM(i.quantity) AS quantity, MAX(i.last_update) AS last_update,
+        SELECT MIN(i.inventory_id) AS inventory_id, i.product_id, i.warehouse_id, SUM(i.quantity) AS quantity, MAX(i.last_update) AS last_update, MIN(i.created_at) AS created_at,
                p.product_name, w.warehouse_name
         FROM inventory i
         LEFT JOIN products p ON i.product_id = p.product_id
@@ -24,7 +27,7 @@
     </select>
 
     <select id="findAllPaged" resultMap="InventoryResultMap">
-        SELECT MIN(i.inventory_id) AS inventory_id, i.product_id, i.warehouse_id, SUM(i.quantity) AS quantity, MAX(i.last_update) AS last_update,
+        SELECT MIN(i.inventory_id) AS inventory_id, i.product_id, i.warehouse_id, SUM(i.quantity) AS quantity, MAX(i.last_update) AS last_update, MIN(i.created_at) AS created_at,
                p.product_name, w.warehouse_name
         FROM inventory i
         LEFT JOIN products p ON i.product_id = p.product_id
@@ -75,8 +78,8 @@
 
     <insert id="insert" parameterType="com.gaebalfan.erp.domain.Inventory"
             useGeneratedKeys="true" keyProperty="inventoryId">
-        INSERT INTO inventory (product_id, warehouse_id, quantity, last_update)
-        VALUES (#{productId}, #{warehouseId}, #{quantity}, NOW())
+        INSERT INTO inventory (product_id, warehouse_id, quantity, last_update, created_at)
+        VALUES (#{productId}, #{warehouseId}, #{quantity}, NOW(), NOW())
         ON DUPLICATE KEY UPDATE
             quantity = quantity + #{quantity},
             last_update = NOW()
@@ -89,8 +92,8 @@
     </update>
 
     <update id="updateQuantity">
-        INSERT INTO inventory (product_id, warehouse_id, quantity, last_update)
-        VALUES (#{productId}, #{warehouseId}, #{quantity}, NOW())
+        INSERT INTO inventory (product_id, warehouse_id, quantity, last_update, created_at)
+        VALUES (#{productId}, #{warehouseId}, #{quantity}, NOW(), NOW())
         ON DUPLICATE KEY UPDATE
             quantity = quantity + #{quantity},
             last_update = NOW()
@@ -102,6 +105,20 @@
 
     <select id="findTotalQuantityByProduct" resultType="int">
         SELECT COALESCE(SUM(quantity), 0) FROM inventory WHERE product_id = #{productId}
+    </select>
+
+    <select id="findByWarehouse" resultMap="InventoryResultMap">
+        SELECT MIN(i.inventory_id) AS inventory_id, i.product_id, i.warehouse_id,
+               SUM(i.quantity) AS quantity, MAX(i.last_update) AS last_update,
+               MIN(i.created_at) AS created_at,
+               p.product_name, w.warehouse_name
+        FROM inventory i
+        LEFT JOIN products p ON i.product_id = p.product_id
+        LEFT JOIN warehouses w ON i.warehouse_id = w.warehouse_id
+        WHERE i.warehouse_id = #{warehouseId}
+        GROUP BY i.product_id, i.warehouse_id, p.product_name, w.warehouse_name
+        HAVING SUM(i.quantity) > 0
+        ORDER BY p.product_name
     </select>
 
     <select id="findByProduct" resultMap="InventoryResultMap">

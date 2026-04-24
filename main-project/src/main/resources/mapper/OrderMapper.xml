@@ -15,6 +15,7 @@
         <result property="workOrderId"     column="work_order_id"/>
         <result property="purchaseOrderId" column="purchase_order_id"/>
         <result property="shipmentId"      column="shipment_id"/>
+        <result property="deliveryAddress"  column="delivery_address"/>
         <result property="notes"           column="notes"/>
         <result property="createdAt"       column="created_at"/>
         <result property="updatedAt"       column="updated_at"/>
@@ -71,6 +72,26 @@
 
     <update id="updateStatus">
         UPDATE customer_orders SET status = #{status}, updated_at = NOW()
+        WHERE order_id = #{orderId}
+    </update>
+
+    <update id="updateCompleteWithDelivery">
+        UPDATE customer_orders
+        SET status           = 'COMPLETED',
+            customer_name    = #{customerName},
+            delivery_address = #{deliveryAddress},
+            notes            = #{notes},
+            shipment_id      = #{shipmentId},
+            updated_at       = NOW()
+        WHERE order_id = #{orderId}
+    </update>
+
+    <update id="updateDeliveryInfo">
+        UPDATE customer_orders
+        SET customer_name    = #{customerName},
+            delivery_address = #{deliveryAddress},
+            notes            = #{notes},
+            updated_at       = NOW()
         WHERE order_id = #{orderId}
     </update>
 

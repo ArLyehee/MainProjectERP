@@ -18,7 +18,7 @@
   <td><c:if test="${w.status == '대기'}"><span class="badge badge-pending">대기</span></c:if><c:if test="${w.status == '진행중'}"><span class="badge badge-inprogress">진행중</span></c:if><c:if test="${w.status == '완료'}"><span class="badge badge-completed">완료</span></c:if><c:if test="${w.status == '취소'}"><span class="badge badge-cancelled">취소</span></c:if></td>
   <td onclick="event.stopPropagation()">
     <c:if test="${w.status == '대기'}"><button class="btn-action btn-start" data-id="${w.workOrderId}" data-s="진행중" onclick="changeStatus(this.dataset.id, this.dataset.s)">시작</button><button class="btn-action btn-auto-order" onclick="autoOrderParts(${w.workOrderId})">부품 자동발주</button></c:if>
-    <c:if test="${w.status == '진행중'}"><button class="btn-action btn-complete" data-id="${w.workOrderId}" data-s="완료" onclick="changeStatus(this.dataset.id, this.dataset.s)">생산완료</button></c:if>
+    <c:if test="${w.status == '진행중'}"><button class="btn-action btn-complete" onclick="openCompleteModal(${w.workOrderId})">생산완료</button></c:if>
     <c:if test="${w.status == '대기' or w.status == '진행중'}"><button class="btn-action btn-cancel-w" data-id="${w.workOrderId}" data-s="취소" onclick="changeStatus(this.dataset.id, this.dataset.s)">취소</button></c:if>
   </td>
 </tr>
@@ -100,6 +100,11 @@
 </div><div class="modal-overlay" id="modalOverlay"><div class="modal"><h3>작업지시 등록</h3><div class="form-group"><label>제품 *</label><select id="productId" onchange="onProductOrQtyChange()"></select></div><div class="form-group"><label>생산 수량 *</label><input type="number" id="quantity" placeholder="0" min="1" oninput="onProductOrQtyChange()"></div><div id="stockCheckArea" style="margin:8px 0;display:none;"><div style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--text-muted);"> 자재 재고 현황</div><table style="width:100%;font-size:12px;border-collapse:collapse;" id="stockTable"><thead><tr style="background:var(--surface);"><th style="padding:4px 8px;text-align:left;">자재명</th><th style="padding:4px 8px;text-align:right;">필요</th><th style="padding:4px 8px;text-align:right;">보유</th><th style="padding:4px 8px;text-align:right;">부족</th></tr></thead><tbody id="stockTableBody"></tbody></table></div><div id="stockWarning" style="font-size:12px;color:#e74c3c;margin:4px 0 8px;display:none;"> 재고가 부족한 자재가 있습니다. 등록 시 재고가 음수가 될 수 있습니다.</div><div class="form-group"><label>시작일</label><input type="datetime-local" id="startDate"></div><div class="form-group"><label>상태</label><select id="status"><option value="대기">대기</option><option value="진행중">진행중</option></select></div><div class="modal-footer"><button class="btn-cancel" onclick="closeModal()">취소</button><button class="btn-save" onclick="saveWorkOrder()">저장</button></div></div>
 </div><script>
 let _pendingCompleteWorkOrderId = null;
+function openCompleteModal(id) {
+    _pendingCompleteWorkOrderId = id;
+    document.getElementById('shipWarehouseId').value = '';
+    document.getElementById('shipModal').classList.add('open');
+}
 function closeShipModal() {
     document.getElementById('shipModal').classList.remove('open');
 }

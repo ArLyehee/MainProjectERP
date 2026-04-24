@@ -7,7 +7,7 @@
     <resultMap id="WarehouseResultMap" type="com.gaebalfan.erp.domain.Warehouse">
         <id     property="warehouseId"   column="warehouse_id"/>
         <result property="warehouseName" column="warehouse_name"/>
-        <result property="location"      column="location"/>
+        <result property="createdAt"     column="created_at"/>
     </resultMap>
 
     <select id="findAll" resultMap="WarehouseResultMap">
@@ -20,14 +20,13 @@
 
     <insert id="insert" parameterType="com.gaebalfan.erp.domain.Warehouse"
             useGeneratedKeys="true" keyProperty="warehouseId">
-        INSERT INTO warehouses (warehouse_name, location)
-        VALUES (#{warehouseName}, #{location})
+        INSERT INTO warehouses (warehouse_name, created_at)
+        VALUES (#{warehouseName}, NOW())
     </insert>
 
     <update id="update" parameterType="com.gaebalfan.erp.domain.Warehouse">
         UPDATE warehouses
-        SET warehouse_name = #{warehouseName},
-            location       = #{location}
+        SET warehouse_name = #{warehouseName}
         WHERE warehouse_id = #{warehouseId}
     </update>
 

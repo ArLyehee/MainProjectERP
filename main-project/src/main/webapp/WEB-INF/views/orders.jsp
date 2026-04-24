@@ -12,7 +12,6 @@
 <title>주문 처리 현황 | 개발팬 ERP</title>
 <link rel="stylesheet" href="/css/erp.css?v=18">
 <style>
-/* ── 주문 상태 배지 ── */
 .badge-pending       { background:#fef3c7; color:#92400e; border:1px solid #f59e0b; }
 .badge-hold          { background:#fee2e2; color:#991b1b; border:1px solid #f87171; }
 .badge-in-production { background:#dbeafe; color:#1e3a8a; border:1px solid #60a5fa; }
@@ -20,50 +19,32 @@
 .badge-ready         { background:#d1fae5; color:#065f46; border:1px solid #34d399; }
 .badge-shipped       { background:#e5e7eb; color:#374151; border:1px solid #9ca3af; }
 
-/* ── 플로우 진행바 ── */
 .flow-bar {
-    display: flex;
-    gap: 0;
-    margin-bottom: 20px;
-    border-radius: 10px;
-    overflow: hidden;
-    border: 1px solid #e2e8f0;
+    display: flex; gap: 0; margin-bottom: 20px;
+    border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;
 }
 .flow-step {
-    flex: 1;
-    padding: 10px 6px;
-    text-align: center;
-    font-size: 11px;
-    font-weight: 600;
-    background: #f8fafc;
-    color: #94a3b8;
-    position: relative;
-    cursor: default;
+    flex: 1; padding: 10px 6px; text-align: center;
+    font-size: 11px; font-weight: 600; background: #f8fafc; color: #94a3b8;
+    position: relative; cursor: default;
 }
 .flow-step.active  { background: #3b82f6; color: #fff; }
 .flow-step.done    { background: #d1fae5; color: #065f46; }
 .flow-step.hold-s  { background: #fee2e2; color: #991b1b; }
 .flow-step.filter-selected { outline: 3px solid #1d4ed8; outline-offset: -3px; opacity: 1; font-weight: bold; }
-.flow-step span.count {
-    display: block;
-    font-size: 18px;
-    font-weight: 700;
-    line-height: 1.2;
-}
+.flow-step span.count { display: block; font-size: 18px; font-weight: 700; line-height: 1.2; }
 
-
-/* ── 결과 토스트 ── */
 #toast {
     position: fixed; bottom: 28px; right: 28px; z-index: 9999;
-    padding: 12px 20px; border-radius: 8px;
-    font-size: 13px; font-weight: 600;
-    box-shadow: 0 4px 16px rgba(0,0,0,.15);
-    display: none;
-    max-width: 320px;
+    padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    box-shadow: 0 4px 16px rgba(0,0,0,.15); display: none; max-width: 320px;
 }
 #toast.success { background:#16a34a; color:#fff; }
 #toast.info    { background:#0ea5e9; color:#fff; }
 #toast.warn    { background:#f59e0b; color:#fff; }
+
+.addr-cell { max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:#374151; }
+.addr-none { color:#d1d5db; font-size:12px; }
 </style>
 </head>
 <body>
@@ -118,15 +99,14 @@
                     <th class="sort-th" onclick="sortTable(this,2,'str')">제품<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th>
                     <th class="sort-th" onclick="sortTable(this,3,'num')">수량<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th>
                     <th class="sort-th" onclick="sortTable(this,4,'str')">상태<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th>
-                    <th class="sort-th" onclick="sortTable(this,5,'str')">등록일<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th>
+                    <th>배송지</th>
+                    <th class="sort-th" onclick="sortTable(this,6,'str')">등록일<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th>
                     <th>액션</th>
                 </tr>
             </thead>
             <tbody>
                 <c:if test="${empty orderList}">
-                <tr>
-                    <td colspan="7" class="empty-state">등록된 주문이 없습니다.</td>
-                </tr>
+                <tr><td colspan="8" class="empty-state">등록된 주문이 없습니다.</td></tr>
                 </c:if>
                 <c:forEach var="o" items="${orderList}">
                 <tr data-status="${o.status}">
@@ -142,6 +122,14 @@
                         <c:if test="${o.status == '출고준비'}"><span class="badge badge-ready">출고 준비</span></c:if>
                         <c:if test="${o.status == 'COMPLETED'}"><span class="badge badge-shipped">출고 완료</span></c:if>
                     </td>
+                    <td>
+                        <c:choose>
+                            <c:when test="${not empty o.deliveryAddress}">
+                                <span class="addr-cell" title="${o.deliveryAddress}">${o.deliveryAddress}</span>
+                            </c:when>
+                            <c:otherwise><span class="addr-none">-</span></c:otherwise>
+                        </c:choose>
+                    </td>
                     <td>${o.createdAtStr}</td>
                     <td>
                         <!-- 대기: 수락 / 보류 -->
@@ -155,7 +143,7 @@
                         <button class="btn-action btn-reopen" onclick="reopenOrder(${o.orderId})">재검토</button>
                         </c:if>
 
-                        <!-- ACCEPTED: 취소만 가능 (출고 준비는 작업지시 완료 시 자동) -->
+                        <!-- ACCEPTED: 취소만 가능 -->
                         <c:if test="${o.status == 'ACCEPTED'}">
                         <button class="btn-action btn-cancel-w" onclick="cancelOrder(${o.orderId})">취소</button>
                         </c:if>
@@ -165,9 +153,15 @@
                         <button class="btn-action btn-cancel-w" onclick="cancelOrder(${o.orderId})">취소</button>
                         </c:if>
 
-                        <!-- 출고준비: 출고 처리 -->
+                        <!-- 출고준비: 출고 처리 + 배송지 등록 -->
                         <c:if test="${o.status == '출고준비'}">
-                        <button class="btn-action btn-ship" onclick="shipOrder(${o.orderId}, ${o.productId})">출고 처리</button>
+                        <button class="btn-action" style="background:#eff6ff;color:#2563eb;border-color:#bfdbfe;"
+                            onclick="openEditOrder(${o.orderId}, '출고준비')">출고 처리</button>
+                        </c:if>
+                        <!-- 완료: 배송지 수정만 -->
+                        <c:if test="${o.status == 'COMPLETED'}">
+                        <button class="btn-action" style="background:#f3f4f6;color:#374151;border-color:#d1d5db;"
+                            onclick="openEditOrder(${o.orderId}, 'COMPLETED')">배송지 수정</button>
                         </c:if>
 
                         <!-- 연계 정보 링크 -->
@@ -235,45 +229,56 @@
     </div>
 </div>
 
-<!-- 출고 창고 선택 모달 -->
-<div class="modal-overlay" id="shipModalOverlay">
-<div class="modal" style="max-width:400px;">
-  <h3>출고 처리</h3>
-  <p style="font-size:12px;color:#6b7280;margin-bottom:12px;">출고할 창고를 선택하세요. 해당 창고의 재고에서 차감됩니다.</p>
-  <div class="form-group">
-    <label>출고 창고 *</label>
-    <select id="shipOrderWarehouseId">
-      <option value="">창고 선택</option>
-      <c:forEach var="w" items="${warehouseList}">
-        <option value="${w.warehouseId}">${w.warehouseName}</option>
-      </c:forEach>
-    </select>
-  </div>
-  <div id="warehouseStockInfo" style="font-size:12px;color:#6b7280;margin-top:6px;"></div>
-  <div class="modal-footer">
-    <button class="btn-cancel" onclick="closeShipOrderModal()">취소</button>
-    <button class="btn-save" onclick="confirmShipOrder()">출고 처리</button>
-  </div>
-</div>
+<!-- 배송 정보 수정 / 출고 처리 모달 -->
+<div class="modal-overlay" id="editOrderOverlay">
+    <div class="modal" style="max-width:460px;">
+        <h3 id="editModalTitle">배송 정보 수정</h3>
+        <input type="hidden" id="editOrderId">
+        <input type="hidden" id="editOrderStatus">
+        <!-- 출고준비 상태일 때만 표시 -->
+        <div id="editWarehouseSection" class="form-group" style="display:none;">
+            <label>출고 창고 *</label>
+            <select id="editOrderWarehouseId">
+                <option value="">창고 선택</option>
+                <c:forEach var="w" items="${warehouseList}">
+                    <option value="${w.warehouseId}">${w.warehouseName}</option>
+                </c:forEach>
+            </select>
+            <div style="font-size:11px;color:#6b7280;margin-top:4px;">선택한 창고에서 재고가 차감되고 출고관리에 내역이 생성됩니다.</div>
+        </div>
+        <div class="form-group">
+            <label>고객명 *</label>
+            <input type="text" id="editCustomerName" placeholder="고객사명">
+        </div>
+        <div class="form-group">
+            <label>배송지 주소 *</label>
+            <input type="text" id="editDeliveryAddress" placeholder="예: 서울특별시 강남구 테헤란로 123">
+        </div>
+        <div class="form-group">
+            <label>비고</label>
+            <input type="text" id="editNotes" placeholder="메모">
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeEditOrder()">취소</button>
+            <button class="btn-save" id="editSaveBtn" onclick="saveOrderInfo()">저장</button>
+        </div>
+    </div>
 </div>
 
 <!-- 토스트 -->
 <div id="toast"></div>
 
 <script>
-// ── 유틸 ──────────────────────────────────────────
 function csrf()       { return document.querySelector('meta[name="_csrf"]').content; }
 function csrfHeader() { return document.querySelector('meta[name="_csrf_header"]').content; }
 
 function showToast(msg, type='success') {
     const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = type;
-    t.style.display = 'block';
+    t.textContent = msg; t.className = type; t.style.display = 'block';
     setTimeout(() => { t.style.display = 'none'; }, 3000);
 }
 
-// ── 현황 집계 ─────────────────────────────────────
+// 현황 집계
 (function buildSummary() {
     const counts = {};
     document.querySelectorAll('tbody tr[data-status]').forEach(tr => {
@@ -284,15 +289,14 @@ function showToast(msg, type='success') {
         const el = document.getElementById('cnt-' + s);
         if (el) el.textContent = counts[s] || 0;
     });
-    // 활성 단계 강조
-    const activeMap = {'대기':'active', '보류':'hold-s', 'ACCEPTED':'active', '발주':'active', '출고준비':'active', 'COMPLETED':'done'};
+    const activeMap = {'대기':'active','보류':'hold-s','ACCEPTED':'active','발주':'active','출고준비':'active','COMPLETED':'done'};
     Object.keys(counts).forEach(s => {
         const el = document.getElementById('fs-' + s);
         if (el && counts[s] > 0) el.classList.add(activeMap[s] || 'active');
     });
 })();
 
-// ── 상태 필터 ─────────────────────────────────────
+// 상태 필터
 let _activeFilter = null;
 function filterByStatus(status) {
     if (_activeFilter === status) {
@@ -310,7 +314,7 @@ function filterByStatus(status) {
     }
 }
 
-// ── 검색 ──────────────────────────────────────────
+// 검색
 function filterTable() {
     const q = document.getElementById('searchInput').value.toLowerCase();
     document.querySelectorAll('tbody tr').forEach(tr => {
@@ -319,7 +323,7 @@ function filterTable() {
     });
 }
 
-// ── 정렬 ──────────────────────────────────────────
+// 정렬
 const _sort = {col:-1, asc:true};
 function sortTable(th, col, type) {
     document.querySelectorAll('.sort-th').forEach(t => t.classList.remove('sort-asc','sort-desc'));
@@ -339,7 +343,7 @@ function sortTable(th, col, type) {
     rows.forEach(r => tbody.appendChild(r));
 }
 
-// ── 모달 ──────────────────────────────────────────
+// 주문 등록 모달
 function openCreate() { document.getElementById('modalOverlay').classList.add('open'); }
 function closeModal()  { document.getElementById('modalOverlay').classList.remove('open'); }
 
@@ -358,111 +362,100 @@ function saveOrder() {
         method: 'POST',
         headers: {'Content-Type':'application/json', [csrfHeader()]: csrf()},
         body: JSON.stringify(data)
-    }).then(r => {
-        if (r.ok) location.reload();
-        else showToast('저장 실패', 'warn');
-    });
+    }).then(r => { if (r.ok) location.reload(); else showToast('저장 실패', 'warn'); });
 }
 
-// ── 주문 액션 ─────────────────────────────────────
+// 주문 액션
 function approveOrder(id) {
-    if (!confirm('주문을 수락하고 처리하시겠습니까?\n재고가 충분하면 즉시 출고, 부족하면 작업지시가 생성됩니다.')) return;
-    fetch('/api/orders/' + id + '/approve', {
-        method: 'PATCH',
-        headers: {[csrfHeader()]: csrf()}
-    }).then(r => r.json()).then(data => {
-        const msgMap = {
-            '출고준비': '재고 충분 → 출고 준비 완료! 출고 처리 버튼을 눌러 창고를 선택해 출고하세요.',
-            'ACCEPTED':  '재고 부족 → 작업지시가 생성되었습니다. 부족 부품은 작업지시에서 자동 발주하세요.'
-        };
-        showToast(msgMap[data.status] || '처리 완료', 'success');
-        setTimeout(() => location.reload(), 1500);
-    }).catch(() => showToast('처리 중 오류가 발생했습니다.', 'warn'));
+    if (!confirm('주문을 수락하고 처리하시겠습니까?\n재고가 충분하면 즉시 출고 준비, 부족하면 작업지시가 생성됩니다.')) return;
+    fetch('/api/orders/' + id + '/approve', { method: 'PATCH', headers: {[csrfHeader()]: csrf()} })
+        .then(r => r.json()).then(data => {
+            const msgMap = {
+                '출고준비': '재고 충분 → 출고 준비 완료! 배송지를 등록해 주세요.',
+                'ACCEPTED':  '재고 부족 → 작업지시가 생성되었습니다.'
+            };
+            showToast(msgMap[data.status] || '처리 완료', 'success');
+            setTimeout(() => location.reload(), 1500);
+        }).catch(() => showToast('처리 중 오류가 발생했습니다.', 'warn'));
 }
 
 function holdOrder(id) {
-    fetch('/api/orders/' + id + '/hold', {
-        method: 'PATCH',
-        headers: {[csrfHeader()]: csrf()}
-    }).then(r => { if (r.ok) location.reload(); });
+    fetch('/api/orders/' + id + '/hold', { method: 'PATCH', headers: {[csrfHeader()]: csrf()} })
+        .then(r => { if (r.ok) location.reload(); });
 }
 
 function reopenOrder(id) {
-    fetch('/api/orders/' + id + '/reopen', {
-        method: 'PATCH',
-        headers: {[csrfHeader()]: csrf()}
-    }).then(r => { if (r.ok) location.reload(); });
-}
-
-function markReady(id) {
-    if (!confirm('출고 준비 상태로 전환하시겠습니까?')) return;
-    fetch('/api/orders/' + id + '/ready', {
-        method: 'PATCH',
-        headers: {[csrfHeader()]: csrf()}
-    }).then(r => {
-        if (r.ok) { showToast('출고 준비 상태로 전환되었습니다.', 'success'); setTimeout(() => location.reload(), 1500); }
-        else showToast('처리 오류', 'warn');
-    });
+    fetch('/api/orders/' + id + '/reopen', { method: 'PATCH', headers: {[csrfHeader()]: csrf()} })
+        .then(r => { if (r.ok) location.reload(); });
 }
 
 function cancelOrder(id) {
     if (!confirm('주문을 취소하시겠습니까?')) return;
-    fetch('/api/orders/' + id + '/cancel', {
-        method: 'PATCH',
-        headers: {[csrfHeader()]: csrf()}
-    }).then(r => {
-        if (r.ok) { showToast('주문이 취소되었습니다.', 'info'); setTimeout(() => location.reload(), 1500); }
-        else showToast('처리 오류', 'warn');
-    });
-}
-
-let _pendingShipOrderId = null;
-let _pendingShipProductId = null;
-
-function shipOrder(id, productId) {
-    _pendingShipOrderId = id;
-    _pendingShipProductId = productId;
-    document.getElementById('shipOrderWarehouseId').value = '';
-    document.getElementById('warehouseStockInfo').textContent = '';
-    document.getElementById('shipModalOverlay').classList.add('open');
-    if (productId) loadWarehouseStock(productId);
-}
-
-function loadWarehouseStock(productId) {
-    fetch('/api/inventory/by-product/' + productId)
-        .then(r => r.json())
-        .then(list => {
-            const info = document.getElementById('warehouseStockInfo');
-            if (!list || list.length === 0) {
-                info.textContent = '재고 있는 창고가 없습니다.';
-                return;
-            }
-            info.innerHTML = '<b>창고별 재고:</b> ' + list.map(i =>
-                (i.warehouseName || i.warehouseId) + ' ' + i.quantity + '개'
-            ).join(', ');
+    fetch('/api/orders/' + id + '/cancel', { method: 'PATCH', headers: {[csrfHeader()]: csrf()} })
+        .then(r => {
+            if (r.ok) { showToast('주문이 취소되었습니다.', 'info'); setTimeout(() => location.reload(), 1500); }
+            else showToast('처리 오류', 'warn');
         });
 }
 
-function closeShipOrderModal() {
-    document.getElementById('shipModalOverlay').classList.remove('open');
-}
+// 배송 정보 수정 / 출고 처리
+function openEditOrder(id, status) {
+    fetch('/api/orders/' + id)
+        .then(r => r.json())
+        .then(o => {
+            document.getElementById('editOrderId').value = id;
+            document.getElementById('editOrderStatus').value = status;
+            document.getElementById('editCustomerName').value = o.customerName || '';
+            document.getElementById('editDeliveryAddress').value = o.deliveryAddress || '';
+            document.getElementById('editNotes').value = o.notes || '';
+            document.getElementById('editOrderWarehouseId').value = '';
 
-function confirmShipOrder() {
-    const warehouseId = document.getElementById('shipOrderWarehouseId').value;
-    if (!warehouseId) { showToast('창고를 선택하세요.', 'warn'); return; }
-    fetch('/api/orders/' + _pendingShipOrderId + '/ship', {
-        method: 'PATCH',
-        headers: {'Content-Type':'application/json', [csrfHeader()]: csrf()},
-        body: JSON.stringify({warehouseId: parseInt(warehouseId)})
-    }).then(r => r.json()).then(data => {
-        closeShipOrderModal();
-        if (data.success) {
-            showToast('출고 완료! 매출 자동 등록됨.', 'success');
-            setTimeout(() => location.reload(), 1500);
-        } else {
-            showToast('오류: ' + (data.error || '처리 실패'), 'warn');
-        }
-    }).catch(() => showToast('처리 오류', 'warn'));
+            const isShip = status === '출고준비';
+            document.getElementById('editWarehouseSection').style.display = isShip ? '' : 'none';
+            document.getElementById('editModalTitle').textContent = isShip ? '출고 처리 및 배송지 등록' : '배송 정보 수정';
+            document.getElementById('editSaveBtn').textContent = isShip ? '출고 완료' : '저장';
+
+            document.getElementById('editOrderOverlay').classList.add('open');
+        });
+}
+function closeEditOrder() { document.getElementById('editOrderOverlay').classList.remove('open'); }
+function saveOrderInfo() {
+    const id     = document.getElementById('editOrderId').value;
+    const status = document.getElementById('editOrderStatus').value;
+    const data   = {
+        customerName:    document.getElementById('editCustomerName').value,
+        deliveryAddress: document.getElementById('editDeliveryAddress').value,
+        notes:           document.getElementById('editNotes').value
+    };
+    if (!data.customerName.trim())    { showToast('고객명을 입력하세요.', 'warn'); return; }
+    if (!data.deliveryAddress.trim()) { showToast('배송지 주소를 입력하세요.', 'warn'); return; }
+
+    if (status === '출고준비') {
+        const warehouseId = document.getElementById('editOrderWarehouseId').value;
+        if (!warehouseId) { showToast('출고 창고를 선택하세요.', 'warn'); return; }
+        data.warehouseId = parseInt(warehouseId);
+        fetch('/api/orders/' + id + '/complete-shipment', {
+            method: 'PATCH',
+            headers: {'Content-Type':'application/json', [csrfHeader()]: csrf()},
+            body: JSON.stringify(data)
+        }).then(r => r.json()).then(d => {
+            if (d.success) {
+                showToast('출고 완료! 출고관리에 내역이 등록되었습니다.', 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast('오류: ' + (d.error || '처리 실패'), 'warn');
+            }
+        }).catch(() => showToast('처리 오류', 'warn'));
+    } else {
+        fetch('/api/orders/' + id + '/delivery-info', {
+            method: 'PATCH',
+            headers: {'Content-Type':'application/json', [csrfHeader()]: csrf()},
+            body: JSON.stringify(data)
+        }).then(r => {
+            if (r.ok) { showToast('저장되었습니다.', 'success'); setTimeout(() => location.reload(), 1000); }
+            else showToast('저장 실패', 'warn');
+        });
+    }
 }
 </script>
 </body>

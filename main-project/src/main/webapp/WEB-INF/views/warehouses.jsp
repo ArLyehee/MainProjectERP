@@ -6,16 +6,89 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head><meta charset="UTF-8"><meta name="_csrf" content="${_csrf.token}"><meta name="_csrf_header" content="${_csrf.headerName}"><title>창고 관리 | 개발팬 ERP</title><link rel="stylesheet" href="/css/erp.css?v=18">
+<style>
+.wh-stats{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;}
+.wh-stat{font-size:11px;padding:3px 9px;border-radius:12px;background:rgba(37,99,235,.1);color:#93c5fd;border:1px solid rgba(37,99,235,.2);}
+.inv-table{width:100%;border-collapse:collapse;margin-top:0;}
+.inv-table th{padding:9px 12px;font-size:12px;font-weight:600;text-align:left;border-bottom:2px solid #e5e7eb;color:#6b7280;background:#f9fafb;}
+.inv-table td{padding:10px 12px;font-size:13px;border-bottom:1px solid #f3f4f6;}
+.inv-table tr:last-child td{border-bottom:none;}
+.inv-table tr:hover td{background:#f9fafb;}
+.qty-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600;}
+.qty-ok{background:#d1fae5;color:#065f46;}
+.qty-low{background:#fef3c7;color:#92400e;}
+.qty-zero{background:#fee2e2;color:#991b1b;}
+.detail-modal{max-width:680px!important;}
+.detail-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #f3f4f6;}
+.detail-wh-name{font-size:20px;font-weight:700;color:#111;}
+.detail-meta{font-size:12px;color:#9ca3af;}
+.empty-inv{text-align:center;padding:32px;color:#9ca3af;font-size:13px;}
+</style>
 </head>
 <body>
 <div class="layout"><jsp:include page="/WEB-INF/views/fragments/sidebar.jsp">
   <jsp:param name="current" value="warehouses"/>
-</jsp:include><main class="main"><div class="page-header"><div class="page-title"><h2>창고 관리</h2><p>제품 보관 창고 현황을 관리합니다.</p></div><button onclick="openCreate()" class="btn btn-primary">+ 창고 등록</button></div><div class="search-bar"><input type="text" id="searchInput" placeholder="창고명, 위치 검색..." oninput="filterTable()" class="search-input"></div><div class="card"><table><thead><tr><th class="sort-th" onclick="sortTable(this,0,'num')">#<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,1,'str')">창고명<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th class="sort-th" onclick="sortTable(this,2,'str')">위치<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th><th>액션</th></tr></thead><tbody><c:if test="${empty warehouseList}"><tr><td colspan="4" class="empty-state">등록된 창고가 없습니다.</td></tr></c:if><c:forEach var="w" items="${warehouseList}">
-<tr><td>${w.warehouseId}</td><td>${w.warehouseName}</td><td class="location">${w.location}</td><td><button class="btn-action btn-edit" onclick="openEdit(${w.warehouseId})">수정</button><button class="btn-action btn-del"  onclick="confirmDelete(${w.warehouseId})">삭제</button></td></tr>
-</c:forEach></tbody></table></div></main>
-</div><div class="modal-overlay" id="modalOverlay"><div class="modal"><h3 id="modalTitle">창고 등록</h3><input type="hidden" id="warehouseId"><div class="form-group"><label>창고명 *</label><input type="text" id="warehouseName" placeholder="창고명 입력"></div><div class="form-group"><label>위치</label><input type="text" id="location" placeholder="위치 입력"></div><div class="modal-footer"><button class="btn-cancel" onclick="closeModal()">취소</button><button class="btn-save" onclick="saveWarehouse()">저장</button></div></div>
-</div><script>
+</jsp:include><main class="main">
+<div class="page-header">
+  <div class="page-title"><h2>창고 관리</h2><p>창고별 재고 현황을 관리합니다.</p></div>
+  <button onclick="openCreate()" class="btn btn-primary">+ 창고 등록</button>
+</div>
+<div class="search-bar"><input type="text" id="searchInput" placeholder="창고명 검색..." oninput="filterTable()" class="search-input"></div>
+<div class="card"><table><thead>
+  <tr>
+    <th class="sort-th" onclick="sortTable(this,0,'num')">#<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th>
+    <th class="sort-th" onclick="sortTable(this,1,'str')">창고명<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th>
+    <th>등록일</th>
+    <th>액션</th>
+  </tr>
+</thead><tbody>
+<c:if test="${empty warehouseList}"><tr><td colspan="5" class="empty-state">등록된 창고가 없습니다.</td></tr></c:if>
+<c:forEach var="w" items="${warehouseList}">
+<tr>
+  <td>${w.warehouseId}</td>
+  <td><strong>${w.warehouseName}</strong></td>
+  <td style="font-size:12px;color:#9ca3af;">${w.createdAtStr}</td>
+  <td>
+    <button class="btn-action" style="background:#eff6ff;color:#2563eb;border-color:#bfdbfe;" onclick="openDetail(${w.warehouseId}, '${w.warehouseName}')">재고보기</button>
+    <button class="btn-action btn-edit" onclick="openEdit(${w.warehouseId})">수정</button>
+    <button class="btn-action btn-del"  onclick="confirmDelete(${w.warehouseId})">삭제</button>
+  </td>
+</tr>
+</c:forEach>
+</tbody></table></div>
+</main>
+</div>
+
+<!-- 창고 등록/수정 모달 -->
+<div class="modal-overlay" id="modalOverlay"><div class="modal">
+  <h3 id="modalTitle">창고 등록</h3>
+  <input type="hidden" id="warehouseId">
+  <div class="form-group"><label>창고명 *</label><input type="text" id="warehouseName" placeholder="예: D창고"></div>
+  <div class="modal-footer">
+    <button class="btn-cancel" onclick="closeModal()">취소</button>
+    <button class="btn-save" onclick="saveWarehouse()">저장</button>
+  </div>
+</div></div>
+
+<!-- 창고 재고 상세 모달 -->
+<div class="modal-overlay" id="detailOverlay"><div class="modal detail-modal">
+  <div class="detail-header">
+    <div>
+      <div class="detail-wh-name" id="detailWhName">A창고</div>
+      <div class="detail-meta" id="detailWhMeta"></div>
+    </div>
+    <button class="btn-cancel" style="margin-left:auto;" onclick="closeDetail()">닫기</button>
+  </div>
+  <div id="detailBody">
+    <div class="empty-inv">불러오는 중...</div>
+  </div>
+</div></div>
+
+<script>
+const csrf = document.querySelector('meta[name="_csrf"]').content;
+const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 const _sort = {col:-1, asc:true};
+
 function sortTable(th, col, type) {
     document.querySelectorAll('.sort-th').forEach(t => t.classList.remove('sort-asc','sort-desc'));
     _sort.asc = _sort.col === col ? !_sort.asc : true;
@@ -51,7 +124,6 @@ function openEdit(id) {
             document.getElementById('modalTitle').textContent = '창고 수정';
             document.getElementById('warehouseId').value = w.warehouseId;
             document.getElementById('warehouseName').value = w.warehouseName || '';
-            document.getElementById('location').value = w.location || '';
             document.getElementById('modalOverlay').classList.add('open');
         });
 }
@@ -59,24 +131,65 @@ function closeModal() { document.getElementById('modalOverlay').classList.remove
 function saveWarehouse() {
     const id = document.getElementById('warehouseId').value;
     const data = {
-        warehouseName: document.getElementById('warehouseName').value,
-        location: document.getElementById('location').value
+        warehouseName: document.getElementById('warehouseName').value
     };
+    if (!data.warehouseName.trim()) { alert('창고명을 입력하세요.'); return; }
     const url = id ? '/api/warehouses/' + id : '/api/warehouses';
     const method = id ? 'PUT' : 'POST';
-    const csrf = document.querySelector('meta[name="_csrf"]').content;
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
     fetch(url, { method, headers: {'Content-Type':'application/json', [csrfHeader]: csrf}, body: JSON.stringify(data) })
         .then(() => location.reload());
 }
 function confirmDelete(id) {
     if (confirm('정말 삭제하시겠습니까?')) {
-        const csrf = document.querySelector('meta[name="_csrf"]').content;
-        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
         fetch('/api/warehouses/' + id, { method: 'DELETE', headers: {[csrfHeader]: csrf} })
             .then(() => location.reload());
     }
 }
+
+// 창고 재고 상세
+function openDetail(warehouseId, warehouseName) {
+    document.getElementById('detailWhName').textContent = warehouseName;
+    document.getElementById('detailWhMeta').textContent = '';
+    document.getElementById('detailBody').innerHTML = '<div class="empty-inv">불러오는 중...</div>';
+    document.getElementById('detailOverlay').classList.add('open');
+
+    fetch('/api/inventory/by-warehouse/' + warehouseId)
+        .then(r => r.json())
+        .then(items => {
+            const totalKinds = items.length;
+            const totalQty   = items.reduce((s, i) => s + (i.quantity || 0), 0);
+            document.getElementById('detailWhMeta').textContent =
+                '총 ' + totalKinds + '종 · ' + totalQty.toLocaleString() + '개 보관 중';
+
+            if (items.length === 0) {
+                document.getElementById('detailBody').innerHTML =
+                    '<div class="empty-inv">이 창고에 보관 중인 재고가 없습니다.</div>';
+                return;
+            }
+            let html = '<table class="inv-table"><thead><tr>' +
+                '<th>제품명</th><th>보유 수량</th><th>최종 업데이트</th><th>최초 입고일</th>' +
+                '</tr></thead><tbody>';
+            items.forEach(i => {
+                const qty = i.quantity || 0;
+                const qtyClass = qty <= 0 ? 'qty-zero' : qty <= 10 ? 'qty-low' : 'qty-ok';
+                const lastUpd  = i.lastUpdate ? i.lastUpdate.substring(0, 10) : '-';
+                const created  = i.createdAt  ? i.createdAt.substring(0, 10)  : '-';
+                html += '<tr>' +
+                    '<td><strong>' + (i.productName || '-') + '</strong></td>' +
+                    '<td><span class="qty-badge ' + qtyClass + '">' + qty.toLocaleString() + '개</span></td>' +
+                    '<td style="font-size:12px;color:#9ca3af;">' + lastUpd + '</td>' +
+                    '<td style="font-size:12px;color:#9ca3af;">' + created + '</td>' +
+                    '</tr>';
+            });
+            html += '</tbody></table>';
+            document.getElementById('detailBody').innerHTML = html;
+        })
+        .catch(() => {
+            document.getElementById('detailBody').innerHTML =
+                '<div class="empty-inv">데이터를 불러오지 못했습니다.</div>';
+        });
+}
+function closeDetail() { document.getElementById('detailOverlay').classList.remove('open'); }
 </script>
 </body>
 </html>

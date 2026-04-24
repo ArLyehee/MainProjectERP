@@ -17,6 +17,39 @@ public class OrderController {
         this.service = service;
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<CustomerOrder> findById(@PathVariable Long id) {
+        CustomerOrder order = service.findById(id);
+        if (order == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(order);
+    }
+
+    @PatchMapping("/{id}/complete-shipment")
+    public ResponseEntity<Map<String, Object>> completeShipment(@PathVariable Long id,
+            @RequestBody Map<String, Object> body) {
+        try {
+            Long warehouseId = body != null && body.get("warehouseId") != null
+                    ? Long.valueOf(body.get("warehouseId").toString()) : null;
+            String customerName    = body != null ? (String) body.get("customerName")    : null;
+            String deliveryAddress = body != null ? (String) body.get("deliveryAddress") : null;
+            String notes           = body != null ? (String) body.get("notes")           : null;
+            service.completeShipment(id, warehouseId, customerName, deliveryAddress, notes);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PatchMapping("/{id}/delivery-info")
+    public ResponseEntity<Void> updateDeliveryInfo(@PathVariable Long id,
+            @RequestBody Map<String, Object> body) {
+        String customerName    = body != null ? (String) body.get("customerName")    : null;
+        String deliveryAddress = body != null ? (String) body.get("deliveryAddress") : null;
+        String notes           = body != null ? (String) body.get("notes")           : null;
+        service.updateDeliveryInfo(id, customerName, deliveryAddress, notes);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping
     public ResponseEntity<Void> insert(@RequestBody CustomerOrder order) {
         service.insert(order);

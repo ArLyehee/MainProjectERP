@@ -16,6 +16,15 @@ public interface OrderMapper {
     CustomerOrder findByWorkOrderId(@Param("workOrderId") Long workOrderId);
     void insert(CustomerOrder order);
     void updateStatus(@Param("orderId") Long orderId, @Param("status") String status);
+    void updateCompleteWithDelivery(@Param("orderId") Long orderId,
+                                    @Param("customerName") String customerName,
+                                    @Param("deliveryAddress") String deliveryAddress,
+                                    @Param("notes") String notes,
+                                    @Param("shipmentId") Long shipmentId);
+    void updateDeliveryInfo(@Param("orderId") Long orderId,
+                            @Param("customerName") String customerName,
+                            @Param("deliveryAddress") String deliveryAddress,
+                            @Param("notes") String notes);
     void updateAfterApprove(@Param("orderId") Long orderId,
                             @Param("status") String status,
                             @Param("workOrderId") Long workOrderId,

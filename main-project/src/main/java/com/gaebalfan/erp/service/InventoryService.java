@@ -30,6 +30,10 @@ public class InventoryService {
         return mapper.findByProduct(productId);
     }
 
+    public List<Inventory> findByWarehouse(Long warehouseId) {
+        return mapper.findByWarehouse(warehouseId);
+    }
+
     public Inventory findById(Long id) {
         return mapper.findById(id);
     }

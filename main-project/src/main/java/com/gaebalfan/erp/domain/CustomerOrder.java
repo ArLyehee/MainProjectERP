@@ -17,6 +17,7 @@ public class CustomerOrder {
     private Integer       purchaseOrderId; // 생성된 발주 ID
     private Long          shipmentId;     // 생성된 출고 ID
 
+    private String        deliveryAddress;
     private String        notes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -35,6 +36,7 @@ public class CustomerOrder {
     public Long          getWorkOrderId()    { return workOrderId; }
     public Integer       getPurchaseOrderId(){ return purchaseOrderId; }
     public Long          getShipmentId()     { return shipmentId; }
+    public String        getDeliveryAddress(){ return deliveryAddress; }
     public String        getNotes()          { return notes; }
     public LocalDateTime getCreatedAt()      { return createdAt; }
     public LocalDateTime getUpdatedAt()      { return updatedAt; }
@@ -59,6 +61,7 @@ public class CustomerOrder {
     public void setWorkOrderId(Long workOrderId)       { this.workOrderId = workOrderId; }
     public void setPurchaseOrderId(Integer purchaseOrderId) { this.purchaseOrderId = purchaseOrderId; }
     public void setShipmentId(Long shipmentId)         { this.shipmentId = shipmentId; }
+    public void setDeliveryAddress(String deliveryAddress) { this.deliveryAddress = deliveryAddress; }
     public void setNotes(String notes)                 { this.notes = notes; }
     public void setCreatedAt(LocalDateTime createdAt)  { this.createdAt = createdAt; }
     public void setUpdatedAt(LocalDateTime updatedAt)  { this.updatedAt = updatedAt; }

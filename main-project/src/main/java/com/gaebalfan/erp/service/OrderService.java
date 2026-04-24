@@ -59,6 +59,31 @@ public class OrderService {
     }
 
     @Transactional
+    public void completeShipment(Long orderId, Long warehouseId, String customerName, String deliveryAddress, String notes) {
+        CustomerOrder order = orderMapper.findById(orderId);
+        if (order == null) throw new IllegalArgumentException("주문을 찾을 수 없습니다: " + orderId);
+        if (!"출고준비".equals(order.getStatus()))
+            throw new IllegalStateException("출고준비 상태인 주문만 출고 처리할 수 있습니다.");
+
+        long wh = warehouseId != null ? warehouseId : DEFAULT_WAREHOUSE_ID;
+        com.gaebalfan.erp.domain.Inventory stock = inventoryMapper.findByProductAndWarehouse(order.getProductId(), wh);
+        int currentQty = (stock != null) ? stock.getQuantity() : 0;
+        if (currentQty < order.getQuantity())
+            throw new IllegalStateException("선택한 창고에 재고가 부족합니다. 현재 " + currentQty + "개, 필요 " + order.getQuantity() + "개");
+
+        String cn   = (customerName != null && !customerName.isBlank()) ? customerName : order.getCustomerName();
+        String dest = (deliveryAddress != null && !deliveryAddress.isBlank()) ? deliveryAddress : cn;
+        Long shipmentId = doShipAndSale(order, wh, dest);
+
+        orderMapper.updateCompleteWithDelivery(orderId, cn, deliveryAddress, notes, shipmentId);
+    }
+
+    @Transactional
+    public void updateDeliveryInfo(Long orderId, String customerName, String deliveryAddress, String notes) {
+        orderMapper.updateDeliveryInfo(orderId, customerName, deliveryAddress, notes);
+    }
+
+    @Transactional
     public void hold(Long orderId) {
         orderMapper.updateStatus(orderId, "보류");
     }
@@ -115,7 +140,7 @@ public class OrderService {
         if (currentQty < order.getQuantity()) {
             throw new IllegalStateException("선택한 창고에 재고가 부족합니다. 현재 " + currentQty + "개, 필요 " + order.getQuantity() + "개");
         }
-        Long shipmentId = doShipAndSale(order, wh);
+        Long shipmentId = doShipAndSale(order, wh, null);
         orderMapper.updateAfterApprove(orderId, "COMPLETED", order.getWorkOrderId(), order.getPurchaseOrderId(), shipmentId);
     }
 
@@ -124,21 +149,21 @@ public class OrderService {
         CustomerOrder order = orderMapper.findByWorkOrderId(workOrderId);
         if (order == null || !"출고준비".equals(order.getStatus())) return false;
         long wh = warehouseId != null ? warehouseId : DEFAULT_WAREHOUSE_ID;
-        Long shipmentId = doShipAndSale(order, wh);
+        Long shipmentId = doShipAndSale(order, wh, null);
         orderMapper.updateAfterApprove(order.getOrderId(), "COMPLETED", workOrderId, order.getPurchaseOrderId(), shipmentId);
         return true;
     }
 
     // ─── 내부 헬퍼 ──────────────────────────────────────────────────────────
 
-    private Long doShipAndSale(CustomerOrder order, long warehouseId) {
+    private Long doShipAndSale(CustomerOrder order, long warehouseId, String destination) {
         // 출고 등록
         Shipment shipment = new Shipment();
         shipment.setProductId(order.getProductId());
         shipment.setWarehouseId(warehouseId);
         shipment.setQuantity(order.getQuantity());
         shipment.setShipmentDate(LocalDateTime.now());
-        shipment.setDestination(order.getCustomerName());
+        shipment.setDestination(destination != null && !destination.isBlank() ? destination : order.getCustomerName());
         shipmentMapper.insert(shipment);
 
         // 재고 차감

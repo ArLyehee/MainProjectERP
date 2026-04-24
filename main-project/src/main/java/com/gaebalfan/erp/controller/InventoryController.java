@@ -31,6 +31,11 @@ public class InventoryController {
         return ResponseEntity.ok(service.findByProduct(productId));
     }
 
+    @GetMapping("/by-warehouse/{warehouseId}")
+    public ResponseEntity<List<Inventory>> findByWarehouse(@PathVariable Long warehouseId) {
+        return ResponseEntity.ok(service.findByWarehouse(warehouseId));
+    }
+
     @PostMapping
     public ResponseEntity<Void> insert(@RequestBody Inventory obj) {
         service.insert(obj);
