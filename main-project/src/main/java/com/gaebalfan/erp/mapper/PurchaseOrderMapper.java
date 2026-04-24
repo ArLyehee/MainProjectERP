@@ -22,4 +22,5 @@ public interface PurchaseOrderMapper {
     List<PurchaseOrderItem> findItemsByPoCode(@Param("poCode") String poCode);
     Long findSupplierIdByProduct(@Param("productId") Long productId);
     List<Product> findProductsBySupplier(@Param("supplierId") Long supplierId);
+    int countByPoCodePrefix(@Param("prefix") String prefix);
 }

@@ -7,6 +7,7 @@
     <resultMap id="WarehouseResultMap" type="com.gaebalfan.erp.domain.Warehouse">
         <id     property="warehouseId"   column="warehouse_id"/>
         <result property="warehouseName" column="warehouse_name"/>
+        <result property="warehouseType" column="warehouse_type"/>
         <result property="createdAt"     column="created_at"/>
     </resultMap>
 
@@ -20,13 +21,14 @@
 
     <insert id="insert" parameterType="com.gaebalfan.erp.domain.Warehouse"
             useGeneratedKeys="true" keyProperty="warehouseId">
-        INSERT INTO warehouses (warehouse_name, created_at)
-        VALUES (#{warehouseName}, NOW())
+        INSERT INTO warehouses (warehouse_name, warehouse_type, created_at)
+        VALUES (#{warehouseName}, #{warehouseType, jdbcType=VARCHAR}, NOW())
     </insert>
 
     <update id="update" parameterType="com.gaebalfan.erp.domain.Warehouse">
         UPDATE warehouses
-        SET warehouse_name = #{warehouseName}
+        SET warehouse_name = #{warehouseName},
+            warehouse_type = #{warehouseType, jdbcType=VARCHAR}
         WHERE warehouse_id = #{warehouseId}
     </update>
 

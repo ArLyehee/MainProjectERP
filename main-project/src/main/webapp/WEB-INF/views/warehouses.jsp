@@ -9,6 +9,9 @@
 <style>
 .wh-stats{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;}
 .wh-stat{font-size:11px;padding:3px 9px;border-radius:12px;background:rgba(37,99,235,.1);color:#93c5fd;border:1px solid rgba(37,99,235,.2);}
+.type-badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600;}
+.type-material{background:#fef3c7;color:#92400e;border:1px solid #f59e0b;}
+.type-finished{background:#dbeafe;color:#1e3a8a;border:1px solid #60a5fa;}
 .inv-table{width:100%;border-collapse:collapse;margin-top:0;}
 .inv-table th{padding:9px 12px;font-size:12px;font-weight:600;text-align:left;border-bottom:2px solid #e5e7eb;color:#6b7280;background:#f9fafb;}
 .inv-table td{padding:10px 12px;font-size:13px;border-bottom:1px solid #f3f4f6;}
@@ -38,15 +41,26 @@
   <tr>
     <th class="sort-th" onclick="sortTable(this,0,'num')">#<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th>
     <th class="sort-th" onclick="sortTable(this,1,'str')">창고명<span class="sort-btn"><span class="arr-up">▲</span><span class="arr-down">▼</span></span></th>
+    <th>창고 구분</th>
     <th>등록일</th>
     <th>액션</th>
   </tr>
 </thead><tbody>
-<c:if test="${empty warehouseList}"><tr><td colspan="5" class="empty-state">등록된 창고가 없습니다.</td></tr></c:if>
+<c:if test="${empty warehouseList}"><tr><td colspan="6" class="empty-state">등록된 창고가 없습니다.</td></tr></c:if>
 <c:forEach var="w" items="${warehouseList}">
 <tr>
   <td>${w.warehouseId}</td>
   <td><strong>${w.warehouseName}</strong></td>
+  <td>
+    <c:choose>
+      <c:when test="${w.warehouseType == '자재창고'}">
+        <span class="type-badge type-material">자재창고</span>
+      </c:when>
+      <c:otherwise>
+        <span class="type-badge type-finished">완제품창고</span>
+      </c:otherwise>
+    </c:choose>
+  </td>
   <td style="font-size:12px;color:#9ca3af;">${w.createdAtStr}</td>
   <td>
     <button class="btn-action" style="background:#eff6ff;color:#2563eb;border-color:#bfdbfe;" onclick="openDetail(${w.warehouseId}, '${w.warehouseName}')">재고보기</button>
@@ -64,6 +78,13 @@
   <h3 id="modalTitle">창고 등록</h3>
   <input type="hidden" id="warehouseId">
   <div class="form-group"><label>창고명 *</label><input type="text" id="warehouseName" placeholder="예: D창고"></div>
+  <div class="form-group">
+    <label>창고 구분 *</label>
+    <select id="warehouseType">
+      <option value="완제품창고">완제품창고</option>
+      <option value="자재창고">자재창고</option>
+    </select>
+  </div>
   <div class="modal-footer">
     <button class="btn-cancel" onclick="closeModal()">취소</button>
     <button class="btn-save" onclick="saveWarehouse()">저장</button>
@@ -114,7 +135,7 @@ function openCreate() {
     document.getElementById('modalTitle').textContent = '창고 등록';
     document.getElementById('warehouseId').value = '';
     document.getElementById('warehouseName').value = '';
-    document.getElementById('location').value = '';
+    document.getElementById('warehouseType').value = '완제품창고';
     document.getElementById('modalOverlay').classList.add('open');
 }
 function openEdit(id) {
@@ -124,6 +145,7 @@ function openEdit(id) {
             document.getElementById('modalTitle').textContent = '창고 수정';
             document.getElementById('warehouseId').value = w.warehouseId;
             document.getElementById('warehouseName').value = w.warehouseName || '';
+            document.getElementById('warehouseType').value = w.warehouseType || '완제품창고';
             document.getElementById('modalOverlay').classList.add('open');
         });
 }
@@ -131,7 +153,8 @@ function closeModal() { document.getElementById('modalOverlay').classList.remove
 function saveWarehouse() {
     const id = document.getElementById('warehouseId').value;
     const data = {
-        warehouseName: document.getElementById('warehouseName').value
+        warehouseName: document.getElementById('warehouseName').value,
+        warehouseType: document.getElementById('warehouseType').value
     };
     if (!data.warehouseName.trim()) { alert('창고명을 입력하세요.'); return; }
     const url = id ? '/api/warehouses/' + id : '/api/warehouses';

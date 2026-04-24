@@ -45,6 +45,15 @@
 
 .addr-cell { max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:#374151; }
 .addr-none { color:#d1d5db; font-size:12px; }
+.wh-inv-preview { margin-top:8px; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; }
+.wh-inv-preview table { width:100%; border-collapse:collapse; font-size:12px; }
+.wh-inv-preview th { background:#f9fafb; padding:6px 10px; text-align:left; font-weight:600; color:#6b7280; border-bottom:1px solid #e5e7eb; }
+.wh-inv-preview td { padding:6px 10px; border-bottom:1px solid #f3f4f6; color:#374151; }
+.wh-inv-preview tr:last-child td { border-bottom:none; }
+.wh-inv-empty { padding:12px; text-align:center; color:#9ca3af; font-size:12px; }
+.inv-qty-ok   { color:#065f46; font-weight:600; }
+.inv-qty-low  { color:#92400e; font-weight:600; }
+.inv-qty-zero { color:#991b1b; font-weight:600; }
 </style>
 </head>
 <body>
@@ -238,12 +247,15 @@
         <!-- 출고준비 상태일 때만 표시 -->
         <div id="editWarehouseSection" class="form-group" style="display:none;">
             <label>출고 창고 *</label>
-            <select id="editOrderWarehouseId">
+            <select id="editOrderWarehouseId" onchange="loadWarehouseInventory(this.value)">
                 <option value="">창고 선택</option>
                 <c:forEach var="w" items="${warehouseList}">
-                    <option value="${w.warehouseId}">${w.warehouseName}</option>
+                    <option value="${w.warehouseId}">${w.warehouseName}
+                        <c:if test="${w.warehouseType == '자재창고'}"> [자재]</c:if>
+                    </option>
                 </c:forEach>
             </select>
+            <div id="whInventoryPreview" style="display:none;" class="wh-inv-preview"></div>
             <div style="font-size:11px;color:#6b7280;margin-top:4px;">선택한 창고에서 재고가 차감되고 출고관리에 내역이 생성됩니다.</div>
         </div>
         <div class="form-group">
@@ -409,6 +421,7 @@ function openEditOrder(id, status) {
             document.getElementById('editDeliveryAddress').value = o.deliveryAddress || '';
             document.getElementById('editNotes').value = o.notes || '';
             document.getElementById('editOrderWarehouseId').value = '';
+            document.getElementById('whInventoryPreview').style.display = 'none';
 
             const isShip = status === '출고준비';
             document.getElementById('editWarehouseSection').style.display = isShip ? '' : 'none';
@@ -418,7 +431,37 @@ function openEditOrder(id, status) {
             document.getElementById('editOrderOverlay').classList.add('open');
         });
 }
-function closeEditOrder() { document.getElementById('editOrderOverlay').classList.remove('open'); }
+function closeEditOrder() {
+    document.getElementById('editOrderOverlay').classList.remove('open');
+    document.getElementById('whInventoryPreview').style.display = 'none';
+}
+
+function loadWarehouseInventory(warehouseId) {
+    const preview = document.getElementById('whInventoryPreview');
+    if (!warehouseId) { preview.style.display = 'none'; return; }
+
+    preview.style.display = '';
+    preview.innerHTML = '<div class="wh-inv-empty">불러오는 중...</div>';
+
+    fetch('/api/inventory/by-warehouse/' + warehouseId)
+        .then(r => r.json())
+        .then(items => {
+            if (!items || items.length === 0) {
+                preview.innerHTML = '<div class="wh-inv-empty">이 창고에 보관 중인 재고가 없습니다.</div>';
+                return;
+            }
+            let html = '<table><thead><tr><th>제품명</th><th>보유 수량</th></tr></thead><tbody>';
+            items.forEach(i => {
+                const qty = i.quantity || 0;
+                const cls = qty <= 0 ? 'inv-qty-zero' : qty <= 10 ? 'inv-qty-low' : 'inv-qty-ok';
+                html += '<tr><td>' + (i.productName || '-') + '</td>'
+                      + '<td class="' + cls + '">' + qty.toLocaleString() + '개</td></tr>';
+            });
+            html += '</tbody></table>';
+            preview.innerHTML = html;
+        })
+        .catch(() => { preview.innerHTML = '<div class="wh-inv-empty">데이터를 불러오지 못했습니다.</div>'; });
+}
 function saveOrderInfo() {
     const id     = document.getElementById('editOrderId').value;
     const status = document.getElementById('editOrderStatus').value;

@@ -224,6 +224,11 @@ function closeAutoOrderModal() {
 function confirmAutoOrder() {
     const managerName = document.getElementById('autoOrderManagerName').value.trim();
     if (!managerName) { alert('담당자명을 입력해주세요.'); return; }
+
+    const btn = document.querySelector('#autoOrderModal .btn-save');
+    btn.disabled = true;
+    btn.textContent = '처리 중...';
+
     const csrf = document.querySelector('meta[name="_csrf"]').content;
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
     fetch('/api/work-orders/' + _pendingAutoOrderId + '/auto-order-parts', {
@@ -235,9 +240,12 @@ function confirmAutoOrder() {
         if (data.created > 0) {
             alert(data.created + '건의 발주가 생성되었습니다.\n발주 관리에서 거래처를 지정해주세요.');
         } else {
-            alert('부족한 부품이 없습니다.');
+            alert('이미 발주된 부품이거나 부족한 부품이 없습니다.');
         }
         location.reload();
+    }).finally(() => {
+        btn.disabled = false;
+        btn.textContent = '발주 생성';
     });
 }
 function openDetail(id) {

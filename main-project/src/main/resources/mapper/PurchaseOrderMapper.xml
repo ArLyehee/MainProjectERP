@@ -89,6 +89,11 @@
         AND status = 'PENDING'
     </update>
 
+    <select id="countByPoCodePrefix" resultType="int">
+        SELECT COUNT(*) FROM purchase_orders
+        WHERE po_id LIKE CONCAT(#{prefix}, '%') AND status != 'CANCELLED'
+    </select>
+
     <select id="findByWorkOrderId" resultMap="PurchaseOrderResultMap">
         SELECT po.id, po.po_id, po.supplier_id, po.order_date, po.status, po.item,
                s.supplier_name,

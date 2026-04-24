@@ -75,6 +75,10 @@ public class WorkOrderService {
             int shortage  = needed - available;
             if (shortage <= 0) continue;
 
+            // 같은 작업지시+부품 조합으로 이미 발주된 건이 있으면 건너뜀
+            String prefix = "PO-PARTS-" + workOrderId + "-" + item.getComponentProductId() + "-";
+            if (purchaseOrderMapper.countByPoCodePrefix(prefix) > 0) continue;
+
             Long supplierId = purchaseOrderMapper.findSupplierIdByProduct(item.getComponentProductId());
 
             PurchaseOrder po = new PurchaseOrder();
